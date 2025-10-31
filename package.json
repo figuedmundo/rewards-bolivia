@@ -1,0 +1,15 @@
+{
+  "name": "rewards-bolivia",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "api": "npm run --workspace=api",
+    "web": "npm run --workspace=web"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
