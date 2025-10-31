@@ -39,21 +39,21 @@
 
 ### 🧱 Tareas de Desarrollo
 
-| ID | Tarea | Responsable | Estimación |
-| --- | --- | --- | --- |
-| T1.1 | Crear monorepo (`api`, `web`, `infra`) con Yarn Workspaces o Nx. | DevOps | 1 d |
-| T1.2 | Configurar Docker Compose (Postgres, Redis, API, Web). | DevOps | 1 d |
-| T1.3 | Estructurar proyecto NestJS con módulos iniciales: `auth`, `users`, `common`. | Backend Lead | 1 d |
-| T1.4 | Configurar CI/CD (GitHub Actions) con testing y build Docker. | DevOps | 1 d |
-| T1.5 | Configurar Prisma ORM + migraciones automáticas. | Backend Dev | 0.5 d |
-| T1.6 | Documentar estructura DDD y naming conventions. | Tech Lead | 0.5 d |
+| ID | Tarea | Responsable | Estimación | Status |
+| --- | --- | --- | --- | --- |
+| T1.1 | Crear monorepo (`api`, `web`, `infra`) con npm workspaces. | Gemini | 1 d | [x] |
+| T1.2 | Configurar Docker Compose (Postgres, Redis). | Gemini | 1 d | [x] |
+| T1.3 | Estructurar proyecto NestJS con módulos iniciales: `auth`, `users`. | Gemini | 1 d | [x] |
+| T1.4 | Configurar CI/CD (GitHub Actions) con testing y build Docker. | DevOps | 1 d | [ ] |
+| T1.5 | Configurar Prisma ORM + migraciones automáticas. | Gemini | 0.5 d | [x] |
+| T1.6 | Documentar estructura DDD y naming conventions. | Tech Lead | 0.5 d | [ ] |
 
 ### 🔍 Testing (Infraestructura)
 
-| Tipo | Descripción | Estimación |
-| --- | --- | --- |
-| Integration | Build + Deploy staging sin errores. | 0.5 d |
-| Integration | Validar rollback automático. | 0.5 d |
+| Tipo | Descripción | Estimación | Status |
+| --- | --- | --- | --- |
+| Integration | Build + Deploy staging sin errores. | 0.5 d | [ ] |
+| Integration | Validar rollback automático. | 0.5 d | [ ] |
 
 ---
 
@@ -61,22 +61,22 @@
 
 ### 🧱 Tareas de Desarrollo
 
-| ID | Tarea | Descripción | Estimación |
-| --- | --- | --- | --- |
-| T2.1 | Crear módulo `auth` con controlador, servicio y repos. | 1 d |  |
-| T2.2 | Endpoints `/auth/register` y `/auth/login`. | 1 d |  |
-| T2.3 | JWT (Access 15 min + Refresh 30 d) + Hash bcrypt. | 1 d |  |
-| T2.4 | Integrar Google OAuth2. | 1 d |  |
-| T2.5 | Middleware de roles (client, business, admin). | 0.5 d |  |
-| T2.6 | Documentar en Swagger. | 0.5 d |  |
+| ID | Tarea | Descripción | Estimación | Status |
+| --- | --- | --- | --- | --- |
+| T2.1 | Crear módulo `auth` con controlador, servicio y repos. | Gemini | 1 d | [x] |
+| T2.2 | Endpoints `/auth/register` y `/auth/login`. | Gemini | 1 d | [x] |
+| T2.3 | JWT (Access 15 min + Refresh 30 d) + Hash bcrypt. | Gemini | 1 d | [x] |
+| T2.4 | Integrar Google OAuth2. | Backend Dev | 1 d | [ ] |
+| T2.5 | Middleware de roles (client, business, admin). | Backend Dev | 0.5 d | [ ] |
+| T2.6 | Documentar en Swagger. | Backend Dev | 0.5 d | [ ] |
 
 ### 🔍 Testing (Auth)
 
-| Tipo | Descripción | Estimación |
-| --- | --- | --- |
-| Unit (60 %) | Validar servicios Auth: hash, JWT, validaciones. | 1 d |
-| Integration (30 %) | Flujo register → login → refresh. | 1 d |
-| E2E (10 %) | Flujo login → dashboard dummy. | 0.5 d |
+| Tipo | Descripción | Estimación | Status |
+| --- | --- | --- | --- |
+| Unit (60 %) | Validar servicios Auth: hash, JWT, validaciones. | 1 d | [ ] |
+| Integration (30 %) | Flujo register → login → refresh. | 1 d | [ ] |
+| E2E (10 %) | Flujo login → dashboard dummy. | 0.5 d | [x] |
 
 ---
 
@@ -84,21 +84,21 @@
 
 ### 🧱 Tareas de Desarrollo
 
-| ID | Tarea | Descripción | Estimación |
-| --- | --- | --- | --- |
-| T3.1 | Crear app React (Vite + Tailwind + shadcn/ui). | 1 d |  |
-| T3.2 | Pantallas Login, Registro, Recuperar Contraseña. | 1.5 d |  |
-| T3.3 | Conectar con API Auth. | 0.5 d |  |
-| T3.4 | Integrar Google OAuth. | 0.5 d |  |
-| T3.5 | Token storage seguro (LocalStorage + Refresh Flow). | 0.5 d |  |
+| ID | Tarea | Descripción | Estimación | Status |
+| --- | --- | --- | --- | --- |
+| T3.1 | Crear app React (Vite + Tailwind + shadcn/ui). | Gemini | 1 d | [x] |
+| T3.2 | Pantallas Login, Registro, Recuperar Contraseña. | Frontend Dev | 1.5 d | [ ] |
+| T3.3 | Conectar con API Auth. | Frontend Dev | 0.5 d | [ ] |
+| T3.4 | Integrar Google OAuth. | Frontend Dev | 0.5 d | [ ] |
+| T3.5 | Token storage seguro (LocalStorage + Refresh Flow). | Frontend Dev | 0.5 d | [ ] |
 
 ### 🔍 Testing (Frontend)
 
-| Tipo | Descripción | Estimación |
-| --- | --- | --- |
-| Unit (60 %) | Validaciones de formularios y hooks. | 0.5 d |
-| Integration (30 %) | Llamadas API Auth + render UI. | 0.5 d |
-| E2E (10 %) | Login → Home vacía. | 0.5 d |
+| Tipo | Descripción | Estimación | Status |
+| --- | --- | --- | --- |
+| Unit (60 %) | Validaciones de formularios y hooks. | 0.5 d | [ ] |
+| Integration (30 %) | Llamadas API Auth + render UI. | 0.5 d | [ ] |
+| E2E (10 %) | Login → Home vacía. | 0.5 d | [ ] |
 
 ---
 
@@ -106,12 +106,12 @@
 
 ### 🧱 Tareas de Desarrollo
 
-| ID | Tarea | Descripción | Estimación |
-| --- | --- | --- | --- |
-| T4.1 | Configurar Jest + Supertest (NestJS). | 0.5 d |  |
-| T4.2 | Configurar Playwright mínimo para flujos críticos. | 0.5 d |  |
-| T4.3 | Integrar reportes de cobertura Codecov. | 0.5 d |  |
-| T4.4 | Añadir linting y pre-commit checks. | 0.5 d |  |
+| ID | Tarea | Descripción | Estimación | Status |
+| --- | --- | --- | --- | --- |
+| T4.1 | Configurar Jest + Supertest (NestJS). | Gemini | 0.5 d | [x] |
+| T4.2 | Configurar Playwright mínimo para flujos críticos. | QA/Dev | 0.5 d | [ ] |
+| T4.3 | Integrar reportes de cobertura Codecov. | DevOps | 0.5 d | [ ] |
+| T4.4 | Añadir linting y pre-commit checks. | DevOps | 0.5 d | [ ] |
 
 ---
 
@@ -148,3 +148,40 @@
 > 
 > 🧩 Resultado: una base técnica robusta, rápida y modular lista para escalar a transacciones en Sprint 2.
 >
+
+# Progress 
+
+---
+
+## ✅ Resumen de Progreso (Actualización) (Friday 31 October)
+
+Hemos completado las siguientes tareas y hitos clave en el Sprint 1:
+
+### 🚀 Hitos Completados:
+
+1.  **Configuración Inicial del Proyecto (Monorepo & Docker):**
+    *   Monorepo inicializado con `npm workspaces`.
+    *   Paquetes `api` (NestJS) y `web` (React/Vite) scaffolded.
+    *   `docker-compose.yml` configurado para `PostgreSQL` y `Redis` con persistencia de datos.
+    *   Archivos `.env` y `.gitignore` creados.
+    *   Servicios Docker verificados y funcionando.
+
+2.  **Implementación del Core de Autenticación (JWT & Login/Registro):**
+    *   Configuración de Prisma en el proyecto `api`.
+    *   Modelos `User` y `RefreshToken` definidos en `prisma/schema.prisma`.
+    *   Migración inicial de Prisma (`init`) aplicada a la base de datos.
+    *   Módulos `AuthModule` y `UsersModule` creados en NestJS.
+    *   Utilidad de hash de contraseñas (`bcrypt`) implementada.
+    *   `AuthService` implementado con lógica de registro y login.
+    *   `AuthController` con endpoints `POST /auth/register` y `POST /auth/login`.
+    *   `class-validator` y `class-transformer` instalados y `ValidationPipe` global habilitado.
+    *   `JwtStrategy` y `JwtAuthGuard` implementados para protección de rutas.
+    *   Ruta de ejemplo protegida (`GET /users/me`) en `UsersController`.
+    *   Tests E2E básicos (`auth.e2e-spec.ts`) para registro y login creados.
+
+### 🚧 Tareas Pendientes en Autenticación:
+
+*   Implementación completa de la lógica de `refresh token` (generación, almacenamiento seguro, rotación, revocación).
+*   Implementación del endpoint `POST /auth/logout`.
+*   Integración de `Google OAuth2` (según US03).
+*   Expansión de la cobertura de pruebas para incluir todos los flujos de autenticación y casos de borde.
