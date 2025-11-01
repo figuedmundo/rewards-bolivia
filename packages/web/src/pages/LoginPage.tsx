@@ -38,7 +38,7 @@ const LoginPage = () => {
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <button type="submit">Login</button>
       </form>
-      <GoogleSignInButton /> {/* Use the component here */}
+      <GoogleSignInButton />
     </div>
   );
 };
