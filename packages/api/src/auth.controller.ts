@@ -1,6 +1,7 @@
-import { Controller, Post, Body, UseGuards, Request, HttpCode, HttpStatus, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, HttpCode, HttpStatus, UnauthorizedException, Get, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from './auth/dto/register-user.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -20,5 +21,18 @@ export class AuthController {
     }
     return this.authService.login(user);
   }
-}
 
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(@Req() req) {
+    // This route will redirect to Google's consent screen
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req, @Res() res) {
+    const { accessToken, refreshToken } = await this.authService.login(req.user);
+    // Redirect to the frontend with the tokens in the query string
+    res.redirect(`http://localhost:5173/auth/google/callback?accessToken=${accessToken}&refreshToken=${refreshToken}`);
+  }
+}
