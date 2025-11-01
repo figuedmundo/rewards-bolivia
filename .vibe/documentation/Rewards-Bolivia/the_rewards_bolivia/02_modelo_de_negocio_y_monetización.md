@@ -12,7 +12,7 @@ El objetivo es construir un ecosistema autosostenible que incentive la **fideliz
 
 - Brainstorm :
     
-    [Started Pack](02%20Modelo%20de%20Negocio%20y%20Monetizaci%C3%B3n/Started%20Pack%202897583cfef7802ba149ee213fabf0bf.md)
+    [Started Pack](02_modelo_de_negocio_y_monetización/started_pack.md)
     
 
 | Elemento | Descripción |

@@ -250,7 +250,7 @@ El usuario no debe sentir que usa blockchain; debe sentir **recompensa, progreso
 1. Transacciones off-chain → PostgreSQL.
 2. Batch diario → snapshot hash.
 3. Publicación on-chain.
-4. Portal público: [auditor.rewards.bo](12%20Manual%20de%20Producto%202987583cfef780de8b16c3dd65bee1b2.md)
+4. Portal público: [auditor.rewards.bo](12_manual_de_producto.md)
 
 ### 🧭 Comité de Gobernanza
 

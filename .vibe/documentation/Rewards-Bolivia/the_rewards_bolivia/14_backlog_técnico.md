@@ -266,4 +266,4 @@ Copy code
 
 # Sprints
 
-[15. Backlog Técnico (Sprints)](14%20Backlog%20T%C3%A9cnico/15%20Backlog%20T%C3%A9cnico%20(Sprints)%202987583cfef7801d9d59fda31dd3fb84.md)
+[15. Backlog Técnico (Sprints)](14_backlog_técnico/15_backlog_técnico_(sprints).md)

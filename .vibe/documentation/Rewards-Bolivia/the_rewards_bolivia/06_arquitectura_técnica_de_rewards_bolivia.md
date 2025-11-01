@@ -10,7 +10,7 @@ El objetivo de esta sección es **documentar cómo funciona el sistema por dentr
 
 **Arquitectura híbrida moderna:**
 
-![ChatGPT Image Oct 13, 2025, 06_09_09 PM.png](06%20Arquitectura%20T%C3%A9cnica%20de%20Rewards%20Bolivia/ChatGPT_Image_Oct_13_2025_06_09_09_PM.png)
+![ChatGPT Image Oct 13, 2025, 06_09_09 PM.png](06_arquitectura_técnica_de_rewards_bolivia/chatgpt_image_oct_13_2025_06_09_09_pm.png)
 
 ```
 [Cliente App iOS/Android]  ←→  [Backend/API Layer]  ←→  [DB Off-chain]

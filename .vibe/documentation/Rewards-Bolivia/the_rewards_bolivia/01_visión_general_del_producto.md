@@ -43,7 +43,7 @@ Crear un **ecosistema de fidelización local** que:
 
 ## 🔹 Diagrama Conceptual
 
-![image.png](01%20Visi%C3%B3n%20General%20del%20Producto/image.png)
+![image.png](01_visión_general_del_producto/image.png)
 
 ```mermaid
 flowchart LR
