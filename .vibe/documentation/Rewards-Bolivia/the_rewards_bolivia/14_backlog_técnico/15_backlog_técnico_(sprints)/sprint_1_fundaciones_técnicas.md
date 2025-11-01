@@ -66,7 +66,7 @@
 | T2.1 | Crear módulo `auth` con controlador, servicio y repos. | Gemini | 1 d | [x] |
 | T2.2 | Endpoints `/auth/register` y `/auth/login`. | Gemini | 1 d | [x] |
 | T2.3 | JWT (Access 15 min + Refresh 30 d) + Hash bcrypt. | Gemini | 1 d | [x] |
-| T2.4 | Integrar Google OAuth2. | Backend Dev | 1 d | [ ] |
+| T2.4 | Integrar Google OAuth2. | Gemini | 1 d | [x] |
 | T2.5 | Middleware de roles (client, business, admin). | Backend Dev | 0.5 d | [ ] |
 | T2.6 | Documentar en Swagger. | Backend Dev | 0.5 d | [ ] |
 
@@ -88,8 +88,8 @@
 | --- | --- | --- | --- | --- |
 | T3.1 | Crear app React (Vite + Tailwind + shadcn/ui). | Gemini | 1 d | [x] |
 | T3.2 | Pantallas Login, Registro, Recuperar Contraseña. | Frontend Dev | 1.5 d | [ ] |
-| T3.3 | Conectar con API Auth. | Frontend Dev | 0.5 d | [ ] |
-| T3.4 | Integrar Google OAuth. | Frontend Dev | 0.5 d | [ ] |
+| T3.3 | Conectar con API Auth. | Gemini | 0.5 d | [x] |
+| T3.4 | Integrar Google OAuth. | Gemini | 0.5 d | [x] |
 | T3.5 | Token storage seguro (LocalStorage + Refresh Flow). | Frontend Dev | 0.5 d | [ ] |
 
 ### 🔍 Testing (Frontend)
@@ -98,7 +98,7 @@
 | --- | --- | --- | --- |
 | Unit (60 %) | Validaciones de formularios y hooks. | 0.5 d | [ ] |
 | Integration (30 %) | Llamadas API Auth + render UI. | 0.5 d | [ ] |
-| E2E (10 %) | Login → Home vacía. | 0.5 d | [ ] |
+| E2E (10 %) | Login → Home vacía. | 0.5 d | [x] |
 
 ---
 
@@ -184,4 +184,40 @@ Hemos completado las siguientes tareas y hitos clave en el Sprint 1:
 *   Implementación completa de la lógica de `refresh token` (generación, almacenamiento seguro, rotación, revocación).
 *   Implementación del endpoint `POST /auth/logout`.
 *   Integración de `Google OAuth2` (según US03).
+*   Expansión de la cobertura de pruebas para incluir todos los flujos de autenticación y casos de borde.
+
+---
+
+## ✅ Resumen de Progreso (Actualización) (Saturday 1 November)
+
+Continuando con el Sprint 1, hoy hemos logrado los siguientes avances significativos:
+
+### 🚀 Hitos Completados:
+
+1.  **Integración de Google OAuth2 (End-to-End):**
+    *   **Backend:**
+        *   Implementada la estrategia de Passport.js para Google OAuth2 (`GoogleStrategy`).
+        *   Configurado el `AuthModule` para cargar las variables de entorno (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`) de forma segura.
+        *   Añadidos los endpoints `/auth/google` y `/auth/google/callback` en el `AuthController`.
+        *   Implementada la lógica en `AuthService` para validar usuarios de OAuth, crearlos si no existen y generar JWTs.
+    *   **Frontend:**
+        *   Creado el botón de "Sign in with Google" y la lógica de redirección.
+        *   Configurado el proxy de Vite para comunicar el frontend con el backend en el entorno de desarrollo.
+        *   Implementada la página de callback para recibir los tokens del backend.
+
+2.  **Configuración y Mejora del Entorno de Testing Frontend:**
+    *   Configurado `vitest` para la ejecución de pruebas unitarias y de integración en el paquete `web`.
+    *   Solucionados múltiples problemas de configuración con PostCSS, Tailwind CSS y el entorno de ejecución de pruebas.
+    *   Creada una estructura de directorios de testing (`__tests__`) para mantener el código fuente limpio.
+    *   Añadidas las dependencias necesarias para testing (`@testing-library/user-event`).
+
+3.  **Corrección de Errores y Refactorización:**
+    *   Solucionados errores de compilación en el backend relacionados con la configuración de NestJS, tipos de TypeScript y dependencias faltantes.
+    *   Resuelto el problema de carga de variables de entorno en un entorno monorepo.
+    *   Corregidos errores de 404 y 500 en la comunicación frontend-backend.
+
+### 🚧 Tareas Pendientes en Autenticación:
+
+*   Implementación completa de la lógica de `refresh token` (generación, almacenamiento seguro, rotación, revocación).
+*   Implementación del endpoint `POST /auth/logout`.
 *   Expansión de la cobertura de pruebas para incluir todos los flujos de autenticación y casos de borde.

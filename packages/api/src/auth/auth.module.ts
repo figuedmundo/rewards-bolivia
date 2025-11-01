@@ -7,18 +7,28 @@ import { PrismaService } from '../prisma.service';
 import { UsersService } from '../users.service';
 import { AuthController } from '../auth.controller';
 import { JwtStrategy } from './jwt.strategy';
+import { GoogleStrategy } from './google.strategy'; // Import GoogleStrategy
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     UsersModule,
     PassportModule,
-    JwtModule.register({
-      global: true, // Make JWT services available globally
-      secret: 'HARDCODED_SECRET_REPLACE_WITH_ENV_VAR', // TODO: Move to .env
-      signOptions: { expiresIn: '15m' }, // Access token expiration
+    JwtModule.registerAsync({ // Use registerAsync to inject ConfigService
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'), // Use JWT_SECRET from .env
+        signOptions: { expiresIn: '15m' },
+      }),
+      inject: [ConfigService], // Inject ConfigService
     }),
   ],
-  providers: [AuthService, UsersService, PrismaService, JwtStrategy],
+  providers: [
+    AuthService,
+    UsersService,
+    PrismaService,
+    JwtStrategy,
+    GoogleStrategy, // Add GoogleStrategy
+  ],
   controllers: [AuthController],
 })
 export class AuthModule {}
