@@ -1,42 +1,83 @@
-# Gemini Project Memory: Rewards Bolivia
+# Rewards Bolivia Project
 
-This document serves as my memory for the Rewards Bolivia project, helping me maintain context, track decisions, and understand the project structure.
+## Project Overview
 
-## 0. Important Memories
+This project is a monorepo for the "Rewards Bolivia" platform, a loyalty and rewards program. The application is architected as a modular monolith with a backend and a frontend. It leverages a hybrid on-chain/off-chain data model, using a traditional PostgreSQL database for performance-critical operations and a blockchain for ensuring trust and auditability through a `Proof-of-Audit` hash.
+
+### Key Technologies
+
+*   **Backend:**
+    *   Framework: NestJS
+    *   Database: PostgreSQL
+    *   ORM: Prisma
+    *   Authentication: JWT
+*   **Frontend:**
+    *   Framework: React
+    *   Build Tool: Vite
+    *   Styling: Tailwind CSS
+*   **Infrastructure:**
+    *   Containerization: Docker, Docker Compose
+    *   Caching: Redis
+
+## Building and Running the Project
+
+The project is managed as a monorepo using npm workspaces.
+
+### Prerequisites
+
+*   Node.js
+*   npm
+*   Docker
+
+### Running the Application
+
+1.  **Start the database and other services:**
+    ```bash
+    docker-compose up -d
+    ```
+
+2.  **Install dependencies for all workspaces:**
+    ```bash
+    npm install
+    ```
+
+3.  **Run the backend API:**
+    ```bash
+    npm run api -- start:dev
+    ```
+
+4.  **Run the frontend web application:**
+    ```bash
+    npm run web -- dev
+    ```
+
+### Running Tests
+
+*   **Backend (API):**
+    ```bash
+    npm run api -- test
+    ```
+*   **Frontend (Web):**
+    ```bash
+    npm run web -- lint
+    ```
+
+## Development Conventions
+
+*   The backend follows the standard NestJS project structure.
+*   The frontend is a standard Vite-based React application.
+*   The project uses a modular monolith architecture. It is important to maintain clean boundaries between modules.
+*   Communication between modules should be done through defined public interfaces (services).
+*   Use linting rules to prevent direct imports of internal components between modules.
+
+---
+
+## Important AI Memories
 - Always use context7 when I need code generation, setup or configuration steps, or library/API documentation. This means you should automatically use the Context7 MCP tools to resolve library id and get library docs without me having to explicitly ask.
 
-
-
 ---
 
-## 1. Project Overview
-
-Rewards Bolivia is a local loyalty ecosystem for Bolivia, built on a hybrid off-chain/on-chain architecture. It aims to provide a fast, gamified user experience while ensuring trust and auditability through a "Proof-of-Audit" blockchain layer.
-
----
-
-## 2. Key Architectural Decisions
-
-1.  **Modular Monolith:** We are using a modular monolith architecture for the backend (built with NestJS) for the MVP. This prioritizes development speed and simplicity while maintaining clear domain boundaries, avoiding the premature complexity of microservices.
-2.  **Hybrid Off-chain/On-chain Model:** Core transactions (earning/redeeming points) are handled in a high-speed off-chain PostgreSQL database. A daily hash of these transactions is posted to a blockchain (Polygon) for auditability. This provides Web2 speed with Web3 trust.
-3.  **JWT with Access/Refresh Tokens:** Authentication is handled via a standard, secure pattern using short-lived access tokens and long-lived, revocable refresh tokens.
-4.  **Monorepo Structure:** The project is organized as a monorepo (using npm workspaces) to manage the `api`, `web`, and future packages in a single repository.
-
----
-
-## 3. Tech Stack Summary
-
--   **Backend:** NestJS (Node.js + TypeScript)
--   **Database:** PostgreSQL
--   **ORM:** Prisma
--   **Caching:** Redis
--   **Frontend (Web Dashboard):** React (Vite) + TypeScript + Tailwind CSS + shadcn/ui
--   **Frontend (Mobile App):** Flutter (planned)
--   **Local Infrastructure:** Docker
-
----
-
-## 4. Key File & Directory Locations
+## Key File & Directory Locations
 
 -   **Project Root:** `/Users/edmundo.figueroaherbas@medirect.com.mt/projects/personal/rewards-bolivia`
 -   **API Package:** `packages/api`
@@ -48,24 +89,3 @@ Rewards Bolivia is a local loyalty ecosystem for Bolivia, built on a hybrid off-
 -   **Prisma Schema:** `packages/api/prisma/schema.prisma`
 
 ---
-
-## 5. Common Commands
-
--   **Start Local Services:** `docker-compose up -d`
--   **Run DB Migrations:** `npx prisma migrate dev --schema=./packages/api/prisma/schema.prisma --name <migration_name>`
--   **Initialize shadcn/ui (from `packages/web`):** `npx shadcn@latest init`
-
----
-
-## 6. Pending Tasks & TODOs (from Sprint 1)
-
--   **Authentication:**
-    -   [ ] Implement the full refresh token logic (generation, secure storage, rotation, and revocation).
-    -   [ ] Implement the `POST /auth/logout` endpoint.
-    -   [ ] Integrate Google OAuth2 as an alternative login method.
--   **Frontend:**
-    -   [ ] Build the Login, Registration, and Password Recovery screens (T3.2).
-    -   [ ] Connect the frontend forms to the authentication API (T3.3).
--   **CI/CD & QA:**
-    -   [ ] Configure the initial CI/CD pipeline using GitHub Actions (T1.4).
-    -   [ ] Expand test coverage for the authentication module (unit and integration tests).
