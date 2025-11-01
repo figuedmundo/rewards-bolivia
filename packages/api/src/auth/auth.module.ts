@@ -7,19 +7,20 @@ import { PrismaService } from '../prisma.service';
 import { UsersService } from '../users.service';
 import { AuthController } from '../auth.controller';
 import { JwtStrategy } from './jwt.strategy';
-import { GoogleStrategy } from './google.strategy'; // Import GoogleStrategy
+import { GoogleStrategy } from './google.strategy';
 import { ConfigService } from '@nestjs/config';
+import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 
 @Module({
   imports: [
     UsersModule,
     PassportModule,
-    JwtModule.registerAsync({ // Use registerAsync to inject ConfigService
+    JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'), // Use JWT_SECRET from .env
+        secret: configService.get<string>('JWT_SECRET'),
         signOptions: { expiresIn: '15m' },
       }),
-      inject: [ConfigService], // Inject ConfigService
+      inject: [ConfigService],
     }),
   ],
   providers: [
@@ -27,7 +28,8 @@ import { ConfigService } from '@nestjs/config';
     UsersService,
     PrismaService,
     JwtStrategy,
-    GoogleStrategy, // Add GoogleStrategy
+    GoogleStrategy,
+    RefreshTokenStrategy,
   ],
   controllers: [AuthController],
 })
