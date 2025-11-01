@@ -74,8 +74,8 @@
 
 | Tipo | Descripción | Estimación | Status |
 | --- | --- | --- | --- |
-| Unit (60 %) | Validar servicios Auth: hash, JWT, validaciones. | 1 d | [ ] |
-| Integration (30 %) | Flujo register → login → refresh. | 1 d | [ ] |
+| Unit (60 %) | Validar servicios Auth: hash, JWT, validaciones. | 1 d | [x] |
+| Integration (30 %) | Flujo register → login → refresh. | 1 d | [x] |
 | E2E (10 %) | Flujo login → dashboard dummy. | 0.5 d | [x] |
 
 ---
@@ -87,10 +87,10 @@
 | ID | Tarea | Descripción | Estimación | Status |
 | --- | --- | --- | --- | --- |
 | T3.1 | Crear app React (Vite + Tailwind + shadcn/ui). | Gemini | 1 d | [x] |
-| T3.2 | Pantallas Login, Registro, Recuperar Contraseña. | Frontend Dev | 1.5 d | [ ] |
+| T3.2 | Pantallas Login, Registro, Recuperar Contraseña. | Frontend Dev | 1.5 d | [x] |
 | T3.3 | Conectar con API Auth. | Gemini | 0.5 d | [x] |
 | T3.4 | Integrar Google OAuth. | Gemini | 0.5 d | [x] |
-| T3.5 | Token storage seguro (LocalStorage + Refresh Flow). | Frontend Dev | 0.5 d | [ ] |
+| T3.5 | Token storage seguro (LocalStorage + Refresh Flow). | Frontend Dev | 0.5 d | [x] |
 
 ### 🔍 Testing (Frontend)
 
@@ -216,8 +216,27 @@ Continuando con el Sprint 1, hoy hemos logrado los siguientes avances significat
     *   Resuelto el problema de carga de variables de entorno en un entorno monorepo.
     *   Corregidos errores de 404 y 500 en la comunicación frontend-backend.
 
+---
+
+## ✅ Resumen de Progreso (Actualización) (Saturday 1 November - Tarde)
+
+Hoy hemos completado la implementación del flujo de `refresh token`:
+
+### 🚀 Hitos Completados:
+
+1.  **Implementación del Flujo de Refresh Token (End-to-End):**
+    *   **Backend:**
+        *   Implementada la lógica de generación, almacenamiento (hasheado) y rotación de `refresh tokens`.
+        *   Añadido el endpoint `POST /auth/refresh` para obtener nuevos `access tokens`.
+        *   Añadido el endpoint `POST /auth/logout` para invalidar los `refresh tokens`.
+        *   Configurado el envío de `refresh tokens` a través de cookies `HttpOnly` para mayor seguridad.
+        *   Añadidas y actualizadas las pruebas unitarias y de integración para cubrir el nuevo flujo.
+    *   **Frontend:**
+        *   Creado un cliente API (`axios`) con un interceptor para gestionar automáticamente la renovación de `access tokens` al recibir un error 401.
+        *   Implementado un `AuthContext` para gestionar el estado de autenticación de forma centralizada.
+        *   Creadas las páginas de `Login` y `Home`, junto con un `ProtectedRoute` para las rutas que requieren autenticación.
+        *   Actualizada la funcionalidad de `logout` para que llame al nuevo endpoint del backend.
+
 ### 🚧 Tareas Pendientes en Autenticación:
 
-*   Implementación completa de la lógica de `refresh token` (generación, almacenamiento seguro, rotación, revocación).
-*   Implementación del endpoint `POST /auth/logout`.
 *   Expansión de la cobertura de pruebas para incluir todos los flujos de autenticación y casos de borde.
