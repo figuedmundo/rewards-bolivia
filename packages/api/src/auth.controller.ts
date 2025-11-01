@@ -2,7 +2,7 @@ import { Controller, Post, Body, UseGuards, HttpCode, HttpStatus, UnauthorizedEx
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from './auth/dto/register-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 
 @Controller('auth')

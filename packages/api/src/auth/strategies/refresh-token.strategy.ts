@@ -14,13 +14,17 @@ export class RefreshTokenStrategy extends PassportStrategy(
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
   ) {
+    const secret = configService.get<string>('JWT_REFRESH_SECRET');
+    if (!secret) {
+      throw new Error('JWT_REFRESH_SECRET environment variable is not set.');
+    }
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
           return request?.cookies?.refresh_token;
         },
       ]),
-      secretOrKey: configService.get('JWT_REFRESH_SECRET'),
+      secretOrKey: secret,
       passReqToCallback: true,
     });
   }

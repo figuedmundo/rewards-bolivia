@@ -1,0 +1,62 @@
+
+version: '3.8'
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres_prod
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: rewards
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - rewards-network-prod
+
+  redis:
+    image: redis:6.2-alpine
+    container_name: redis_prod
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data_prod:/data
+    networks:
+      - rewards-network-prod
+
+  api:
+    build:
+      context: ./packages/api
+      dockerfile: Dockerfile.prod
+    container_name: api_prod
+    ports:
+      - "3001:3000"
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: "postgresql://user:password@postgres_prod:5432/rewards?schema=public"
+      REDIS_HOST: redis_prod
+      REDIS_PORT: 6379
+    networks:
+      - rewards-network-prod
+
+  web:
+    build:
+      context: ./packages/web
+      dockerfile: Dockerfile.prod
+    container_name: web_prod
+    ports:
+      - "5174:80"
+    depends_on:
+      - api
+    networks:
+      - rewards-network-prod
+
+volumes:
+  postgres_data_prod:
+  redis_data_prod:
+
+networks:
+  rewards-network-prod:
+    driver: bridge

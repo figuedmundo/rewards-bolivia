@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../lib/api';
 import { useNavigate } from 'react-router-dom';
+import GoogleSignInButton from '../components/GoogleSignInButton'; // Import the component
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -37,6 +38,7 @@ const LoginPage = () => {
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <button type="submit">Login</button>
       </form>
+      <GoogleSignInButton /> {/* Use the component here */}
     </div>
   );
 };

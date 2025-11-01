@@ -6,6 +6,7 @@ import { RegisterUserDto } from './auth/dto/register-user.dto';
 import { PrismaService } from './prisma.service';
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
+import { RefreshToken } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -79,7 +80,7 @@ export class AuthService {
     };
   }
 
-  private async findMatchingToken(token: string, userTokens: { token: string }[]) {
+    private async findMatchingToken(token: string, userTokens: RefreshToken[]) {
     for (const userToken of userTokens) {
       if (await bcrypt.compare(token, userToken.token)) {
         return userToken;

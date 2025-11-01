@@ -44,7 +44,7 @@
 | T1.1 | Crear monorepo (`api`, `web`, `infra`) con npm workspaces. | Gemini | 1 d | [x] |
 | T1.2 | Configurar Docker Compose (Postgres, Redis). | Gemini | 1 d | [x] |
 | T1.3 | Estructurar proyecto NestJS con módulos iniciales: `auth`, `users`. | Gemini | 1 d | [x] |
-| T1.4 | Configurar CI/CD (GitHub Actions) con testing y build Docker. | DevOps | 1 d | [ ] |
+| T1.4 | Configurar CI/CD (GitHub Actions) con testing y build Docker. | Gemini | 1 d | [x] |
 | T1.5 | Configurar Prisma ORM + migraciones automáticas. | Gemini | 0.5 d | [x] |
 | T1.6 | Documentar estructura DDD y naming conventions. | Tech Lead | 0.5 d | [ ] |
 
@@ -240,3 +240,25 @@ Hoy hemos completado la implementación del flujo de `refresh token`:
 ### 🚧 Tareas Pendientes en Autenticación:
 
 *   Expansión de la cobertura de pruebas para incluir todos los flujos de autenticación y casos de borde.
+
+---
+
+## ✅ Resumen de Progreso (Actualización) (Saturday 1 November - Noche)
+
+Hoy hemos configurado el pipeline de CI/CD con GitHub Actions:
+
+### 🚀 Hitos Completados:
+
+1.  **Configuración de CI/CD con GitHub Actions:**
+    *   Creado el workflow `ci.yml` en `.github/workflows`.
+    *   El workflow se dispara en `push` y `pull_request` a la rama `main`.
+    *   Configurado un job `build-and-test` que instala dependencias, ejecuta tests de la API y el linter del frontend.
+    *   Añadido un servicio de `postgres` al job de testing para las pruebas de integración.
+    *   Configurado un job `build-docker-images` que, si los tests pasan en la rama `main`, construye y sube las imágenes de la API y el frontend a DockerHub.
+    *   Añadidos los `Dockerfiles` para los paquetes `api` y `web`.
+
+2.  **Configuración de Entornos Docker (Desarrollo y Producción):**
+    *   Creado `docker-compose.yml` para el entorno de desarrollo con hot-reloading para `api` y `web`.
+    *   Creado `docker-compose.prod.yml` para el entorno de producción.
+    *   Creados `Dockerfile.dev` para los paquetes `api` y `web`.
+    *   Actualizados y optimizados `Dockerfile.prod` para `api` (multi-stage build) y `web` (custom Nginx).

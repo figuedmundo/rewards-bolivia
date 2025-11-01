@@ -1,12 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import LoginPage from '@/pages/LoginPage';
+import LoginPage from '../src/pages/LoginPage';
+import { AuthProvider } from '../src/contexts/AuthContext';
 
 describe('LoginPage', () => {
   it('renders the Login heading', () => {
     render(
       <BrowserRouter>
-        <LoginPage />
+        <AuthProvider>
+          <LoginPage />
+        </AuthProvider>
       </BrowserRouter>
     );
     expect(screen.getByRole('heading', { name: /login/i })).toBeInTheDocument();
@@ -15,7 +18,9 @@ describe('LoginPage', () => {
   it('renders the Google Sign-In button', () => {
     render(
       <BrowserRouter>
-        <LoginPage />
+        <AuthProvider>
+          <LoginPage />
+        </AuthProvider>
       </BrowserRouter>
     );
     expect(screen.getByRole('button', { name: /sign in with google/i })).toBeInTheDocument();

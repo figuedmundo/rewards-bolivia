@@ -19,6 +19,34 @@ services:
     volumes:
       - redis_data:/data
 
+  api:
+    build:
+      context: .
+      dockerfile: packages/api/Dockerfile.dev
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./packages/api:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+
+  web:
+    build:
+      context: .
+      dockerfile: packages/web/Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./packages/web:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - api
+
 volumes:
   postgres_data:
   redis_data:
