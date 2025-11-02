@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks';
 import api from '../lib/api';
 import { useNavigate } from 'react-router-dom';
 import GoogleSignInButton from '../components/GoogleSignInButton'; // Import the component

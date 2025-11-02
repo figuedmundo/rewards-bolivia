@@ -1,45 +1,68 @@
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
-  withCredentials: true, // Send cookies with requests
-});
+class ApiService {
+  private static instance: ApiService;
+  public api: AxiosInstance;
 
-// Add a response interceptor
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-    // If the error is 401 and we haven't already retried the request
-    if (error.response.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+  private constructor() {
+    this.api = axios.create({
+      baseURL: '/api',
+      withCredentials: true, // Send cookies with requests
+    });
 
-      try {
-        const { data } = await axios.post(
-          '/auth/refresh',
-          {},
-          {
-            baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
-            withCredentials: true,
-          },
-        );
+    // Add a response interceptor for handling token refreshes
+    this.api.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config;
 
-        // Update the authorization header with the new access token
-        axios.defaults.headers.common['Authorization'] = `Bearer ${data.accessToken}`;
-        originalRequest.headers['Authorization'] = `Bearer ${data.accessToken}`;
+        // Check for 401 Unauthorized and ensure it's not a retry
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true;
 
-        return axios(originalRequest);
-      } catch (refreshError) {
-        // Handle refresh token failure (e.g., redirect to login)
-        console.error('Unable to refresh token', refreshError);
-        // Here you might want to redirect to the login page
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
-      }
+          try {
+            // Use a fresh axios instance for the refresh call to avoid interceptor loops
+            await axios.post(
+              `${this.api.defaults.baseURL}/auth/refresh`,
+              {},
+              {
+                withCredentials: true,
+              },
+            );
+
+            // The refresh endpoint should set the new access token cookie automatically.
+            // We can now retry the original request.
+            return this.api(originalRequest);
+          } catch (refreshError) {
+            console.error('Unable to refresh token', refreshError);
+            // Only redirect to login if this wasn't a refresh request itself
+            // This prevents infinite loops when the app initializes and refresh fails
+            if (!originalRequest.url?.includes('/auth/refresh')) {
+              window.location.href = '/login';
+            }
+            return Promise.reject(refreshError);
+          }
+        }
+
+        return Promise.reject(error);
+      },
+    );
+  }
+
+  public static getInstance(): ApiService {
+    if (!ApiService.instance) {
+      ApiService.instance = new ApiService();
     }
+    return ApiService.instance;
+  }
 
-    return Promise.reject(error);
-  },
-);
+  // Example of how to add specific methods
+  // async login(credentials: YourLoginDto) {
+  //   const response = await this.api.post('/auth/login', credentials);
+  //   return response.data;
+  // }
+}
+
+const api = ApiService.getInstance().api;
 
 export default api;

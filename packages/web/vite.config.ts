@@ -17,12 +17,10 @@ export default defineConfig({
     include: ['__tests__/**/*.{test,spec}.{ts,tsx}'],
   },
   server: {
-    watch: {
-      usePolling: true,
-    },
+    host: '0.0.0.0',
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'http://api:3001',
         changeOrigin: true,
         secure: false,
       },

@@ -3,7 +3,7 @@ import { UsersService } from './users.service';
 import { JwtService } from '@nestjs/jwt';
 import { hashPassword, comparePassword } from './auth/password.utils';
 import { RegisterUserDto } from './auth/dto/register-user.dto';
-import { PrismaService } from './prisma.service';
+import { PrismaService } from './prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
 import { RefreshToken } from '@prisma/client';
