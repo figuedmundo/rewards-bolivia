@@ -67,8 +67,7 @@
 | T2.2 | Endpoints `/auth/register` y `/auth/login`. | Gemini | 1 d | [x] |
 | T2.3 | JWT (Access 15 min + Refresh 30 d) + Hash bcrypt. | Gemini | 1 d | [x] |
 | T2.4 | Integrar Google OAuth2. | Gemini | 1 d | [x] |
-| T2.5 | Middleware de roles (client, business, admin). | Backend Dev | 0.5 d | [ ] |
-| T2.6 | Documentar en Swagger. | Backend Dev | 0.5 d | [ ] |
+| T2.5 | Middleware de roles (client, business, admin). | Backend Dev | 0.5 d | [x] |
 
 ### 🔍 Testing (Auth)
 
@@ -262,3 +261,26 @@ Hoy hemos configurado el pipeline de CI/CD con GitHub Actions:
     *   Creado `docker-compose.prod.yml` para el entorno de producción.
     *   Creados `Dockerfile.dev` para los paquetes `api` y `web`.
     *   Actualizados y optimizados `Dockerfile.prod` para `api` (multi-stage build) y `web` (custom Nginx).
+
+---
+
+## ✅ Resumen de Progreso (Actualización) (Sunday 2 November)
+
+Hemos completado la implementación del middleware de roles:
+
+### 🚀 Hitos Completados:
+
+1.  **Implementación del Middleware de Roles (End-to-End):**
+    *   **Backend:**
+        *   Actualizado `prisma/schema.prisma` para incluir el campo `role` en el modelo `User`.
+        *   Ejecutada la migración de Prisma para aplicar los cambios a la base de datos.
+        *   Creado el decorador `@Roles` para definir los roles requeridos por un endpoint.
+        *   Implementado `RolesGuard` para verificar los roles del usuario.
+        *   Actualizado `AuthService` para incluir el rol del usuario en el payload del JWT.
+        *   Actualizado `JwtStrategy` para extraer el rol del usuario del payload del JWT.
+        *   Añadido un endpoint de prueba (`GET /users/admin-only`) en `UsersController` para demostrar el uso del `RolesGuard`.
+        *   Añadidas pruebas unitarias para `RolesGuard`.
+
+### 🚧 Tareas Pendientes en Autenticación:
+
+*   Expansión de la cobertura de pruebas para incluir todos los flujos de autenticación y casos de borde.

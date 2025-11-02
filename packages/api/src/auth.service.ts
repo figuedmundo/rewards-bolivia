@@ -6,7 +6,7 @@ import { RegisterUserDto } from './auth/dto/register-user.dto';
 import { PrismaService } from './prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
-import { RefreshToken } from '@prisma/client';
+import { RefreshToken, User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -25,8 +25,8 @@ export class AuthService {
     return null;
   }
 
-  async login(user: any) {
-    const payload = { email: user.email, sub: user.id };
+  async login(user: User) {
+    const payload = { email: user.email, sub: user.id, role: (user as any).role };
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = await this.createRefreshToken(user.id);
 
@@ -71,7 +71,7 @@ export class AuthService {
     });
 
     const newRefreshToken = await this.createRefreshToken(user.id);
-    const payload = { email: user.email, sub: user.id };
+    const payload = { email: user.email, sub: user.id, role: (user as any).role };
     const accessToken = this.jwtService.sign(payload);
 
     return {

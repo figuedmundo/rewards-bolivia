@@ -21,6 +21,7 @@ model User {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   refreshTokens RefreshToken[]
+  role          String         @default("client") // client, business, admin
 
   // Fields for OAuth providers
   provider      String         @default("local")
