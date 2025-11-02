@@ -146,3 +146,23 @@ No frontend changes are required for this task.
 - Provide a concise summary of the plan before starting.
 - Announce the completion of each major milestone.
 - If you encounter a blocker or a significant ambiguity, stop and ask for clarification.
+
+---
+
+## 12. Commit Message
+
+```
+feat(auth): implement role-based access control
+
+Implements a robust role-based access control (RBAC) system using NestJS Guards. This change introduces the `RolesGuard` and a `@Roles` decorator to protect endpoints based on user roles (client, business, admin).
+
+Key changes:
+- Adds a `role` field to the `User` model in `schema.prisma`.
+- Creates `RolesGuard` to handle role-based authorization logic.
+- Creates `@Roles` decorator to specify required roles for endpoints.
+- Updates `AuthService` to include the user's role in the JWT payload.
+- Updates `JwtStrategy` to extract the user's role from the JWT payload.
+- Adds a test endpoint (`/users/admin-only`) to demonstrate the usage of the `RolesGuard`.
+
+This change fulfills the requirement for T2.5 and provides a secure and scalable way to manage access to different parts of the API.
+```
