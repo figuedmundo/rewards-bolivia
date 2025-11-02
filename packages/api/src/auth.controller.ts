@@ -1,7 +1,9 @@
-import { Controller, Post, Body, UseGuards, Request, HttpCode, HttpStatus, UnauthorizedException, Get, Req, Res } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, HttpCode, HttpStatus, UnauthorizedException, Get, Req, Res, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from './auth/dto/register-user.dto';
 import { AuthGuard } from '@nestjs/passport';
+import type { Response } from 'express';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -14,12 +16,47 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Body() body: { email: string; password: string }) {
+  async login(
+    @Body() body: { email: string; password: string },
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const user = await this.authService.validateUser(body.email, body.password);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    return this.authService.login(user);
+    const { accessToken, refreshToken } = await this.authService.login(user);
+    response.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== 'development', // Use secure cookies in production
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+    return { accessToken };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async logout(@Req() req, @Res({ passthrough: true }) response: Response) {
+    await this.authService.logout(req.user.userId);
+    response.clearCookie('refresh_token');
+  }
+
+  @UseGuards(AuthGuard('jwt-refresh'))
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refreshTokens(@Req() req, @Res({ passthrough: true }) response: Response) {
+    const { accessToken, refreshToken } = await this.authService.refreshTokens(
+      req.user.userId,
+      req.user.refreshToken,
+    );
+    response.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== 'development',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+    return { accessToken };
   }
 
   @Get('google')
@@ -30,9 +67,12 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req, @Res() res) {
+  async googleAuthRedirect(@Req() req, @Res() res: Response) {
     const { accessToken, refreshToken } = await this.authService.login(req.user);
-    // Redirect to the frontend with the tokens in the query string
-    res.redirect(`http://localhost:5173/auth/google/callback?accessToken=${accessToken}&refreshToken=${refreshToken}`);
+    // Instead of setting a cookie, redirect to a frontend page with tokens in the URL.
+    // This is a more robust pattern for SPAs in development.
+    res.redirect(
+      `http://localhost:5173/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}`,
+    );
   }
 }

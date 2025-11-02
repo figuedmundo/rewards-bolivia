@@ -1,34 +1,30 @@
-import React, { useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks';
 
-const AuthCallbackPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
+const AuthCallbackPage = () => {
+  const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    const accessToken = searchParams.get('accessToken');
-    const refreshToken = searchParams.get('refreshToken');
+    const params = new URLSearchParams(location.search);
+    const accessToken = params.get('accessToken');
+    // You could also grab and store the refreshToken here if you adapt the login function
 
     if (accessToken) {
-      // Store the tokens in localStorage (or a more secure storage)
-      localStorage.setItem('accessToken', accessToken);
-      if (refreshToken) {
-        localStorage.setItem('refreshToken', refreshToken);
-      }
-      // Redirect to the dashboard
-      navigate('/dashboard');
+      console.log('AuthCallbackPage: Access token found, logging in...');
+      login(accessToken);
+      // Navigate to the home page after successful login
+      navigate('/', { replace: true });
     } else {
-      // Handle error case
-      console.error('Authentication failed: No access token found.');
-      navigate('/login');
+      console.error('AuthCallbackPage: No access token found in URL');
+      // Handle error, maybe navigate to login with an error message
+      navigate('/login', { replace: true });
     }
-  }, [searchParams, navigate]);
+  }, [login, navigate, location]);
 
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <p>Authenticating...</p>
-    </div>
-  );
+  return <div>Loading...</div>;
 };
 
 export default AuthCallbackPage;
