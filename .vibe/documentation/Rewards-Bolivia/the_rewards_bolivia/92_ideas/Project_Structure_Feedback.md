@@ -70,7 +70,7 @@ Below is a concrete, slightly expanded monorepo layout that keeps the current pa
 │   │   ├── Dockerfile.dev
 │   │   └── Dockerfile.prod
 │   ├── web/                    # React web app (Vite)
-│   ├── mobile/                 # (future) React Native / Expo app
+│   ├── mobile/                 # (future) mobile app
 │   ├── worker/                 # Background worker (worker.ts) — bullmq / bee-queue
 │   ├── shared-types/           # TypeScript types and DTO contracts
 │   ├── sdk/                    # Auto-generated JS/TS client from OpenAPI

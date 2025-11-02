@@ -1,0 +1,23 @@
+{
+  "name": "@rewards-bolivia/worker",
+  "version": "1.0.0",
+  "main": "dist/worker.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/worker.js",
+    "dev": "ts-node src/worker.ts"
+  },
+  "dependencies": {
+    "bullmq": "^5.8.5",
+    "ioredis": "^5.4.1",
+    "@rewards-bolivia/logger": "file:../libs/logger",
+    "@rewards-bolivia/shared-types": "file:../shared-types",
+    "@prisma/client": "^6.18.0",
+    "dotenv": "^16.6.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "ts-node": "^10.9.2",
+    "@types/node": "^22.10.7"
+  }
+}

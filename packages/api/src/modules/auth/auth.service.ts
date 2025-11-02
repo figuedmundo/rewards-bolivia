@@ -1,9 +1,7 @@
 import { Injectable, UnauthorizedException, ConflictException, ForbiddenException } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { JwtService } from '@nestjs/jwt';
-import { hashPassword, comparePassword } from './auth/password.utils';
-import { RegisterUserDto } from './auth/dto/register-user.dto';
-import { PrismaService } from './prisma/prisma.service';
+import { UsersService } from '../users/users.service';
+import { PrismaService } from '../../infrastructure/prisma.service';
+import { hashPassword, comparePassword } from './password.utils';
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
 import { RefreshToken, User } from '@prisma/client';

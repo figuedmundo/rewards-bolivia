@@ -37,13 +37,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run API tests
-        run: npm run api -- test
+      - name: Install turbo
+        run: npm install -g turbo
+
+      - name: Run tests and lint
+        run: turbo run test lint
         env:
           DATABASE_URL: postgresql://rewardsuser:rewardspassword@localhost:5432/rewardsdb
-
-      - name: Run web lint
-        run: npm run web -- lint
 
   build-docker-images:
     needs: build-and-test

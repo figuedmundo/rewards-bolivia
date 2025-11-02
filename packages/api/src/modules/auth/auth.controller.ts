@@ -1,9 +1,9 @@
 import { Controller, Post, Body, UseGuards, HttpCode, HttpStatus, UnauthorizedException, Get, Req, Res, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterUserDto } from './auth/dto/register-user.dto';
+import { RegisterUserDto } from '@rewards-bolivia/shared-types';
 import { AuthGuard } from '@nestjs/passport';
 import type { Response } from 'express';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
