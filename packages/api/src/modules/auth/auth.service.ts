@@ -5,6 +5,8 @@ import { hashPassword, comparePassword } from './password.utils';
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
 import { RefreshToken, User } from '@prisma/client';
+import { JwtService } from '@nestjs/jwt';
+import { RegisterUserDto } from '@rewards-bolivia/shared-types';
 
 @Injectable()
 export class AuthService {

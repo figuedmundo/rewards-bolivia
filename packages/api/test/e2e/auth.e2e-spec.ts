@@ -1,6 +1,6 @@
 import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../../src/app.module';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 

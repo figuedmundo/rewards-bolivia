@@ -1,11 +1,26 @@
-FROM node:20-alpine
+FROM node:24-alpine
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Set CI environment variable for pnpm
+ENV CI=true
 
 WORKDIR /usr/src/app
 
-COPY packages/web/package*.json ./
+# Copy the entire project context
+COPY . .
 
-RUN npm install
+# Install all dependencies. This will create the correct symlinks within the container.
+RUN pnpm install --frozen-lockfile
 
-COPY packages/web/ .
+# Build workspace packages that are dependencies
+RUN pnpm --filter @rewards-bolivia/logger build
+RUN pnpm --filter @rewards-bolivia/shared-types build
 
-CMD ["npm", "run", "dev"]
+# Switch to web directory
+WORKDIR /usr/src/app/packages/web
+
+# Expose and start
+EXPOSE 5173
+CMD ["pnpm", "run", "dev"]

@@ -31,10 +31,10 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('docs', app, document);
 
   // Add OpenAPI JSON endpoint for SDK generation
-  app.getHttpAdapter().get('/api-json', (req, res) => {
+  app.getHttpAdapter().get('/docs-json', (req, res) => {
     res.json(document);
   });
 

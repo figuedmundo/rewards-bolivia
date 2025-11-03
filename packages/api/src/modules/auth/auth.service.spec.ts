@@ -5,6 +5,7 @@ import { PrismaService } from '../../infrastructure/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ForbiddenException } from '@nestjs/common';
 import { AuthModule } from './auth.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -27,16 +28,22 @@ describe('AuthService', () => {
   };
 
   beforeEach(async () => {
-        const module: TestingModule = await Test.createTestingModule({
-          imports: [AuthModule],
-        })
-          .overrideProvider(UsersService)
-          .useValue(mockUsersService)
-          .overrideProvider(JwtService)
-          .useValue(mockJwtService)
-          .overrideProvider(PrismaService)
-          .useValue(mockPrismaService)
-          .compile();
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        AuthModule,
+        ConfigModule.forRoot({
+          isGlobal: true,
+          load: [() => ({ JWT_SECRET: 'test-secret' })],
+        }),
+      ],
+    })
+      .overrideProvider(UsersService)
+      .useValue(mockUsersService)
+      .overrideProvider(JwtService)
+      .useValue(mockJwtService)
+      .overrideProvider(PrismaService)
+      .useValue(mockPrismaService)
+      .compile();
 
     service = module.get<AuthService>(AuthService);
     jest.clearAllMocks();

@@ -25,12 +25,12 @@ services:
 
   api:
     build:
-      context: .
+      context: ../../
       dockerfile: packages/api/Dockerfile.dev
     ports:
       - "3001:3001"
     volumes:
-      - ./packages/api:/usr/src/app
+      - ../../packages/api/src:/usr/src/app/src
       - /usr/src/app/node_modules
     depends_on:
       - postgres
@@ -43,12 +43,12 @@ services:
 
   web:
     build:
-      context: .
+      context: ../../
       dockerfile: packages/web/Dockerfile.dev
     ports:
       - "5173:5173"
     volumes:
-      - ./packages/web:/usr/src/app
+      - ../../packages/web:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       - api

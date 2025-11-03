@@ -63,8 +63,8 @@ export class LoggerService {
         span.setStatus({ code: SpanStatusCode.OK });
         return result;
       } catch (error) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
-        span.recordException(error);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: error instanceof Error ? error.message : String(error) });
+        span.recordException(error instanceof Error ? error : new Error(String(error)));
         throw error;
       } finally {
         span.end();
