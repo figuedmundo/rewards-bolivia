@@ -1,12 +1,28 @@
-FROM node:20-alpine
+FROM node:24-alpine
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Set CI environment variable for pnpm
+ENV CI=true
 
 WORKDIR /usr/src/app
 
-COPY packages/api/package*.json ./
-COPY packages/api/prisma ./prisma
+# Copy the entire project context
+COPY . .
 
-RUN npm install
+# Install all dependencies. This will create the correct symlinks within the container.
+RUN pnpm install --frozen-lockfile
 
-COPY packages/api/ .
+# Build workspace packages that are dependencies
+RUN pnpm --filter @rewards-bolivia/logger build
+RUN pnpm --filter @rewards-bolivia/shared-types build
 
-CMD ["npm", "run", "start:dev"]
+# --- Switch to API workspace ---
+WORKDIR /usr/src/app/packages/api
+
+COPY packages/api/entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
+EXPOSE 3001
+CMD ["./entrypoint.sh"]

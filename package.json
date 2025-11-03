@@ -2,12 +2,19 @@
   "name": "rewards-bolivia",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.20.0",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/libs/*"
   ],
   "scripts": {
-    "api": "npm run --workspace=api",
-    "web": "npm run --workspace=web"
+    "api": "pnpm run --filter=api",
+    "web": "pnpm run --filter=web",
+    "worker": "pnpm run --filter=@rewards-bolivia/worker",
+    "build": "pnpm run build --filter=\"./packages/**\"",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "generate:sdk": "pnpm run --filter=api start & sleep 5 && npx @openapitools/openapi-generator-cli generate -i http://localhost:3001/api-json -g typescript-axios -o packages/sdk && kill $(lsof -t -i:3001)"
   },
   "keywords": [],
   "author": "",

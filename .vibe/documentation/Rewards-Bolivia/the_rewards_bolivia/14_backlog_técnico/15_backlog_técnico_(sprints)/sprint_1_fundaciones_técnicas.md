@@ -46,7 +46,7 @@
 | T1.3 | Estructurar proyecto NestJS con módulos iniciales: `auth`, `users`. | Gemini | 1 d | [x] |
 | T1.4 | Configurar CI/CD (GitHub Actions) con testing y build Docker. | Gemini | 1 d | [x] |
 | T1.5 | Configurar Prisma ORM + migraciones automáticas. | Gemini | 0.5 d | [x] |
-| T1.6 | Documentar estructura DDD y naming conventions. | Tech Lead | 0.5 d | [ ] |
+| T1.6 | Documentar estructura DDD y naming conventions. | Tech Lead | 0.5 d | [x] |
 
 ### 🔍 Testing (Infraestructura)
 

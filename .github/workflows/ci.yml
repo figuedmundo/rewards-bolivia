@@ -28,22 +28,21 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Use Node.js
+      - name: Use Node.js and pnpm
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-          cache: 'npm'
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
-      - name: Run API tests
-        run: npm run api -- test
+      - name: Run tests and lint
+        run: pnpm run test
         env:
           DATABASE_URL: postgresql://rewardsuser:rewardspassword@localhost:5432/rewardsdb
-
-      - name: Run web lint
-        run: npm run web -- lint
 
   build-docker-images:
     needs: build-and-test

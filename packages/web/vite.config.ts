@@ -1,20 +1,15 @@
 /// <reference types="vitest" />
 import path from "path"
 import react from "@vitejs/plugin-react"
-import { defineConfig } from "vite"
- 
-export default defineConfig({
+import { defineConfig, mergeConfig } from "vite"
+import { defineConfig as defineVitestConfig } from "vitest/config";
+
+const viteConfig = defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: './__tests__/setupTests.ts',
-    include: ['__tests__/**/*.{test,spec}.{ts,tsx}'],
   },
   server: {
     host: '0.0.0.0',
@@ -26,4 +21,15 @@ export default defineConfig({
       },
     },
   },
-})
+});
+
+const vitestConfig = defineVitestConfig({
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test-setup/setupTests.ts',
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+  },
+});
+
+export default mergeConfig(viteConfig, vitestConfig);

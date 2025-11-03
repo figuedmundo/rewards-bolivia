@@ -14,6 +14,10 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
+    "paths": {
+      "@rewards-bolivia/shared-types": ["../shared-types/dist"],
+      "@rewards-bolivia/logger": ["../libs/logger/dist"]
+    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,

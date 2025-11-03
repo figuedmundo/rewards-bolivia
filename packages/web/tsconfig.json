@@ -3,7 +3,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "~/*": ["./__tests__/*"]
+      "~/*": ["./__tests__/*"],
+      "@rewards-bolivia/shared-types": ["../shared-types"]
     }
   },
   "files": [],
