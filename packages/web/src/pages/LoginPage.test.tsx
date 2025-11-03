@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import LoginPage from '@/pages/LoginPage';
-import { AuthProvider } from '../src/components/providers/AuthProvider';
+import LoginPage from './LoginPage';
+import { AuthProvider } from '@/components/providers/AuthProvider';
 
 describe('LoginPage', () => {
   it('renders the Login heading', () => {
