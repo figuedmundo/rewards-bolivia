@@ -26,8 +26,8 @@ This document outlines the policies and procedures for database schema changes i
 
 1. **Create Migration**
    ```bash
-   cd packages/api
-   npx prisma migrate dev --name add_user_roles
+   # From the root of the monorepo
+   npm run --workspace=api db:migrate:dev -- --name add_user_roles
    ```
 
 2. **Update Schema**
@@ -65,9 +65,7 @@ This document outlines the policies and procedures for database schema changes i
 1. **Staging Deployment**
    ```bash
    # Apply migrations
-   npx prisma migrate deploy
-
-   # Run smoke tests
+   npm run --workspace=api db:migrate
    npm run test:migration-smoke
    ```
 
@@ -77,7 +75,7 @@ This document outlines the policies and procedures for database schema changes i
    pg_dump production_db > backup_$(date +%Y%m%d_%H%M%S).sql
 
    # Apply migrations
-   npx prisma migrate deploy
+   npm run --workspace=api db:migrate
 
    # Verify application health
    curl https://api.rewardsbolivia.com/api/health

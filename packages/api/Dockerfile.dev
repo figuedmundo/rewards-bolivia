@@ -21,5 +21,8 @@ RUN pnpm --filter @rewards-bolivia/shared-types build
 # --- Switch to API workspace ---
 WORKDIR /usr/src/app/packages/api
 
+COPY packages/api/entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
 EXPOSE 3001
-CMD ["pnpm", "run", "start:dev"]
+CMD ["./entrypoint.sh"]

@@ -3,7 +3,7 @@ import path from "path"
 import react from "@vitejs/plugin-react"
 import { defineConfig, mergeConfig } from "vite"
 import { defineConfig as defineVitestConfig } from "vitest/config";
- 
+
 const viteConfig = defineConfig({
   plugins: [react()],
   resolve: {
@@ -15,7 +15,7 @@ const viteConfig = defineConfig({
     host: '0.0.0.0',
     proxy: {
       '/api': {
-        target: 'http://3001',
+        target: 'http://api:3001',
         changeOrigin: true,
         secure: false,
       },

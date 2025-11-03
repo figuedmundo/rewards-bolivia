@@ -76,6 +76,9 @@ This runbook covers deployment procedures for the Rewards Bolivia application ac
    ```
 
 2. **Deploy to Kubernetes**
+
+   > **Note:** The Kubernetes manifests are not yet available in `infra/prod/k8s/`. The following steps are a template for when they are added.
+
    ```bash
    cd infra/prod
 

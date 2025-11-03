@@ -21,45 +21,45 @@ This project is a monorepo for the "Rewards Bolivia" platform, a loyalty and rew
 
 ## Building and Running the Project
 
-The project is managed as a monorepo using npm workspaces.
+The project is managed as a monorepo using pnpm workspaces.
 
 ### Prerequisites
 
 *   Node.js
-*   npm
+*   pnpm
 *   Docker
 
 ### Running the Application
 
 1.  **Start the database and other services:**
     ```bash
-    docker-compose up -d
+    docker-compose -f infra/local/docker-compose.yml up -d
     ```
 
 2.  **Install dependencies for all workspaces:**
     ```bash
-    npm install
+    pnpm install
     ```
 
 3.  **Run the backend API:**
     ```bash
-    npm run api -- start:dev
+    pnpm run api -- start:dev
     ```
 
 4.  **Run the frontend web application:**
     ```bash
-    npm run web -- dev
+    pnpm run web -- dev
     ```
 
 ### Running Tests
 
 *   **Backend (API):**
     ```bash
-    npm run api -- test
+    pnpm run api -- test
     ```
 *   **Frontend (Web):**
     ```bash
-    npm run web -- lint
+    pnpm run web -- test
     ```
 
 ## Development Conventions
@@ -86,7 +86,7 @@ The project is managed as a monorepo using npm workspaces.
 -   **Infrastructure as Code:** `infra/`
 -   **Project Documentation:** `.vibe/documentation/`
 -   **Task Plans:** `.vibe/tasks/`
--   **Docker Compose:** `docker-compose.yml`
+-   **Docker Compose:** `infra/local/docker-compose.yml`
 -   **Prisma Schema:** `packages/api/prisma/schema.prisma`
 
 ---

@@ -29,10 +29,17 @@ The project is organized as a monorepo using npm workspaces.
 
 ```
 /rewards-bolivia
+├───e2e/             # End-to-end tests for the whole application
+├───infra/           # Infrastructure as Code (IaC)
 ├───packages/
 │   ├───api/         # NestJS Backend (Modular Monolith)
-│   └───web/         # React Frontend (Vite + Tailwind CSS)
-├───infra/           # Infrastructure as Code (IaC)
+│   ├───web/         # React Frontend (Vite + Tailwind CSS)
+│   ├───worker/      # Background job processing worker
+│   ├───sdk/         # SDK for API client
+│   ├───shared-types/# Shared TypeScript types and DTOs
+│   ├───libs/        # Shared libraries (auth, logger, etc.)
+│   ├───test-utils/  # Utilities for testing
+│   └───infra-scripts/# Scripts for infrastructure management
 ├───.github/         # CI/CD Workflows
 └───.vibe/           # Project documentation and tasks
 ```
@@ -42,23 +49,15 @@ The project is organized as a monorepo using npm workspaces.
 The backend is a NestJS application structured around DDD principles.
 
 ```
-/packages/api/src/
-├───[module-name]/                # Bounded Context (e.g., auth, users, transactions)
-│   ├───application/              # Application Logic (Use Cases)
-│   │   ├───dto/                  # Data Transfer Objects (DTOs)
-│   │   └───[use-case-name].use-case.ts
-│   ├───domain/                   # Domain Logic and Entities
-│   │   ├───entities/             # Domain Entities (Rich Models)
-│   │   ├───repositories/         # Repository Interfaces
-│   │   └───services/             # Domain Services
-│   ├───infrastructure/           # Infrastructure Implementations
-│   │   ├───controllers/          # API Controllers (HTTP)
-│   │   ├───repositories/         # Repository Implementations (e.g., Prisma)
-│   │   └───gateways/              # Gateways to external services
-│   └───[module-name].module.ts
-├───app.module.ts
-├───main.ts
-└───prisma/                       # Prisma schema and migrations
+/packages/api/
+├───prisma/                       # Prisma schema and migrations
+└───src/
+    ├───application/              # Application Logic (Use Cases, DTOs)
+    ├───domain/                   # Domain Logic (Entities, Repositories, Domain Services)
+    ├───infrastructure/           # Infrastructure (Controllers, Prisma Repositories, Gateways)
+    ├───modules/                  # Feature modules (e.g., auth, users)
+    ├───app.module.ts             # Root application module
+    └───main.ts                   # Application entry point
 ```
 
 ### Frontend (`packages/web`)
@@ -102,11 +101,17 @@ By keeping all IaC in a single place, we ensure that our infrastructure is versi
 
 ## 4. Naming Conventions
 
-*   **Files:** `kebab-case.ts` (e.g., `jwt-auth.guard.ts`)
+*   **Files:** `name.type.ts` (e.g., `create-user.use-case.ts`, `auth.controller.ts`, `user.entity.ts`). The `kebab-case` style is preferred for file names with multiple words, for example `jwt-auth.guard.ts`.
 *   **Classes:** `PascalCase` with suffixes (e.g., `AuthService`, `UsersController`, `JwtAuthGuard`).
 *   **Methods:** `camelCase` (e.g., `getUser`, `createTransaction`).
 *   **Variables:** `camelCase` (e.g., `user`, `transactionAmount`).
 *   **Interfaces:** `PascalCase` with the `I` prefix (e.g., `IUserRepository`).
+
+---
+
+## 5. Testing
+
+For a detailed guide on our testing strategy, conventions, and best practices, please refer to the [Testing Documentation](./TESTING.md).
 
 ---
 

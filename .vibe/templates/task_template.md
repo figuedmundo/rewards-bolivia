@@ -83,14 +83,13 @@
 
 ## 3. Project Context & Current State
 
-### Technology Stack & Architecture
+### Technology Stack
 This feature will be built within the established Rewards Bolivia technical environment.
 
 ```yaml
 Project Name: Rewards Bolivia
 Technology Stack:
   Backend: NestJS (Node.js + TypeScript)
-  Mobile App: Flutter
   Web App (Dashboard): React (Vite + Tailwind CSS + shadcn/ui)
   Database (Primary): PostgreSQL
   ORM / DB Toolkit: Prisma
@@ -99,11 +98,61 @@ Technology Stack:
   Infrastructure: Docker & Kubernetes (K8s)
   CI/CD: GitHub Actions
   Testing: Jest (Unit), Playwright (E2E), k6 (Load)
+```
+
+### Architecture
+```yaml
 Key Architectural Patterns:
   - Modular Monolith
+  - Domain-Driven Design (DDD)
+  - Clean Architecture
   - Hybrid Off-chain/On-chain (Proof-of-Audit)
   - Event-driven (for asynchronous tasks)
 ```
+For more details, see the [Architecture Guide](../../docs/ARCHITECTURE.md).
+
+### Project Structure
+The project is a monorepo organized as follows:
+```
+/rewards-bolivia
+├───e2e/
+├───infra/
+├───packages/
+│   ├───api/
+│   ├───web/
+│   ├───worker/
+│   ├───sdk/
+│   ├───shared-types/
+│   ├───libs/
+│   ├───test-utils/
+│   └───infra-scripts/
+├───.github/
+└───docs/
+```
+For more details, see the [Architecture Guide](../../docs/ARCHITECTURE.md).
+
+### Naming Conventions
+-   **Files:** `name.type.ts` (e.g., `create-user.use-case.ts`). `kebab-case` for multi-word names.
+-   **Classes:** `PascalCase` with suffixes (e.g., `AuthService`, `UsersController`).
+-   **Methods & Variables:** `camelCase`.
+-   **Interfaces:** `PascalCase` with `I` prefix (e.g., `IUserRepository`).
+
+For more details, see the [Architecture Guide](../../docs/ARCHITECTURE.md).
+
+### Testing Guidelines
+-   **Unit Tests:** Colocated with source files (`.spec.ts`).
+-   **Integration Tests:** In `test/integration` folder within each package.
+-   **E2E Tests:** In top-level `e2e/` or package-level `e2e/` folders.
+-   **Test Utilities:** In `packages/test-utils`.
+
+For a complete guide, refer to the [Testing Documentation](../../docs/TESTING.md).
+
+### Best Practices
+-   Follow DDD principles for backend development.
+-   Enforce separation of concerns (Domain, Application, Infrastructure).
+-   Write tests for all new features.
+-   Follow the established migration policy for database changes.
+-   Keep documentation up-to-date.
 
 ### Current State
 [Describe what exists today - what's working, what's broken, what's missing relevant to this new feature. e.g., "Currently, users can earn points, but the redemption flow is not implemented. The user wallet UI exists but the 'Redeem' button is disabled."]

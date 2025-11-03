@@ -12,15 +12,16 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   ) {
     const clientID = configService.get<string>('GOOGLE_CLIENT_ID');
     const clientSecret = configService.get<string>('GOOGLE_CLIENT_SECRET');
+    const callbackURL = configService.get<string>('GOOGLE_CALLBACK_URL');
 
-    if (!clientID || !clientSecret) {
-      throw new Error('Google Client ID and Client Secret must be defined in environment variables.');
+    if (!clientID || !clientSecret || !callbackURL) {
+      throw new Error('Google Client ID, Client Secret, and Callback URL must be defined in environment variables.');
     }
 
     super({
       clientID,
       clientSecret,
-      callbackURL: 'http://localhost:3001/api/auth/google/callback',
+      callbackURL,
       scope: ['email', 'profile'],
       passReqToCallback: true,
     });

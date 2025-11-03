@@ -33,7 +33,12 @@ describe('AuthService', () => {
         AuthModule,
         ConfigModule.forRoot({
           isGlobal: true,
-          load: [() => ({ JWT_SECRET: 'test-secret' })],
+          load: [() => ({
+            JWT_SECRET: 'test-secret',
+            GOOGLE_CLIENT_ID: 'test-client-id',
+            GOOGLE_CLIENT_SECRET: 'test-client-secret',
+            GOOGLE_CALLBACK_URL: 'http://localhost:3000/auth/google/callback',
+          })],
         }),
       ],
     })
@@ -62,7 +67,7 @@ describe('AuthService', () => {
       mockJwtService.sign.mockReturnValue(accessToken);
       jest.spyOn(service, 'createRefreshToken').mockResolvedValue({ token: refreshToken });
 
-      const result = await service.login(user);
+      const result = await service.login(user as any);
 
       expect(mockJwtService.sign).toHaveBeenCalledWith({ email: user.email, sub: user.id });
       expect(service.createRefreshToken).toHaveBeenCalledWith(user.id);

@@ -56,8 +56,10 @@ Technology Stack:
   Testing:
     - Backend: Jest (Unit & E2E)
     - Frontend: Vitest, React Testing Library
+    - E2E: Playwright
   Infrastructure:
     - Containerization: Docker, Docker Compose
+    - Orchestration: Kubernetes (K8s)
 ```
 
 ### Project Paths & Commands
@@ -66,40 +68,53 @@ Project Paths:
   Root: /Users/edmundo.figueroaherbas@medirect.com.mt/projects/personal/rewards-bolivia
   API (Backend): packages/api
   Web (Frontend): packages/web
+  Worker: packages/worker
+  Shared Types: packages/shared-types
+  SDK: packages/sdk
+  Test Utilities: packages/test-utils
   Prisma Schema: packages/api/prisma/schema.prisma
-  Docker Compose: docker-compose.yml
+  Docker Compose: infra/local/docker-compose.yml
+  Architecture Docs: docs/
 
 Key Commands:
   - Install All Dependencies: `npm install`
-  - Run API Dev Server: `npm run api -- start:dev`
-  - Run Web Dev Server: `npm run web -- dev`
-  - Run API Tests: `npm run api -- test`
-  - Run API E2E Tests: `npm run api -- test:e2e`
-  - Run Web Tests: `npm run web -- test`
-  - Lint API: `npm run api -- lint`
-  - Lint Web: `npm run web -- lint`
-  - Generate Prisma Client: `npm run api -- postinstall`
+  - Run API Dev Server: `npm run -w api start:dev`
+  - Run Web Dev Server: `npm run -w web dev`
+  - Run API Tests: `npm run -w api test`
+  - Run API E2E Tests: `npm run -w api test:e2e`
+  - Run Web Tests: `npm run -w web test`
+  - Lint API: `npm run -w api lint`
+  - Lint Web: `npm run -w web lint`
+  - Generate Prisma Client: `npm run -w api postinstall`
 ```
 
 ### Project Standards & Guidelines
 
-#### Coding Standards
-```yaml
-Frontend (packages/web):
-  - Component Style: Functional Components with Hooks.
-  - Styling Approach: Tailwind CSS utility classes. Use `clsx` and `tailwind-merge` for conditional classes.
-  - File Naming: PascalCase for components (`MyComponent.tsx`), camelCase for hooks/utils (`useMyHook.ts`).
-  - State Management: React Context API for global state, `useState`/`useReducer` for local state.
-  - Props Validation: TypeScript interfaces.
+#### Coding Standards & Architecture
+- **Architecture**: The project follows a **Modular Monolith** architecture with principles from **Domain-Driven Design (DDD)** and **Clean Architecture**. For a detailed explanation, refer to the [**Architecture Guide**](../../docs/ARCHITECTURE.md).
+- **Project Structure**: The monorepo is organized into several packages under the `packages/` directory. Refer to the project structure diagram in the [Architecture Guide](../../docs/ARCHITECTURE.md).
+- **Naming Conventions**:
+    - **Files:** `name.type.ts` (e.g., `create-user.use-case.ts`). `kebab-case` for multi-word names.
+    - **Classes:** `PascalCase` with suffixes (e.g., `AuthService`, `UsersController`).
+    - **Methods & Variables:** `camelCase`.
+    - **Interfaces:** `PascalCase` with `I` prefix (e.g., `IUserRepository`).
+- **Backend (`packages/api`):**
+    - Adhere to NestJS conventions and use Prettier for formatting.
+    - Structure code into modules following DDD layers (Domain, Application, Infrastructure).
+    - Use standard NestJS exceptions for error handling.
+    - Use `class-validator` and `class-transformer` for DTO validation.
+    - All database interactions must go through the `PrismaService`.
+- **Frontend (`packages/web`):**
+    - Use Functional Components with Hooks.
+    - Use Tailwind CSS utility classes for styling (`clsx` and `tailwind-merge` for conditional classes).
+    - Use React Context API for global state and `useState`/`useReducer` for local state.
 
-Backend (packages/api):
-  - Code Style: NestJS conventions, Prettier for formatting.
-  - API Pattern: RESTful services structured in modules.
-  - Error Handling: Use standard NestJS exceptions (`BadRequestException`, `NotFoundException`, etc.).
-  - Validation: `class-validator` and `class-transformer` decorators on DTOs.
-  - Database: All interactions must go through the `PrismaService`.
-  - Documentation: Add comments for complex logic.
-```
+#### Testing Guidelines
+- A comprehensive testing strategy is crucial. All bug fixes and refactoring must be accompanied by appropriate tests.
+- **Unit Tests:** Colocated with source files (`.spec.ts`).
+- **Integration Tests:** In `test/integration` folder within each package.
+- **E2E Tests:** In top-level `e2e/` or package-level `e2e/` folders.
+- For a complete guide on testing philosophy, conventions, and examples, refer to the [**Testing Documentation**](../../docs/TESTING.md).
 
 #### UI/UX Standards
 ```yaml
@@ -107,7 +122,7 @@ Design System:
   - Component Library: `shadcn/ui` (refer to `packages/web/src/components/ui`).
   - Icons: `lucide-react`.
   - Color Palette & Typography: Defined in `packages/web/tailwind.config.js`.
-  
+
 Interaction Patterns:
   - Loading States: Use skeleton components or spinners for data fetching.
   - Error Display: Use toast notifications for non-critical errors and inline messages for form validation.
