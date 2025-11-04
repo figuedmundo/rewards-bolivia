@@ -33,7 +33,7 @@ describe('ApiService', () => {
     vi.clearAllMocks();
     // Re-initialize the ApiService instance to clear any previous state
     // This is a bit tricky with singletons, but we can force it for testing
-    // @ts-ignore
+    // @ts-expect-error: Resetting private static instance for testing purposes
     ApiService.instance = undefined;
   });
 
@@ -53,7 +53,7 @@ describe('ApiService', () => {
 
   it('should attach a response interceptor', () => {
     ApiService.getInstance();
-    // @ts-ignore
+    // @ts-expect-error: Interceptors are mocked and not directly exposed in AxiosInstance type
     expect(axios.create().interceptors.response.use).toHaveBeenCalledTimes(1);
   });
 
