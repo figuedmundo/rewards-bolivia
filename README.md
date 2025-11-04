@@ -3,9 +3,9 @@
 ![Project Banner](https://via.placeholder.com/1200x300.png?text=Rewards+Bolivia)
 
 <p align="center">
-  <img src="https://img.shields.io/github/actions/workflow/status/figuedmundo/bolivia-rewards/ci.yml?branch=main&style=for-the-badge" alt="Build Status">
-  <img src="https://img.shields.io/github/license/figuedmundo/bolivia-rewards?style=for-the-badge" alt="License">
-  <img src="https://img.shields.io/github/last-commit/figuedmundo/bolivia-rewards?style=for-the-badge" alt="Last Commit">
+  <img src="https://img.shields.io/github/actions/workflow/status/figuedmundo/rewards-bolivia/ci.yml?branch=main&style=for-the-badge" alt="Build Status">
+  <img src="https://img.shields.io/github/license/figuedmundo/rewards-bolivia?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/github/last-commit/figuedmundo/rewards-bolivia?style=for-the-badge" alt="Last Commit">
 </p>
 
 > A modern loyalty and rewards platform for businesses and customers in Bolivia, built with a focus on speed, security, and user experience.
@@ -182,4 +182,4 @@ This project is licensed under the MIT License. See the [LICENSE](./LICENSE) fil
 ## 📞 Contact
 
 -   **Project Maintainer:** [Your Name] - [figuedmundol@gmail.com]
--   **GitHub Issues:** [https://github.com/figuedmundo/bolivia-rewards/issues](https://github.com/figuedmundo/bolivia-rewards/issues)
+-   **GitHub Issues:** [https://github.com/figuedmundo/rewards-bolivia/issues](https://github.com/figuedmundo/rewards-bolivia/issues)
