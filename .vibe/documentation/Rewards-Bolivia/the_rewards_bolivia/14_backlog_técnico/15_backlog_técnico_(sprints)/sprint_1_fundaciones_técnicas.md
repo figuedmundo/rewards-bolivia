@@ -104,8 +104,8 @@ The `SSH_KEY` secret is your private SSH key. It's used to authenticate with you
 
 | Tipo | Descripción | Estimación | Status |
 | --- | --- | --- | --- |
-| Unit (60 %) | Validaciones de formularios y hooks. | 0.5 d | [~] |
-| Integration (30 %) | Llamadas API Auth + render UI. | 0.5 d | [~] |
+| Unit (60 %) | Validaciones de formularios y hooks. | 0.5 d | [x] |
+| Integration (30 %) | Llamadas API Auth + render UI. | 0.5 d | [x] |
 | E2E (10 %) | Login → Home vacía. | 0.5 d | [x] |
 
 ---
@@ -367,3 +367,23 @@ Hoy hemos finalizado las tareas de testing del frontend.
     *   Se han corregido todos los tests que fallaban en el paquete `web`.
     *   Se ha alcanzado una cobertura de `82.56%` en los tests del frontend, superando el objetivo del `70%`.
     *   Todos los tests (unitarios y de integración) del frontend ahora pasan exitosamente.
+
+---
+
+## 🏁 Resumen Final del Sprint
+
+El Sprint 1 se ha completado con éxito, sentando las bases técnicas del proyecto. A continuación se presenta un resumen de los entregables planificados frente a los resultados obtenidos.
+
+| Entregable | Estado | Comentarios |
+| --- | --- | --- |
+| 1. Monorepo funcional (API + Web + Infra) | ✅ Completado | Se ha configurado un monorepo con `pnpm workspaces` y una estructura de paquetes clara. |
+| 2. Arquitectura modular NestJS implementada (Auth + Users) | ✅ Completado | La API de NestJS se ha estructurado con módulos para `auth` y `users`, siguiendo los principios de diseño modular. |
+| 3. Autenticación JWT + Google OAuth2 operativa | ✅ Completado | Se ha implementado un flujo de autenticación completo, incluyendo registro, login, refresh tokens y Google OAuth2. |
+| 4. Front básico (login/registro) | ✅ Completado | El frontend de React cuenta con las pantallas de login y registro, conectadas a la API de autenticación. |
+| 5. CI/CD automático con tests piramidales | ✅ Completado | El pipeline de CI/CD en GitHub Actions ejecuta automáticamente linting, tests unitarios, de integración y E2E. |
+| 6. Cobertura ≥ 70 %, pipeline < 5 min | ✅ Completado | La cobertura de tests ha superado el 82% y el pipeline se ejecuta en menos de 5 minutos. |
+| 7. Documentación Swagger + Readme arquitectónico | ✅ Completado | La documentación de la API está disponible a través de Swagger y se ha creado un `ARCHITECTURE.md`. |
+
+### Conclusión del Sprint
+
+El equipo ha logrado todos los objetivos clave del Sprint 1, entregando una base de código robusta, bien probada y con un alto grado de automatización. La arquitectura modular y el pipeline de CI/CD permitirán un desarrollo más rápido y seguro en los próximos sprints.
