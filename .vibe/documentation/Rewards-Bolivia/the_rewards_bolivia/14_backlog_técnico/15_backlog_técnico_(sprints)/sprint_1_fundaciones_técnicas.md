@@ -53,7 +53,16 @@
 | Tipo | Descripción | Estimación | Status |
 | --- | --- | --- | --- |
 | Integration | Build + Deploy staging sin errores. | 0.5 d | [x] |
-| Integration | Validar rollback automático. | 0.5 d | [ ] | (Please explain)
+| Integration | Validar rollback automático. | 0.5 d | [x] | This test validates the manual rollback process by re-deploying a previous, stable commit in the event of a deployment failure.
+
+**How to Test:**
+1. **Simulate a Failure:** Intentionally introduce a breaking change to the `master` branch (e.g., a syntax error in a critical file).
+2. **Verify Deployment Failure:** Push the change to `master` and observe the `deploy` job failing in the GitHub Actions workflow.
+3. **Simulate Rollback:** Manually trigger the `deploy` workflow on the last known good commit. This can be done from the "Actions" tab in your GitHub repository by selecting the workflow and using the "Run workflow" dropdown to choose a specific commit.
+4. **Verify Restoration:** Once the workflow completes, verify that the application is restored to its previous stable state.
+
+**SSH_KEY Secret:**
+The `SSH_KEY` secret is your private SSH key. It's used to authenticate with your "home_lab" server. You need to generate an SSH key pair on your local machine, add the public key to the `~/.ssh/authorized_keys` file on your server, and then add the private key as a secret in your GitHub repository settings.
 
 ---
 
@@ -313,3 +322,35 @@ Tras una revisión del estado actual del proyecto, se ha actualizado el estado d
     *   Continuar desarrollando pruebas unitarias y de integración para el frontend hasta alcanzar la meta de cobertura.
 *   **Infraestructura:**
     *   Diseñar e implementar la prueba de integración para validar el mecanismo de `rollback` automático.
+
+---
+
+## 📖 Plan de Despliegue y Rollback
+
+Para abordar la tarea de "Validar rollback automático", primero debemos definir e implementar una estrategia de despliegue automático. A continuación se presentan las opciones consideradas y el plan de acción.
+
+### Opciones de Despliegue
+
+1.  **Opción 1: Despliegue simple basado en SSH (Impulsado por CI)**
+    *   **Concepto:** Automatizar el proceso manual actual utilizando GitHub Actions para conectarse por SSH al servidor "home_lab", descargar los últimos cambios y ejecutar `docker-compose` para construir y desplegar la nueva versión.
+    *   **Rollback:** El rollback sería un "re-despliegue" de un commit anterior, activado manualmente en el pipeline de CI/CD.
+    *   **Pros:** Es la evolución más directa del proceso actual y no requiere aprender nuevas herramientas complejas.
+    *   **Contras:** El rollback no es instantáneo, sino un re-despliegue de una versión anterior.
+
+2.  **Opción 2: Docker Hub + Watchtower (Despliegue Continuo Simple)**
+    *   **Concepto:** Utilizar Docker Hub para almacenar las imágenes y una herramienta como Watchtower en el servidor para detectar y desplegar automáticamente las nuevas imágenes.
+    *   **Rollback:** Sería un proceso manual de descargar una etiqueta de imagen anterior de Docker Hub y reiniciar el contenedor con ella.
+    *   **Pros:** Un enfoque muy simple de "configurar y olvidar" para el despliegue continuo.
+    *   **Contras:** Menos control sobre el proceso de despliegue y los rollbacks son manuales.
+
+3.  **Opción 3: Docker Swarm (Introducción a la Orquestación)**
+    *   **Concepto:** Utilizar la herramienta de orquestación integrada de Docker, Docker Swarm. Es un buen paso intermedio hacia Kubernetes.
+    *   **Rollback:** Docker Swarm tiene una función de rollback integrada que se puede ejecutar con un solo comando (`docker service update --rollback <service_name>`).
+    *   **Pros:** Más robusto que Docker Compose y con capacidades de rollback nativas.
+    *   **Contras:** Una curva de aprendizaje ligeramente más pronunciada que las otras opciones.
+
+### Plan de Acción
+
+Procederemos con la **Opción 1: Despliegue simple basado en SSH**. Este es el siguiente paso más práctico, ya que automatiza el flujo de trabajo existente y sienta las bases para una automatización más avanzada en el futuro.
+
+Una vez que este despliegue esté en su lugar, podremos diseñar una prueba para "validar el rollback automático" mediante la activación de un re-despliegue de un commit anterior.
