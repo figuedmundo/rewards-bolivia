@@ -1,4 +1,16 @@
-import { Controller, Post, Body, UseGuards, HttpCode, HttpStatus, UnauthorizedException, Get, Req, Res, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  UnauthorizedException,
+  Get,
+  Req,
+  Res,
+  Request,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from '@rewards-bolivia/shared-types';
 import { AuthGuard } from '@nestjs/passport';
@@ -45,7 +57,10 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt-refresh'))
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refreshTokens(@Req() req, @Res({ passthrough: true }) response: Response) {
+  async refreshTokens(
+    @Req() req,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const { accessToken, refreshToken } = await this.authService.refreshTokens(
       req.user.userId,
       req.user.refreshToken,
@@ -68,7 +83,9 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
-    const { accessToken, refreshToken } = await this.authService.login(req.user);
+    const { accessToken, refreshToken } = await this.authService.login(
+      req.user,
+    );
     // Instead of setting a cookie, redirect to a frontend page with tokens in the URL.
     // This is a more robust pattern for SPAs in development.
     res.redirect(

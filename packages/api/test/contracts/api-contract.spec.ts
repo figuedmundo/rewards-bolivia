@@ -115,9 +115,7 @@ describe('API Contract Tests', () => {
     });
 
     it('should reject requests without authentication', async () => {
-      await request(app.getHttpServer())
-        .get('/api/users/profile')
-        .expect(401);
+      await request(app.getHttpServer()).get('/api/users/profile').expect(401);
     });
   });
 
@@ -180,10 +178,14 @@ describe('API Contract Tests', () => {
       expect(spec).toHaveProperty('paths');
 
       // Verify no breaking changes in API contract
-      const authPaths = Object.keys(spec.paths).filter(path => path.startsWith('/api/auth'));
+      const authPaths = Object.keys(spec.paths).filter((path) =>
+        path.startsWith('/api/auth'),
+      );
       expect(authPaths.length).toBeGreaterThan(0);
 
-      const userPaths = Object.keys(spec.paths).filter(path => path.startsWith('/api/users'));
+      const userPaths = Object.keys(spec.paths).filter((path) =>
+        path.startsWith('/api/users'),
+      );
       expect(userPaths.length).toBeGreaterThan(0);
     });
   });

@@ -1,0 +1,101 @@
+
+> web@0.0.0 test /Users/edmundo.figueroaherbas@medirect.com.mt/projects/personal/rewards-bolivia/packages/web
+> vitest -- --coverage --reporter=json
+
+
+[1m[46m RUN [49m[22m [36mv4.0.6 [39m[90m/Users/edmundo.figueroaherbas@medirect.com.mt/projects/personal/rewards-bolivia/packages/web[39m
+
+ [31m❯[39m src/pages/AuthCallbackPage.test.tsx [2m([22m[2m4 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[32m 44[2mms[22m[39m
+[31m     [31m×[31m shows loading text initially[39m[32m 29[2mms[22m[39m
+[31m     [31m×[31m logs in and navigates to home when access token is present[39m[32m 4[2mms[22m[39m
+[31m     [31m×[31m navigates to login when no access token is present[39m[32m 4[2mms[22m[39m
+[31m     [31m×[31m handles URL parameters correctly[39m[32m 5[2mms[22m[39m
+[90mstdout[2m | src/components/providers/AuthProvider.test.tsx[2m > [22m[2mAuthProvider[2m > [22m[2mrenders children
+[22m[39mAuthProvider: No stored token found, skipping refresh
+
+[90mstdout[2m | src/components/providers/AuthProvider.test.tsx[2m > [22m[2mAuthProvider[2m > [22m[2mskips refresh when no stored token
+[22m[39mAuthProvider: No stored token found, skipping refresh
+
+[90mstdout[2m | src/components/providers/AuthProvider.test.tsx[2m > [22m[2mAuthProvider[2m > [22m[2mattempts refresh when token exists
+[22m[39mAuthProvider: Attempting to verify auth session...
+
+[90mstdout[2m | src/components/providers/AuthProvider.test.tsx[2m > [22m[2mAuthProvider[2m > [22m[2mattempts refresh when token exists
+[22m[39mAuthProvider: Session refresh successful { accessToken: [32m'new-token'[39m }
+
+[90mstdout[2m | src/components/providers/AuthProvider.test.tsx[2m > [22m[2mAuthProvider[2m > [22m[2mhandles successful refresh
+[22m[39mAuthProvider: Attempting to verify auth session...
+
+[90mstdout[2m | src/components/providers/AuthProvider.test.tsx[2m > [22m[2mAuthProvider[2m > [22m[2mhandles successful refresh
+[22m[39mAuthProvider: Session refresh successful { accessToken: [32m'new-token'[39m }
+
+ [32m✓[39m src/pages/DashboardPage.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 740[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the dashboard heading [33m 649[2mms[22m[39m
+[90mstdout[2m | src/components/providers/AuthProvider.test.tsx[2m > [22m[2mAuthProvider[2m > [22m[2mhandles failed refresh
+[22m[39mAuthProvider: Attempting to verify auth session...
+
+[90mstdout[2m | src/components/providers/AuthProvider.test.tsx[2m > [22m[2mAuthProvider[2m > [22m[2mprovides auth context to children
+[22m[39mAuthProvider: Attempting to verify auth session...
+
+ [32m✓[39m src/components/providers/AuthProvider.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 260[2mms[22m[39m
+ [32m✓[39m src/pages/HomePage.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 847[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the welcome message [33m 543[2mms[22m[39m
+ [32m✓[39m src/components/GoogleSignInButton.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 982[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the Google sign-in button with correct text and image [33m 603[2mms[22m[39m
+ [32m✓[39m test/integration/register.integration.spec.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 903[2mms[22m[39m
+     [33m[2m✓[22m[39m should render the register page with all form elements [33m 879[2mms[22m[39m
+[90mstdout[2m | src/pages/LoginPage.test.tsx[2m > [22m[2mLoginPage[2m > [22m[2mrenders the Login heading
+[22m[39mAuthProvider: No stored token found, skipping refresh
+
+[90mstdout[2m | test/integration/protected-routes.integration.spec.tsx[2m > [22m[2mProtected Routes Integration Flow[2m > [22m[2mshould redirect unauthenticated users to login when accessing protected routes
+[22m[39mAuthProvider: No stored token found, skipping refresh
+
+ [32m✓[39m src/App.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 833[2mms[22m[39m
+     [33m[2m✓[22m[39m renders login page when user is not authenticated [33m 670[2mms[22m[39m
+[90mstdout[2m | src/pages/LoginPage.test.tsx[2m > [22m[2mLoginPage[2m > [22m[2mrenders the Google Sign-In button
+[22m[39mAuthProvider: No stored token found, skipping refresh
+
+[90mstdout[2m | test/integration/protected-routes.integration.spec.tsx[2m > [22m[2mProtected Routes Integration Flow[2m > [22m[2mshould allow authenticated users to access protected routes
+[22m[39mAuthProvider: No stored token found, skipping refresh
+
+[90mstdout[2m | test/integration/protected-routes.integration.spec.tsx[2m > [22m[2mProtected Routes Integration Flow[2m > [22m[2mshould show loading state during authentication check
+[22m[39mAuthProvider: No stored token found, skipping refresh
+
+ [32m✓[39m src/pages/RegisterPage.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 1381[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the register heading [33m 604[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the register button [33m 321[2mms[22m[39m
+[90mstdout[2m | test/integration/protected-routes.integration.spec.tsx[2m > [22m[2mProtected Routes Integration Flow[2m > [22m[2mshould handle logout and redirect to login
+[22m[39mAuthProvider: No stored token found, skipping refresh
+
+ [32m✓[39m test/integration/protected-routes.integration.spec.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 988[2mms[22m[39m
+     [33m[2m✓[22m[39m should redirect unauthenticated users to login when accessing protected routes [33m 784[2mms[22m[39m
+[90mstdout[2m | test/integration/auth.integration.spec.tsx[2m > [22m[2mAuthentication Integration Flow[2m > [22m[2mshould allow a user to log in and be redirected to the home page
+[22m[39mAuthProvider: No stored token found, skipping refresh
+
+[90mstdout[2m | src/pages/LoginPage.test.tsx[2m > [22m[2mLoginPage[2m > [22m[2mshows an error message on failed login
+[22m[39mAuthProvider: No stored token found, skipping refresh
+
+[90mstdout[2m | test/integration/auth.integration.spec.tsx[2m > [22m[2mAuthentication Integration Flow[2m > [22m[2mshould show an error message on failed login
+[22m[39mAuthProvider: Attempting to verify auth session...
+
+[90mstdout[2m | src/pages/LoginPage.test.tsx[2m > [22m[2mLoginPage[2m > [22m[2mcalls the login function on successful submission
+[22m[39mAuthProvider: No stored token found, skipping refresh
+
+ [32m✓[39m src/pages/LoginPage.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 1243[2mms[22m[39m
+     [33m[2m✓[22m[39m renders the Login heading [33m 739[2mms[22m[39m
+ [32m✓[39m test/integration/auth.integration.spec.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 1255[2mms[22m[39m
+     [33m[2m✓[22m[39m should allow a user to log in and be redirected to the home page [33m 1114[2mms[22m[39m
+ [32m✓[39m src/lib/api.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/lib/utils.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/contexts/AuthContext.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m src/components/ProtectedRoute.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+[90mstdout[2m | src/hooks/useAuth.test.tsx[2m > [22m[2museAuth[2m > [22m[2mshould return auth context when used within AuthProvider
+[22m[39mAuthProvider: No stored token found, skipping refresh
+
+ [32m✓[39m src/hooks/useAuth.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m15 passed[39m[22m[90m (16)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m61 passed[39m[22m[90m (65)[39m
+[2m   Start at [22m 14:51:02
+[2m   Duration [22m 7.86s[2m (transform 1.95s, setup 4.72s, collect 15.59s, tests 9.58s, environment 29.43s, prepare 540ms)[22m
+
+ ELIFECYCLE  Test failed. See above for more details.

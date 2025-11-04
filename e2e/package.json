@@ -1,5 +1,5 @@
 {
-  "name": "rewards-bolivia-e2e",
+  "name": "e2e",
   "version": "1.0.0",
   "description": "End-to-end tests for Rewards Bolivia",
   "scripts": {

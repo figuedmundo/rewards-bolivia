@@ -119,7 +119,7 @@ describe('Migration Smoke Tests', () => {
       // Test that orphaned records don't exist
       // Check for transactions without users, etc.
       const users = await prisma.user.findMany({ select: { id: true } });
-      const userIds = users.map(u => u.id);
+      const userIds = users.map((u) => u.id);
 
       const orphanedTransactions = await prisma.transaction.findMany({
         where: {
@@ -151,22 +151,20 @@ describe('Migration Smoke Tests', () => {
     it('should respond within acceptable time', async () => {
       const start = Date.now();
 
-      await request(app.getHttpServer())
-        .get('/api/health')
-        .expect(200);
+      await request(app.getHttpServer()).get('/api/health').expect(200);
 
       const duration = Date.now() - start;
       expect(duration).toBeLessThan(1000); // 1 second
     });
 
     it('should handle concurrent requests', async () => {
-      const promises = Array(10).fill(null).map(() =>
-        request(app.getHttpServer()).get('/api/health')
-      );
+      const promises = Array(10)
+        .fill(null)
+        .map(() => request(app.getHttpServer()).get('/api/health'));
 
       const responses = await Promise.all(promises);
 
-      responses.forEach(response => {
+      responses.forEach((response) => {
         expect(response.status).toBe(200);
       });
     });

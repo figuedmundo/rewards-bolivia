@@ -33,12 +33,14 @@ describe('AuthService', () => {
         AuthModule,
         ConfigModule.forRoot({
           isGlobal: true,
-          load: [() => ({
-            JWT_SECRET: 'test-secret',
-            GOOGLE_CLIENT_ID: 'test-client-id',
-            GOOGLE_CLIENT_SECRET: 'test-client-secret',
-            GOOGLE_CALLBACK_URL: 'http://localhost:3000/auth/google/callback',
-          })],
+          load: [
+            () => ({
+              JWT_SECRET: 'test-secret',
+              GOOGLE_CLIENT_ID: 'test-client-id',
+              GOOGLE_CLIENT_SECRET: 'test-client-secret',
+              GOOGLE_CALLBACK_URL: 'http://localhost:3000/auth/google/callback',
+            }),
+          ],
         }),
       ],
     })
@@ -65,11 +67,16 @@ describe('AuthService', () => {
       const refreshToken = 'refresh_token';
 
       mockJwtService.sign.mockReturnValue(accessToken);
-      jest.spyOn(service, 'createRefreshToken').mockResolvedValue({ token: refreshToken });
+      jest
+        .spyOn(service, 'createRefreshToken')
+        .mockResolvedValue({ token: refreshToken });
 
       const result = await service.login(user as any);
 
-      expect(mockJwtService.sign).toHaveBeenCalledWith({ email: user.email, sub: user.id });
+      expect(mockJwtService.sign).toHaveBeenCalledWith({
+        email: user.email,
+        sub: user.id,
+      });
       expect(service.createRefreshToken).toHaveBeenCalledWith(user.id);
       expect(result).toEqual({ accessToken, refreshToken });
     });
@@ -93,7 +100,9 @@ describe('AuthService', () => {
 
     it('should throw ForbiddenException if user not found', async () => {
       mockUsersService.findOneById.mockResolvedValue(null);
-      await expect(service.refreshTokens(userId, refreshToken)).rejects.toThrow(ForbiddenException);
+      await expect(service.refreshTokens(userId, refreshToken)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should throw ForbiddenException if no matching token found', async () => {
@@ -101,7 +110,9 @@ describe('AuthService', () => {
       mockPrismaService.refreshToken.findMany.mockResolvedValue([]);
       jest.spyOn(service as any, 'findMatchingToken').mockResolvedValue(null);
 
-      await expect(service.refreshTokens(userId, refreshToken)).rejects.toThrow(ForbiddenException);
+      await expect(service.refreshTokens(userId, refreshToken)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should return new tokens and revoke the old one', async () => {
@@ -110,10 +121,16 @@ describe('AuthService', () => {
       const newRefreshToken = { token: 'new_refresh_token' };
 
       mockUsersService.findOneById.mockResolvedValue(user);
-      mockPrismaService.refreshToken.findMany.mockResolvedValue([oldTokenRecord]);
-      jest.spyOn(service as any, 'findMatchingToken').mockResolvedValue(oldTokenRecord);
+      mockPrismaService.refreshToken.findMany.mockResolvedValue([
+        oldTokenRecord,
+      ]);
+      jest
+        .spyOn(service as any, 'findMatchingToken')
+        .mockResolvedValue(oldTokenRecord);
       mockPrismaService.refreshToken.update.mockResolvedValue({} as any);
-      jest.spyOn(service, 'createRefreshToken').mockResolvedValue(newRefreshToken);
+      jest
+        .spyOn(service, 'createRefreshToken')
+        .mockResolvedValue(newRefreshToken);
       mockJwtService.sign.mockReturnValue(newAccessToken);
 
       const result = await service.refreshTokens(userId, refreshToken);
@@ -123,8 +140,14 @@ describe('AuthService', () => {
         data: { revokedAt: expect.any(Date) },
       });
       expect(service.createRefreshToken).toHaveBeenCalledWith(userId);
-      expect(mockJwtService.sign).toHaveBeenCalledWith({ email: user.email, sub: user.id });
-      expect(result).toEqual({ accessToken: newAccessToken, refreshToken: newRefreshToken.token });
+      expect(mockJwtService.sign).toHaveBeenCalledWith({
+        email: user.email,
+        sub: user.id,
+      });
+      expect(result).toEqual({
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken.token,
+      });
     });
   });
 });

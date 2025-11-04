@@ -15,7 +15,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     const callbackURL = configService.get<string>('GOOGLE_CALLBACK_URL');
 
     if (!clientID || !clientSecret || !callbackURL) {
-      throw new Error('Google Client ID, Client Secret, and Callback URL must be defined in environment variables.');
+      throw new Error(
+        'Google Client ID, Client Secret, and Callback URL must be defined in environment variables.',
+      );
     }
 
     super({

@@ -148,3 +148,32 @@ None.
 3.  **Install:** Run `pnpm install`.
 4.  **Verify:** Run `pnpm lint` to ensure it works as expected.
 5.  **Document:** Update `GEMINI.md`.
+
+---
+
+## Commit Message
+
+```
+feat: Implement unified linting strategy and update documentation
+
+This commit introduces a unified linting strategy across the monorepo using `turbo run lint`.
+It ensures that `pnpm lint` from the project root now lints both `api` and `web` packages.
+
+Resolved existing linting issues in the `packages/web` directory, including:
+- Replaced `any` type with `User` interface in `AuthContext.tsx`.
+- Refactored `require()` statements to ES module imports and updated `useAuth` mocking in `LoginPage.test.tsx`.
+- Corrected unused variable linting error in `LoginPage.tsx`.
+
+Updated `README.md` to provide comprehensive documentation for:
+- Running Playwright E2E tests.
+- Understanding Husky Git hooks (`pre-commit` and `commit-msg`).
+- Generating and viewing LCOV code coverage reports for the `web` package.
+- The 'e2e' package is now correctly included in 'pnpm-workspace.yaml', resolving issues with pnpm filtering.
+- The 'rewards-bolivia-e2e' package has been renamed to 'e2e' for conciseness.
+- The 'README.md' has been comprehensively updated to:
+  - Use 'pnpm' consistently across all commands.
+  - Provide accurate instructions for running E2E tests from the project root, including options for headed mode, UI mode, specific browser projects (e.g., Chromium), and viewing test reports.
+  - Clarify installation and running project steps.
+
+Added `coverage/` to the root `.gitignore` to prevent committing generated code coverage reports.
+```
