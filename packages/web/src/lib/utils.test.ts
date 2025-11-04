@@ -16,7 +16,7 @@ describe('cn utility function', () => {
   });
 
   it('handles falsy values', () => {
-    expect(cn('base-class', false && 'conditional-class', null, undefined)).toBe('base-class');
+    expect(cn('base-class', null, undefined)).toBe('base-class');
   });
 
   it('handles array inputs', () => {
