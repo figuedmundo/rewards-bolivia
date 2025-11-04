@@ -32,7 +32,7 @@
 
 ## 📂 Project Structure
 
-This project is a monorepo using npm workspaces. The main packages are:
+This project is a monorepo using pnpm workspaces. The main packages are:
 
 ```
 /rewards-bolivia
@@ -63,7 +63,7 @@ For a more detailed explanation of the architecture, please see [`docs/ARCHITECT
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-github/your-repo.git
+    git clone https://github.com/figuedmundo/rewards-bolivia.git
     cd rewards-bolivia
     ```
 
@@ -80,23 +80,55 @@ For a more detailed explanation of the architecture, please see [`docs/ARCHITECT
 
 ## 🏃 Running the Project
 
+You can run this project in two ways: using Docker Compose for the entire stack, or running the backend and frontend services locally while using Docker for the database and cache.
+
+### Option 1: Run Everything with Docker (Recommended)
+
+This method uses Docker Compose to build and run the entire application stack, including the API, web frontend, database, and cache. It's the simplest way to get started.
+
+1.  **Ensure Docker is running.**
+2.  **Build and start the services:**
+    ```bash
+    docker-compose -f infra/local/docker-compose.yml --env-file .env up --build
+    ```
+    This command will:
+    -   Build the Docker images for the `api` and `web` services.
+    -   Start all the services defined in the `docker-compose.yml` file.
+    -   Automatically apply database migrations.
+    -   Mount your local source code into the containers, so changes will trigger hot-reloading.
+
+### Option 2: Hybrid Setup (Local Development)
+
+This method is for developers who prefer to run the Node.js services (API, web, worker) directly on their host machine for easier debugging, while still using Docker for the database and cache.
+
 1.  **Start the infrastructure (Database & Cache):**
     ```bash
-    docker-compose -f infra/local/docker-compose.yml up -d
+    docker-compose -f infra/local/docker-compose.yml up -d postgres redis
     ```
+    *This starts only the `postgres` and `redis` services.*
 
 2.  **Run database migrations:**
     ```bash
-    pnpm --filter api db:migrate
+    pnpm --filter api exec prisma migrate dev
     ```
 
 3.  **Start the development servers:**
-    ```bash
-    pnpm dev
-    ```
-    *This will start the API backend, the web frontend, and the worker concurrently.*
+    Run each of the following commands in a separate terminal:
 
-The application will be available at the following URLs:
+    ```bash
+    # Terminal 1: Start the API backend
+    pnpm --filter api start:dev
+
+    # Terminal 2: Start the web frontend
+    pnpm --filter web dev
+
+    # Terminal 3: Start the worker
+    pnpm --filter @rewards-bolivia/worker dev
+    ```
+
+### Accessing the Application
+
+Once the application is running (using either method), it will be available at the following URLs:
 -   **Web App:** `http://localhost:5173`
 -   **API:** `http://localhost:3001`
 
@@ -181,5 +213,5 @@ This project is licensed under the MIT License. See the [LICENSE](./LICENSE) fil
 
 ## 📞 Contact
 
--   **Project Maintainer:** [Your Name] - [figuedmundol@gmail.com]
+-   **Project Maintainer:** Edmundo Figueroa - [figuedmundol@gmail.com]
 -   **GitHub Issues:** [https://github.com/figuedmundo/rewards-bolivia/issues](https://github.com/figuedmundo/rewards-bolivia/issues)

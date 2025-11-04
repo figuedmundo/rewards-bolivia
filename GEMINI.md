@@ -19,55 +19,113 @@ This project is a monorepo for the "Rewards Bolivia" platform, a loyalty and rew
     *   Containerization: Docker, Docker Compose
     *   Caching: Redis
 
-## Building and Running the Project
-
-The project is managed as a monorepo using pnpm workspaces.
+## 🏁 Getting Started
 
 ### Prerequisites
 
-*   Node.js
-*   pnpm
-*   Docker
+-   [Node.js](https://nodejs.org/) (v20 or higher)
+-   [pnpm](https://pnpm.io/) (v8 or higher)
+-   [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
 
-### Running the Application
+### Installation
 
-1.  **Start the database and other services:**
+1.  **Clone the repository:**
     ```bash
-    docker-compose -f infra/local/docker-compose.yml up -d
+    git clone https://github.com/figuedmundo/rewards-bolivia.git
+    cd rewards-bolivia
     ```
 
-2.  **Install dependencies for all workspaces:**
+2.  **Install dependencies:**
     ```bash
     pnpm install
     ```
 
-3.  **Run the backend API:**
+3.  **Set up environment variables:**
     ```bash
-    pnpm run api -- start:dev
+    cp .env.example .env
+    ```
+    *Fill in the required variables in the `.env` file.*
+
+## 🏃 Running the Project
+
+You can run this project in two ways: using Docker Compose for the entire stack, or running the backend and frontend services locally while using Docker for the database and cache.
+
+### Option 1: Run Everything with Docker (Recommended)
+
+This method uses Docker Compose to build and run the entire application stack, including the API, web frontend, database, and cache. It's the simplest way to get started.
+
+1.  **Ensure Docker is running.**
+2.  **Build and start the services:**
+    ```bash
+    docker-compose -f infra/local/docker-compose.yml --env-file .env up --build
+    ```
+    This command will:
+    -   Build the Docker images for the `api` and `web` services.
+    -   Start all the services defined in the `docker-compose.yml` file.
+    -   Automatically apply database migrations.
+    -   Mount your local source code into the containers, so changes will trigger hot-reloading.
+
+### Option 2: Hybrid Setup (Local Development)
+
+This method is for developers who prefer to run the Node.js services (API, web, worker) directly on their host machine for easier debugging, while still using Docker for the database and cache.
+
+1.  **Start the infrastructure (Database & Cache):**
+    ```bash
+    docker-compose -f infra/local/docker-compose.yml up -d postgres redis
+    ```
+    *This starts only the `postgres` and `redis` services.*
+
+2.  **Run database migrations:**
+    ```bash
+    pnpm --filter api exec prisma migrate dev
     ```
 
-4.  **Run the frontend web application:**
+3.  **Start the development servers:**
+    Run each of the following commands in a separate terminal:
+
     ```bash
-    pnpm run web -- dev
+    # Terminal 1: Start the API backend
+    pnpm --filter api start:dev
+
+    # Terminal 2: Start the web frontend
+    pnpm --filter web dev
+
+    # Terminal 3: Start the worker
+    pnpm --filter @rewards-bolivia/worker dev
     ```
 
-### Running Tests
+### Accessing the Application
 
-*   **Backend (API):**
+Once the application is running (using either method), it will be available at the following URLs:
+-   **Web App:** `http://localhost:5173`
+-   **API:** `http://localhost:3001`
+
+## 🧪 Running Tests
+
+This project uses a comprehensive testing strategy. For more details, please see [`docs/TESTING.md`](./docs/TESTING.md).
+
+-   **Run all unit and integration tests:**
     ```bash
-    pnpm run api -- test
-    ```
-*   **Frontend (Web):**
-    ```bash
-    pnpm run web -- test
+    pnpm test
     ```
 
-### Running Linting
-
-*   **All Workspaces:**
+-   **Run tests for a specific package:**
     ```bash
-    pnpm lint
+    # For the API
+    pnpm --filter api test
+
+    # For the Web App
+    pnpm --filter web test
     ```
+
+-   **Run E2E tests:**
+    ```bash
+    pnpm --filter e2e test
+    ```
+    - To run in headed mode: `pnpm --filter e2e test:headed`
+    - To open the Playwright UI: `pnpm --filter e2e test:ui`
+    - To run tests for a specific browser (e.g., Chromium): `pnpm --filter e2e test --project=chromium`
+    - To view the last report: `pnpm --filter e2e report`
 
 ## Development Conventions
 
