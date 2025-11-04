@@ -354,3 +354,16 @@ Para abordar la tarea de "Validar rollback automático", primero debemos definir
 Procederemos con la **Opción 1: Despliegue simple basado en SSH**. Este es el siguiente paso más práctico, ya que automatiza el flujo de trabajo existente y sienta las bases para una automatización más avanzada en el futuro.
 
 Una vez que este despliegue esté en su lugar, podremos diseñar una prueba para "validar el rollback automático" mediante la activación de un re-despliegue de un commit anterior.
+
+---
+
+## ✅ Resumen de Progreso (Actualización) (Tuesday 4 November)
+
+Hoy hemos finalizado las tareas de testing del frontend.
+
+### 🚀 Hitos Completados:
+
+1.  **Finalización de Pruebas Frontend:**
+    *   Se han corregido todos los tests que fallaban en el paquete `web`.
+    *   Se ha alcanzado una cobertura de `82.56%` en los tests del frontend, superando el objetivo del `70%`.
+    *   Todos los tests (unitarios y de integración) del frontend ahora pasan exitosamente.
