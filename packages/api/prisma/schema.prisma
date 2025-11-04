@@ -13,6 +13,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum TransactionType {
+  EARN
+  REDEEM
+  ADJUSTMENT
+}
+
 model User {
   id            String         @id @default(cuid())
   email         String         @unique
@@ -24,22 +30,71 @@ model User {
   role          String         @default("client") // client, business, admin
 
   // Fields for OAuth providers
-  provider      String         @default("local")
-  providerId    String?
+  provider   String  @default("local")
+  providerId String?
+
+  pointsBalance Int           @default(0)
+  transactions  Transaction[]
+  businesses    Business[] // A user can own/manage multiple businesses
 
   @@unique([provider, providerId])
 }
 
+model Business {
+  id            String        @id @default(cuid())
+  name          String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  pointsBalance Int           @default(0)
+  transactions  Transaction[]
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
+
+  @@index([ownerId])
+}
+
 model RefreshToken {
-  id         String    @id @default(cuid())
-  userId     String
-  token      String    @unique
-  expiresAt  DateTime
-  createdAt  DateTime  @default(now())
-  revokedAt  DateTime?
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String    @id @default(cuid())
+  userId    String
+  token     String    @unique
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
+model Transaction {
+  id           String          @id @default(cuid())
+  type         TransactionType
+  pointsAmount Int
+  status       String // e.g., "COMPLETED", "PENDING", "FAILED"
+  auditHash    String?         @unique
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 
+  business   Business @relation(fields: [businessId], references: [id])
+  businessId String
+  customer   User     @relation(fields: [customerId], references: [id])
+  customerId String
+
+  ledgerEntries PointLedger[]
+
+  @@index([businessId])
+  @@index([customerId])
+}
+
+model PointLedger {
+  id            String      @id @default(cuid())
+  accountId     String // Can be a userId or businessId
+  debit         Int // Points removed
+  credit        Int // Points added
+  balanceAfter  Int
+  createdAt     DateTime    @default(now())
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  transactionId String
+
+  @@index([accountId])
+}
