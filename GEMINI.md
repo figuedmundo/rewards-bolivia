@@ -62,6 +62,13 @@ The project is managed as a monorepo using pnpm workspaces.
     pnpm run web -- test
     ```
 
+### Running Linting
+
+*   **All Workspaces:**
+    ```bash
+    pnpm lint
+    ```
+
 ## Development Conventions
 
 *   The backend follows the standard NestJS project structure.

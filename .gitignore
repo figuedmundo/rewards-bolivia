@@ -55,3 +55,10 @@ docker-compose.override.yml
 # Gemini
 .gemini/
 .vibe/prep/
+
+# Code Coverage
+coverage/
+
+# Playwright
+playwright-report/
+test-results/

@@ -56,7 +56,7 @@ For a more detailed explanation of the architecture, please see [`docs/ARCHITECT
 ### Prerequisites
 
 -   [Node.js](https://nodejs.org/) (v20 or higher)
--   [npm](https://www.npmjs.com/) (v10 or higher)
+-   [pnpm](https://pnpm.io/) (v8 or higher)
 -   [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
 
 ### Installation
@@ -69,7 +69,7 @@ For a more detailed explanation of the architecture, please see [`docs/ARCHITECT
 
 2.  **Install dependencies:**
     ```bash
-    npm install
+    pnpm install
     ```
 
 3.  **Set up environment variables:**
@@ -87,12 +87,12 @@ For a more detailed explanation of the architecture, please see [`docs/ARCHITECT
 
 2.  **Run database migrations:**
     ```bash
-    npm run -w api db:migrate
+    pnpm --filter api db:migrate
     ```
 
 3.  **Start the development servers:**
     ```bash
-    npm run dev
+    pnpm dev
     ```
     *This will start the API backend, the web frontend, and the worker concurrently.*
 
@@ -104,24 +104,72 @@ The application will be available at the following URLs:
 
 This project uses a comprehensive testing strategy. For more details, please see [`docs/TESTING.md`](./docs/TESTING.md).
 
--   **Run all tests:**
+-   **Run all unit and integration tests:**
     ```bash
-    npm test
+    pnpm test
     ```
 
 -   **Run tests for a specific package:**
     ```bash
     # For the API
-    npm run -w api test
+    pnpm --filter api test
 
     # For the Web App
-    npm run -w web test
+    pnpm --filter web test
     ```
 
 -   **Run E2E tests:**
     ```bash
-    npm run test:e2e
+    pnpm --filter e2e test
     ```
+    - To run in headed mode: `pnpm --filter e2e test:headed`
+    - To open the Playwright UI: `pnpm --filter e2e test:ui`
+    - To run tests for a specific browser (e.g., Chromium): `pnpm --filter e2e test --project=chromium`
+    - To view the last report: `pnpm --filter e2e report`
+
+### Code Coverage
+
+This project uses `vitest` to generate code coverage reports for the `web` package. The report is generated in LCOV format, which provides a detailed, interactive HTML view of your test coverage.
+
+**What is an LCOV Report?**
+
+LCOV is a tool that creates a graphical front-end for `gcov`, a code coverage analysis tool. The `lcov-report` is a directory containing a set of HTML files that allow you to visualize your code coverage. You can browse through your source code and see exactly which lines of code have been executed by your tests and which have not. This is an invaluable tool for identifying gaps in your testing and improving the quality of your codebase.
+
+**How to Generate the Report**
+
+To generate the code coverage report for the `web` package, run the following command from the root of the project:
+
+```bash
+pnpm run --filter=web test -- --coverage
+```
+
+This command runs the tests for the `web` package with the `--coverage` flag, which instructs `vitest` to collect coverage data and generate the report.
+
+**Viewing the Report**
+
+Once the command has finished, you will find the generated report in the `packages/web/coverage/` directory. To view the report, open the `index.html` file in that directory in your web browser:
+
+```bash
+# On macOS
+open packages/web/coverage/index.html
+
+# On Windows
+start packages/web/coverage/index.html
+
+# On Linux
+xdg-open packages/web/coverage/index.html
+```
+
+This will open the interactive HTML report, where you can explore the coverage data for each file in the `web` package.
+
+## 💅 Code Quality and Git Hooks
+
+This project uses [Husky](https://typicode.github.io/husky/) to enforce code quality standards and consistent commit messages. The following Git hooks are configured:
+
+-   **`pre-commit`:** Before each commit, `lint-staged` is run to automatically lint and format staged files. This ensures that no code that violates the project's style guide is committed.
+-   **`commit-msg`:** When you write a commit message, `commitlint` checks it to ensure it follows the [Conventional Commits](https://www.conventionalcommits.org/) specification.
+
+You don't need to do anything to activate these hooks; they run automatically when you commit your changes.
 
 ## 🤝 Contributing
 

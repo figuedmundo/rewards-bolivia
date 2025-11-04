@@ -52,8 +52,8 @@
 
 | Tipo | Descripción | Estimación | Status |
 | --- | --- | --- | --- |
-| Integration | Build + Deploy staging sin errores. | 0.5 d | [ ] |
-| Integration | Validar rollback automático. | 0.5 d | [ ] |
+| Integration | Build + Deploy staging sin errores. | 0.5 d | [x] |
+| Integration | Validar rollback automático. | 0.5 d | [ ] | (Please explain)
 
 ---
 
@@ -95,8 +95,8 @@
 
 | Tipo | Descripción | Estimación | Status |
 | --- | --- | --- | --- |
-| Unit (60 %) | Validaciones de formularios y hooks. | 0.5 d | [ ] |
-| Integration (30 %) | Llamadas API Auth + render UI. | 0.5 d | [ ] |
+| Unit (60 %) | Validaciones de formularios y hooks. | 0.5 d | [~] |
+| Integration (30 %) | Llamadas API Auth + render UI. | 0.5 d | [~] |
 | E2E (10 %) | Login → Home vacía. | 0.5 d | [x] |
 
 ---
@@ -108,9 +108,9 @@
 | ID | Tarea | Descripción | Estimación | Status |
 | --- | --- | --- | --- | --- |
 | T4.1 | Configurar Jest + Supertest (NestJS). | Gemini | 0.5 d | [x] |
-| T4.2 | Configurar Playwright mínimo para flujos críticos. | QA/Dev | 0.5 d | [ ] |
-| T4.3 | Integrar reportes de cobertura Codecov. | DevOps | 0.5 d | [ ] |
-| T4.4 | Añadir linting y pre-commit checks. | DevOps | 0.5 d | [ ] |
+| T4.2 | Configurar Playwright mínimo para flujos críticos. | QA/Dev | 0.5 d | [x] |
+| T4.3 | Integrar reportes de cobertura Codecov. | DevOps | 0.5 d | [x] |
+| T4.4 | Añadir linting y pre-commit checks. | DevOps | 0.5 d | [x] |
 
 ---
 
@@ -284,3 +284,30 @@ Hemos completado la implementación del middleware de roles:
 ### 🚧 Tareas Pendientes en Autenticación:
 
 *   Expansión de la cobertura de pruebas para incluir todos los flujos de autenticación y casos de borde.
+
+---
+
+## ✅ Resumen de Progreso (Actualización) (Monday 3 November)
+
+Tras una revisión del estado actual del proyecto, se ha actualizado el estado de las tareas pendientes del pipeline de QA.
+
+### 🚀 Hitos Completados:
+
+1.  **Configuración de Herramientas de QA (T4.2, T4.3, T4.4):**
+    *   **Playwright (T4.2):** La configuración base para las pruebas E2E con Playwright está completa (`e2e/playwright.config.ts`).
+    *   **Codecov (T4.3):** La integración con Codecov está configurada en el pipeline de CI (`.github/workflows/ci.yml`) para subir los reportes de cobertura.
+    *   **Linting y Pre-commit (T4.4):** Se ha configurado un hook de pre-commit con Husky que ejecuta `lint-staged` para formatear y verificar el código antes de cada commit.
+
+2.  **Inicio de Pruebas Frontend:**
+    *   Se han creado los primeros ficheros de pruebas para el frontend (`useAuth.test.tsx`, `LoginPage.test.tsx`), marcando el inicio de las tareas de testing de UI.
+
+### 🚧 Tareas Pendientes y Próximos Pasos:
+
+*   **Integración en CI:** Actualizar el workflow `ci.yml` para que ejecute los siguientes comandos en cada build:
+    *   `pnpm lint` (para toda la base de código).
+    *   `pnpm run web -- test` (para las pruebas del frontend).
+    *   Un nuevo script para ejecutar las pruebas E2E de Playwright.
+*   **Expandir Cobertura de Pruebas:**
+    *   Continuar desarrollando pruebas unitarias y de integración para el frontend hasta alcanzar la meta de cobertura.
+*   **Infraestructura:**
+    *   Diseñar e implementar la prueba de integración para validar el mecanismo de `rollback` automático.

@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, ConflictException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { PrismaService } from '../../infrastructure/prisma.service';
 import { hashPassword, comparePassword } from './password.utils';
@@ -18,7 +23,11 @@ export class AuthService {
 
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.usersService.findOne(email);
-    if (user && user.passwordHash && (await comparePassword(pass, user.passwordHash))) {
+    if (
+      user &&
+      user.passwordHash &&
+      (await comparePassword(pass, user.passwordHash))
+    ) {
       const { passwordHash, ...result } = user;
       return result;
     }
@@ -26,7 +35,11 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const payload = { email: user.email, sub: user.id, role: (user as any).role };
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      role: (user as any).role,
+    };
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = await this.createRefreshToken(user.id);
 
@@ -58,7 +71,10 @@ export class AuthService {
       where: { userId, revokedAt: null },
     });
 
-    const matchingToken = await this.findMatchingToken(refreshToken, userRefreshTokens);
+    const matchingToken = await this.findMatchingToken(
+      refreshToken,
+      userRefreshTokens,
+    );
 
     if (!matchingToken) {
       throw new ForbiddenException('Access Denied');
@@ -71,7 +87,11 @@ export class AuthService {
     });
 
     const newRefreshToken = await this.createRefreshToken(user.id);
-    const payload = { email: user.email, sub: user.id, role: (user as any).role };
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      role: (user as any).role,
+    };
     const accessToken = this.jwtService.sign(payload);
 
     return {
@@ -80,7 +100,7 @@ export class AuthService {
     };
   }
 
-    private async findMatchingToken(token: string, userTokens: RefreshToken[]) {
+  private async findMatchingToken(token: string, userTokens: RefreshToken[]) {
     for (const userToken of userTokens) {
       if (await bcrypt.compare(token, userToken.token)) {
         return userToken;
@@ -161,4 +181,3 @@ export class AuthService {
     }
   }
 }
-
