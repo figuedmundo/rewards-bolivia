@@ -112,6 +112,8 @@
 | T4.3 | Integrar reportes de cobertura Codecov. | DevOps | 0.5 d | [x] |
 | T4.4 | Añadir linting y pre-commit checks. | DevOps | 0.5 d | [x] |
 
+**Nota:** Actualmente, el linting de pre-commit para el paquete `api` está deshabilitado temporalmente debido a problemas de linting existentes. Se abordará en una tarea futura.
+
 ---
 
 ## 📊 Métricas Sprint 1
