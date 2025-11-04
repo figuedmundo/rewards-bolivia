@@ -39,8 +39,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Run linting
+        run: pnpm lint
+
       - name: Run API tests
-        run: npm run -w api test
+        run: pnpm run api -- test
+
+      - name: Run web tests
+        run: pnpm run web -- test
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -48,8 +54,31 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
 
-  deploy:
+  e2e-tests:
     needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js and pnpm
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: pnpm exec playwright test
+
+  deploy:
+    needs: [build-and-test, e2e-tests]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     steps:

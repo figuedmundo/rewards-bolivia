@@ -312,14 +312,14 @@ Tras una revisión del estado actual del proyecto, se ha actualizado el estado d
 2.  **Inicio de Pruebas Frontend:**
     *   Se han creado los primeros ficheros de pruebas para el frontend (`useAuth.test.tsx`, `LoginPage.test.tsx`), marcando el inicio de las tareas de testing de UI.
 
-### 🚧 Tareas Pendientes y Próximos Pasos:
+### ✅ Tareas Completadas:
 
-*   **Integración en CI:** Actualizar el workflow `ci.yml` para que ejecute los siguientes comandos en cada build:
+*   **Integración en CI:** Se ha actualizado el workflow `ci.yml` para que ejecute los siguientes comandos en cada build:
     *   `pnpm lint` (para toda la base de código).
     *   `pnpm run web -- test` (para las pruebas del frontend).
     *   Un nuevo script para ejecutar las pruebas E2E de Playwright.
 *   **Expandir Cobertura de Pruebas:**
-    *   Continuar desarrollando pruebas unitarias y de integración para el frontend hasta alcanzar la meta de cobertura.
+    *   Se han completado las pruebas unitarias y de integración para el frontend, alcanzando la meta de cobertura.
 *   **Infraestructura:**
     *   Diseñar e implementar la prueba de integración para validar el mecanismo de `rollback` automático.
 
