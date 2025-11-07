@@ -15,6 +15,7 @@ describe('TransactionsController (integration)', () => {
   let testUser: User;
   let testBusiness: Business;
   let businessUser: User;
+  let adminUser: User;
 
   beforeAll(async () => {
     // Set environment variables before creating the module
@@ -71,6 +72,14 @@ describe('TransactionsController (integration)', () => {
         name: 'Test Business',
         ownerId: businessUser.id,
         pointsBalance: 5000,
+      },
+    });
+
+    adminUser = await prisma.user.create({
+      data: {
+        email: 'admin@example.com',
+        name: 'Admin User',
+        role: 'admin',
       },
     });
   });
@@ -154,7 +163,7 @@ describe('TransactionsController (integration)', () => {
       const response = await request(app.getHttpServer())
         .post('/api/transactions/redeem')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(redeemDto)
+        .send(redeDto)
         .expect(201);
 
       expect(response.body.pointsRedeemed).toBe(100);
@@ -191,12 +200,12 @@ describe('TransactionsController (integration)', () => {
         businessId: testBusiness.id,
         pointsToRedeem: 100,
         ticketTotal: 9,
-      }; // 100 * 0.03 = 3. 30% of 9 is 2.7
+      };
 
       return request(app.getHttpServer())
         .post('/api/transactions/redeem')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(redeemDto)
+        .send(redeDto)
         .expect(400);
     });
 
@@ -236,7 +245,11 @@ describe('TransactionsController (integration)', () => {
         businessId: testBusiness.id,
         pointsToRedeem: 300,
         ticketTotal: 50,
-      }; // 300 * 0.03 = 9, 30% of 50 = 15, ok
+      };
+
+      const burnRate = 0.005; // From EconomicControlService
+      const expectedBurnAmount = Math.floor(redeemDto.pointsToRedeem * burnRate);
+      const expectedBusinessCredit = redeemDto.pointsToRedeem - expectedBurnAmount;
 
       const redeemResponse = await request(app.getHttpServer())
         .post('/api/transactions/redeem')
@@ -256,7 +269,7 @@ describe('TransactionsController (integration)', () => {
       updatedBusiness = await prisma.business.findUnique({
         where: { id: testBusiness.id },
       });
-      expect(updatedBusiness!.pointsBalance).toBe(5100); // 4800 + 300
+      expect(updatedBusiness!.pointsBalance).toBe(4800 + expectedBusinessCredit); // 4800 + (300 - burnAmount)
 
       // Verify Redis cache
       const cachedUserBalance = await redisService.get(
@@ -267,7 +280,71 @@ describe('TransactionsController (integration)', () => {
       const cachedBusinessBalance = await redisService.get(
         `business:${testBusiness.id}:balance`,
       );
-      expect(cachedBusinessBalance).toBe('5100');
+      expect(cachedBusinessBalance).toBe((4800 + expectedBusinessCredit).toString());
+    });
+  });
+
+  describe('/GET transactions/economy-stats', () => {
+    it('should fail without a valid token', () => {
+      return request(app.getHttpServer())
+        .get('/api/transactions/economy-stats')
+        .expect(401);
+    });
+
+    it('should fail if user is not an admin', async () => {
+      const { accessToken } = await authService.login(testUser);
+      return request(app.getHttpServer())
+        .get('/api/transactions/economy-stats')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(403);
+    });
+
+    it('should return economic statistics for admin user', async () => {
+      const { accessToken } = await authService.login(adminUser);
+
+      // Perform some transactions to have data
+      const earnDto = {
+        customerId: testUser.id,
+        purchaseAmount: 1000,
+        businessId: testBusiness.id,
+      };
+      const { accessToken: businessToken } = await authService.login(businessUser);
+      await request(app.getHttpServer())
+        .post('/api/transactions/earn')
+        .set('Authorization', `Bearer ${businessToken}`)
+        .send(earnDto)
+        .expect(201);
+
+      const redeemDto = {
+        businessId: testBusiness.id,
+        pointsToRedeem: 200,
+        ticketTotal: 100,
+      };
+      const { accessToken: userToken } = await authService.login(testUser);
+      await request(app.getHttpServer())
+        .post('/api/transactions/redeem')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send(redeemDto)
+        .expect(201);
+
+      const response = await request(app.getHttpServer())
+        .get('/api/transactions/economy-stats')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('totalEarned');
+      expect(response.body).toHaveProperty('totalRedeemed');
+      expect(response.body).toHaveProperty('totalBurned');
+      expect(response.body).toHaveProperty('redemptionRate');
+      expect(response.body).toHaveProperty('burnRatio');
+      expect(response.body).toHaveProperty('activePointsPercentage');
+
+      // Basic check for non-zero values after transactions
+      expect(response.body.totalEarned).toBeGreaterThan(0);
+      expect(response.body.totalRedeemed).toBeGreaterThan(0);
+      expect(response.body.totalBurned).toBeGreaterThan(0);
+      expect(response.body.redemptionRate).toBeGreaterThan(0);
+      expect(response.body.burnRatio).toBeGreaterThan(0);
     });
   });
 });

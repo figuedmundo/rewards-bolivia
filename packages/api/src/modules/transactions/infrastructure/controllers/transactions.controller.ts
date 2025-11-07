@@ -1,23 +1,39 @@
-import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, NotFoundException, Get } from '@nestjs/common';
 import { EarnPointsUseCase } from '../../application/earn-points.use-case';
 import { RedeemPointsUseCase } from '../../application/redeem-points.use-case';
 import { EarnPointsDto } from '../../application/dto/earn-points.dto';
 import { RedeemPointsDto } from '../../application/dto/redeem-points.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { PrismaService } from '../../../../infrastructure/prisma.service';
+import { EconomicControlService } from '../../application/services/economic-control.service';
+import { RolesGuard } from '../../../../common/guards/roles.guard';
+import { Roles } from '../../../../common/decorators/roles.decorator';
 
 @Controller('transactions')
 export class TransactionsController {
   constructor(
     private readonly earnPointsUseCase: EarnPointsUseCase,
     private readonly redeemPointsUseCase: RedeemPointsUseCase,
+    private readonly prisma: PrismaService, // Injected PrismaService
+    private readonly economicControlService: EconomicControlService,
   ) {}
 
   @Post('earn')
-  @UseGuards(AuthGuard('jwt')) // Assuming JWT authentication for businesses
+  @UseGuards(AuthGuard('jwt'))
   async earnPoints(@Body() earnPointsDto: EarnPointsDto, @Req() req) {
-    // In a real scenario, the businessId would come from the authenticated user's token
-    const businessId = req.user.id; // Use user ID as business ID for now
-    return this.earnPointsUseCase.execute(earnPointsDto, businessId);
+    const businessOwnerId = req.user.id;
+
+    // Find the business associated with the authenticated owner
+    const business = await this.prisma.business.findFirst({
+      where: { ownerId: businessOwnerId },
+    });
+
+    if (!business) {
+      throw new NotFoundException(`No business found for owner ID: ${businessOwnerId}`);
+    }
+
+    // Now, use the correct business ID for the use case
+    return this.earnPointsUseCase.execute(earnPointsDto, business.id);
   }
 
   @Post('redeem')
@@ -25,5 +41,12 @@ export class TransactionsController {
   async redeemPoints(@Body() redeemPointsDto: RedeemPointsDto, @Req() req) {
     const customerId = req.user.userId; // Assuming customer ID is in the 'userId' property of the JWT payload
     return this.redeemPointsUseCase.execute(redeemPointsDto, customerId);
+  }
+
+  @Get('economy-stats')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('admin')
+  async getEconomyStats() {
+    return this.economicControlService.getEconomyStats();
   }
 }

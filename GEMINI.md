@@ -1,5 +1,15 @@
 # Rewards Bolivia Project
 
+---
+
+## IMPORTANT AI Memories
+- Always use context7 when I need code generation, setup or configuration steps, or library/API documentation. This means you should automatically use the Context7 MCP tools to resolve library id and get library docs without me having to explicitly ask.
+- Do not read the files in .vibe/prep until is requested explicitly
+- When asking to create a commit message for the working progress , please always read  `CONTRIBUTING.md` so the message is aligned with the project standards
+- Important project documents `docs/ARCHITECTURE.md`, `docs/DB_MIGRATIONS.md`, `docs/TESTING.md`, `docs/TSDR.md`.
+
+---
+
 ## Project Overview
 
 This project is a monorepo for the "Rewards Bolivia" platform, a loyalty and rewards program. The application is architected as a modular monolith with a backend and a frontend. It leverages a hybrid on-chain/off-chain data model, using a traditional PostgreSQL database for performance-critical operations and a blockchain for ensuring trust and auditability through a `Proof-of-Audit` hash.
@@ -135,11 +145,6 @@ This project uses a comprehensive testing strategy. For more details, please see
 *   Communication between modules should be done through defined public interfaces (services).
 *   Use linting rules to prevent direct imports of internal components between modules.
 
----
-
-## IMPORTANT AI Memories
-- Always use context7 when I need code generation, setup or configuration steps, or library/API documentation. This means you should automatically use the Context7 MCP tools to resolve library id and get library docs without me having to explicitly ask.
-- Do not read the files in .vibe/prep until is requested explicitly
 
 ---
 

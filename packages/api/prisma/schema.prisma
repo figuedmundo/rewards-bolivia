@@ -17,6 +17,7 @@ enum TransactionType {
   EARN
   REDEEM
   ADJUSTMENT
+  BURN
 }
 
 model User {
@@ -70,6 +71,7 @@ model Transaction {
   id           String          @id @default(cuid())
   type         TransactionType
   pointsAmount Int
+  burnAmount   Int?            // Amount of points burned in the transaction
   status       String // e.g., "COMPLETED", "PENDING", "FAILED"
   auditHash    String?         @unique
   createdAt    DateTime        @default(now())

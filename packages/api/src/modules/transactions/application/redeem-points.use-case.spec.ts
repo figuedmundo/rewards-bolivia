@@ -4,10 +4,13 @@ import { ITransactionRepository } from '../domain/repositories/transaction.repos
 import { PrismaService } from '../../../infrastructure/prisma.service';
 import { RedisService } from '../../../infrastructure/redis/redis.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { TransactionEventPublisher } from './services/transaction-event.publisher';
+import { TransactionType } from '@prisma/client';
 
 describe('RedeemPointsUseCase', () => {
   let useCase: RedeemPointsUseCase;
   let transactionRepository: ITransactionRepository;
+  let eventPublisher: TransactionEventPublisher;
 
   const mockTransactionRepository = {
     redeem: jest.fn(),
@@ -28,6 +31,10 @@ describe('RedeemPointsUseCase', () => {
     set: jest.fn(),
   };
 
+  const mockEventPublisher = {
+    publishTransactionCompleted: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -44,6 +51,10 @@ describe('RedeemPointsUseCase', () => {
           provide: RedisService,
           useValue: mockRedisService,
         },
+        {
+          provide: TransactionEventPublisher,
+          useValue: mockEventPublisher,
+        },
       ],
     }).compile();
 
@@ -51,6 +62,7 @@ describe('RedeemPointsUseCase', () => {
     transactionRepository = module.get<ITransactionRepository>(
       'ITransactionRepository',
     );
+    eventPublisher = module.get<TransactionEventPublisher>(TransactionEventPublisher);
     jest.clearAllMocks();
   });
 
@@ -131,17 +143,15 @@ describe('RedeemPointsUseCase', () => {
 
     it('should create a transaction and return the result', async () => {
       const business = { id: '1', name: 'Test Business', pointsBalance: 5000 };
-      const updatedBusiness = { ...business, pointsBalance: 5100 };
       const customer = { id: '1', pointsBalance: 200 };
-      const updatedCustomer = { ...customer, pointsBalance: 100 };
-      const transaction = { id: '1', pointsAmount: 100, status: 'COMPLETED' };
+      const transaction = { id: '1', pointsAmount: 100, status: 'COMPLETED', type: TransactionType.REDEEM };
 
       mockPrismaService.user.findUnique
         .mockResolvedValueOnce(customer)
-        .mockResolvedValueOnce(updatedCustomer);
+        .mockResolvedValueOnce({ ...customer, pointsBalance: customer.pointsBalance - transaction.pointsAmount });
       mockPrismaService.business.findUnique
         .mockResolvedValueOnce(business)
-        .mockResolvedValueOnce(updatedBusiness);
+        .mockResolvedValueOnce({ ...business, pointsBalance: business.pointsBalance + transaction.pointsAmount });
       mockTransactionRepository.redeem.mockResolvedValue(transaction as any);
 
       const result = await useCase.execute(
@@ -149,13 +159,28 @@ describe('RedeemPointsUseCase', () => {
         '1',
       );
 
-      expect(transactionRepository.redeem).toHaveBeenCalled();
+      expect(transactionRepository.redeem).toHaveBeenCalledWith({
+        type: TransactionType.REDEEM,
+        pointsAmount: 100,
+        status: 'COMPLETED',
+        auditHash: expect.any(String),
+        businessId: '1',
+        customerId: '1',
+      });
+      expect(eventPublisher.publishTransactionCompleted).toHaveBeenCalledWith({
+        transaction: expect.objectContaining({
+          id: '1',
+          type: TransactionType.REDEEM,
+          pointsAmount: 100,
+          status: 'COMPLETED',
+        }),
+      });
       expect(result).toEqual({
         transactionId: transaction.id,
         status: transaction.status,
         pointsRedeemed: transaction.pointsAmount,
         discountValueBs: '3.00',
-        newCustomerBalance: updatedCustomer.pointsBalance,
+        newCustomerBalance: customer.pointsBalance - transaction.pointsAmount,
         businessName: business.name,
       });
     });

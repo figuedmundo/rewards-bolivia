@@ -4,10 +4,13 @@ import { ITransactionRepository } from '../domain/repositories/transaction.repos
 import { PrismaService } from '../../../infrastructure/prisma.service';
 import { RedisService } from '../../../infrastructure/redis/redis.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { TransactionEventPublisher } from './services/transaction-event.publisher';
+import { TransactionType } from '@prisma/client';
 
 describe('EarnPointsUseCase', () => {
   let useCase: EarnPointsUseCase;
   let transactionRepository: ITransactionRepository;
+  let eventPublisher: TransactionEventPublisher;
 
   const mockTransactionRepository = {
     create: jest.fn(),
@@ -27,6 +30,10 @@ describe('EarnPointsUseCase', () => {
     set: jest.fn(),
   };
 
+  const mockEventPublisher = {
+    publishTransactionCompleted: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -43,6 +50,10 @@ describe('EarnPointsUseCase', () => {
           provide: RedisService,
           useValue: mockRedisService,
         },
+        {
+          provide: TransactionEventPublisher,
+          useValue: mockEventPublisher,
+        },
       ],
     }).compile();
 
@@ -50,6 +61,7 @@ describe('EarnPointsUseCase', () => {
     transactionRepository = module.get<ITransactionRepository>(
       'ITransactionRepository',
     );
+    eventPublisher = module.get<TransactionEventPublisher>(TransactionEventPublisher);
   });
 
   it('should be defined', () => {
@@ -99,24 +111,36 @@ describe('EarnPointsUseCase', () => {
     it('should create a transaction and return the result', async () => {
       const business = { id: '1', pointsBalance: 200 };
       const customer = { id: '1', name: 'Test Customer', pointsBalance: 100 };
-      const transaction = { id: '1', pointsAmount: 100, status: 'COMPLETED' };
+      const transaction = { id: '1', pointsAmount: 100, status: 'COMPLETED', type: TransactionType.EARN };
 
       mockPrismaService.business.findUnique.mockResolvedValue(business);
       mockPrismaService.user.findUnique.mockResolvedValue(customer);
       mockTransactionRepository.create.mockResolvedValue(transaction);
+      mockPrismaService.user.findUnique.mockResolvedValue({ ...customer, pointsBalance: 200 }); // Updated balance
+      mockPrismaService.business.findUnique.mockResolvedValue({ ...business, pointsBalance: 100 }); // Updated balance
 
       const result = await useCase.execute(
         { customerId: '1', purchaseAmount: 100 },
         '1',
       );
 
-      expect(transactionRepository.create).toHaveBeenCalled();
+      expect(transactionRepository.create).toHaveBeenCalledWith({
+        type: TransactionType.EARN,
+        pointsAmount: 100,
+        status: 'COMPLETED',
+        auditHash: expect.any(String),
+        businessId: '1',
+        customerId: '1',
+      });
+      expect(eventPublisher.publishTransactionCompleted).toHaveBeenCalledWith({
+        transaction: transaction,
+      });
       expect(result).toEqual({
         transactionId: transaction.id,
         status: transaction.status,
         pointsEarned: transaction.pointsAmount,
         customerName: customer.name,
-        newCustomerBalance: customer.pointsBalance,
+        newCustomerBalance: 200,
       });
     });
   });

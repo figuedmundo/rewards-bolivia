@@ -11,6 +11,7 @@ import { PrismaService } from '../../../infrastructure/prisma.service';
 import { TransactionType } from '@prisma/client';
 import * as crypto from 'crypto';
 import { RedisService } from '../../../infrastructure/redis/redis.service';
+import { TransactionEventPublisher } from './services/transaction-event.publisher';
 
 @Injectable()
 export class RedeemPointsUseCase {
@@ -19,6 +20,7 @@ export class RedeemPointsUseCase {
     private readonly transactionRepository: ITransactionRepository,
     private readonly prisma: PrismaService,
     private readonly redisService: RedisService,
+    private readonly eventPublisher: TransactionEventPublisher,
   ) {}
 
   async execute(redeemPointsDto: RedeemPointsDto, customerId: string) {
