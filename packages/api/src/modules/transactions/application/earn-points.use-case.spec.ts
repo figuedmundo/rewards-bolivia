@@ -2,12 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EarnPointsUseCase } from './earn-points.use-case';
 import { ITransactionRepository } from '../domain/repositories/transaction.repository';
 import { PrismaService } from '../../../infrastructure/prisma.service';
+import { RedisService } from '../../../infrastructure/redis/redis.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 describe('EarnPointsUseCase', () => {
   let useCase: EarnPointsUseCase;
   let transactionRepository: ITransactionRepository;
-  let prismaService: PrismaService;
 
   const mockTransactionRepository = {
     create: jest.fn(),
@@ -22,6 +22,11 @@ describe('EarnPointsUseCase', () => {
     },
   };
 
+  const mockRedisService = {
+    get: jest.fn(),
+    set: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -34,12 +39,17 @@ describe('EarnPointsUseCase', () => {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
+        {
+          provide: RedisService,
+          useValue: mockRedisService,
+        },
       ],
     }).compile();
 
     useCase = module.get<EarnPointsUseCase>(EarnPointsUseCase);
-    transactionRepository = module.get<ITransactionRepository>('ITransactionRepository');
-    prismaService = module.get<PrismaService>(PrismaService);
+    transactionRepository = module.get<ITransactionRepository>(
+      'ITransactionRepository',
+    );
   });
 
   it('should be defined', () => {
@@ -49,21 +59,39 @@ describe('EarnPointsUseCase', () => {
   describe('execute', () => {
     it('should throw an error if business is not found or has insufficient balance', async () => {
       mockPrismaService.business.findUnique.mockResolvedValue(null);
-      await expect(useCase.execute({ customerId: '1', purchaseAmount: 100 }, '1')).rejects.toThrow(
-        new HttpException('Insufficient business points balance', HttpStatus.BAD_REQUEST),
+      await expect(
+        useCase.execute({ customerId: '1', purchaseAmount: 100 }, '1'),
+      ).rejects.toThrow(
+        new HttpException(
+          'Insufficient business points balance',
+          HttpStatus.BAD_REQUEST,
+        ),
       );
 
-      mockPrismaService.business.findUnique.mockResolvedValue({ id: '1', pointsBalance: 50 });
-      await expect(useCase.execute({ customerId: '1', purchaseAmount: 100 }, '1')).rejects.toThrow(
-        new HttpException('Insufficient business points balance', HttpStatus.BAD_REQUEST),
+      mockPrismaService.business.findUnique.mockResolvedValue({
+        id: '1',
+        pointsBalance: 50,
+      });
+      await expect(
+        useCase.execute({ customerId: '1', purchaseAmount: 100 }, '1'),
+      ).rejects.toThrow(
+        new HttpException(
+          'Insufficient business points balance',
+          HttpStatus.BAD_REQUEST,
+        ),
       );
     });
 
     it('should throw an error if customer is not found', async () => {
-      mockPrismaService.business.findUnique.mockResolvedValue({ id: '1', pointsBalance: 200 });
+      mockPrismaService.business.findUnique.mockResolvedValue({
+        id: '1',
+        pointsBalance: 200,
+      });
       mockPrismaService.user.findUnique.mockResolvedValue(null);
 
-      await expect(useCase.execute({ customerId: '1', purchaseAmount: 100 }, '1')).rejects.toThrow(
+      await expect(
+        useCase.execute({ customerId: '1', purchaseAmount: 100 }, '1'),
+      ).rejects.toThrow(
         new HttpException('Customer not found', HttpStatus.NOT_FOUND),
       );
     });
@@ -77,7 +105,10 @@ describe('EarnPointsUseCase', () => {
       mockPrismaService.user.findUnique.mockResolvedValue(customer);
       mockTransactionRepository.create.mockResolvedValue(transaction);
 
-      const result = await useCase.execute({ customerId: '1', purchaseAmount: 100 }, '1');
+      const result = await useCase.execute(
+        { customerId: '1', purchaseAmount: 100 },
+        '1',
+      );
 
       expect(transactionRepository.create).toHaveBeenCalled();
       expect(result).toEqual({

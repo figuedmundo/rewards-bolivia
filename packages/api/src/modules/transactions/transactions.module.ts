@@ -5,9 +5,10 @@ import { RedeemPointsUseCase } from './application/redeem-points.use-case';
 import { PrismaTransactionRepository } from './infrastructure/repositories/prisma-transaction.repository';
 import { ITransactionRepository } from './domain/repositories/transaction.repository';
 import { PrismaModule } from '../../infrastructure/prisma.module';
+import { RedisModule } from '../../infrastructure/redis/redis.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, RedisModule],
   controllers: [TransactionsController],
   providers: [
     EarnPointsUseCase,

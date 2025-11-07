@@ -1,4 +1,7 @@
-import { Transaction as PrismaTransaction, PointLedger as PrismaPointLedger } from '@prisma/client';
+import {
+  Transaction as PrismaTransaction,
+  PointLedger as PrismaPointLedger,
+} from '@prisma/client';
 
 export class Transaction implements PrismaTransaction {
   id: string;

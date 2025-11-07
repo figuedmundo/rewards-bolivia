@@ -136,6 +136,7 @@ export class AuthService {
     const newUser = await this.usersService.create({
       email: registerUserDto.email,
       passwordHash: hashedPassword,
+      name: `${registerUserDto.firstName} ${registerUserDto.lastName}`,
     });
 
     // Exclude password from the returned user object

@@ -16,14 +16,14 @@ export class TransactionsController {
   @UseGuards(AuthGuard('jwt')) // Assuming JWT authentication for businesses
   async earnPoints(@Body() earnPointsDto: EarnPointsDto, @Req() req) {
     // In a real scenario, the businessId would come from the authenticated user's token
-    const businessId = req.user.businessId; // Placeholder
+    const businessId = req.user.id; // Use user ID as business ID for now
     return this.earnPointsUseCase.execute(earnPointsDto, businessId);
   }
 
   @Post('redeem')
   @UseGuards(AuthGuard('jwt')) // Assuming JWT authentication for customers
   async redeemPoints(@Body() redeemPointsDto: RedeemPointsDto, @Req() req) {
-    const customerId = req.user.sub; // Assuming customer ID is in the 'sub' claim of the JWT
+    const customerId = req.user.userId; // Assuming customer ID is in the 'userId' property of the JWT payload
     return this.redeemPointsUseCase.execute(redeemPointsDto, customerId);
   }
 }

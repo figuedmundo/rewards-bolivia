@@ -36,24 +36,24 @@
 
 ### 🧱 Tareas de Desarrollo
 
-| ID | Tarea | Descripción | Estimación |
-| --- | --- | --- | --- |
-| T5.1 | Crear módulo `transactions` (service, controller, repo, entity). | 1 d |  |
-| T5.2 | Definir entidades Prisma: `Transaction`, `PointLedger`, `Business`, `Customer`. | 1 d |  |
-| T5.3 | Implementar endpoint `POST /transactions/earn` (emisión puntos). | 1 d |  |
-| T5.4 | Implementar endpoint `POST /transactions/redeem` (redención puntos). | 1 d |  |
-| T5.5 | Validar límites redención (máx. 30 % ticket). | 0.5 d |  |
-| T5.6 | Agregar middleware para atomicidad (una transacción por flujo). | 0.5 d |  |
-| T5.7 | Generar eventos de auditoría con hash SHA256. | 0.5 d |  |
-| T5.8 | Integrar Redis para cachear balances. | 0.5 d |  |
+| ID | Tarea | Descripción | Estimación | Progreso |
+| --- | --- | --- | --- | --- |
+| T5.1 | Crear módulo `transactions` (service, controller, repo, entity). | 1 d |  | ✅ Done |
+| T5.2 | Definir entidades Prisma: `Transaction`, `PointLedger`, `Business`, `Customer`. | 1 d |  | ✅ Done |
+| T5.3 | Implementar endpoint `POST /transactions/earn` (emisión puntos). | 1 d |  | ✅ Done |
+| T5.4 | Implementar endpoint `POST /transactions/redeem` (redención puntos). | 1 d |  | ✅ Done |
+| T5.5 | Validar límites redención (máx. 30 % ticket). | 0.5 d |  | ✅ Done |
+| T5.6 | Agregar middleware para atomicidad (una transacción por flujo). | 0.5 d |  | ✅ Done |
+| T5.7 | Generar eventos de auditoría con hash SHA256. | 0.5 d |  | ✅ Done |
+| T5.8 | Integrar Redis para cachear balances. | 0.5 d |  | ⏳ In Progress |
 
 ### 🔍 Testing (Transactions)
 
-| Tipo | Descripción | Estimación |
-| --- | --- | --- |
-| Unit (60 %) | Validar reglas de negocio (earn/redeem, límites). | 1 d |
-| Integration (30 %) | Flujo DB + Redis + API. | 1 d |
-| E2E (10 %) | Escenario completo Cliente ↔ Comercio. | 0.5 d |
+| Tipo | Descripción | Estimación | Progreso |
+| --- | --- | --- | --- |
+| Unit (60 %) | Validar reglas de negocio (earn/redeem, límites). | 1 d | ✅ Done |
+| Integration (30 %) | Flujo DB + Redis + API. | 1 d | ⏳ In Progress |
+| E2E (10 %) | Escenario completo Cliente ↔ Comercio. | 0.5 d | ⬜ Not Started |
 
 ---
 
@@ -153,4 +153,48 @@
 # Progress 
 
 
-## Resumen de Progreso 
+## Resumen de Progreso (Actualización) (Thursday 6 November)
+
+### 🚀 Hitos Completados:
+
+1.  **Implementación del Flujo de Redención de Puntos:**
+    *   Endpoint `POST /transactions/redeem` implementado y validado.
+    *   Límites de redención (máx. 30% del ticket) validados.
+    *   Atomicidad de las transacciones garantizada mediante el uso de `$transaction` de Prisma.
+    *   Generación de hash de auditoría SHA256 implementada.
+2.  **Testing del Módulo Transactions:**
+    *   Pruebas de integración para el flujo de redención completadas.
+
+### 🚧 Tareas Pendientes:
+
+1.  **Optimización y Caching:**
+    *   Integrar Redis para cachear balances.
+2.  **Testing del Módulo Transactions:**
+    *   Implementar pruebas de integración para el flujo DB + Redis + API.
+    *   Desarrollar pruebas E2E para el escenario completo Cliente ↔ Comercio.
+
+---
+
+## Resumen de Progreso (Actualización) (Wednesday 5 November)
+
+### 🚀 Hitos Completados:
+
+1.  **Configuración Inicial del Módulo Transactions:**
+    *   Módulo `transactions` creado (service, controller, repository, entity).
+    *   Entidades Prisma `Transaction`, `PointLedger`, `Business`, `Customer` definidas.
+    *   Endpoint `POST /transactions/earn` implementado para la emisión de puntos.
+
+### 🚧 Tareas Pendientes:
+
+1.  **Implementación del Flujo de Redención de Puntos:**
+    *   Implementar endpoint `POST /transactions/redeem`.
+    *   Validar límites de redención (máx. 30 % ticket).
+2.  **Manejo de Transacciones y Auditoría:**
+    *   Agregar middleware para atomicidad (una transacción por flujo).
+    *   Generar eventos de auditoría con hash SHA256.
+3.  **Optimización y Caching:**
+    *   Integrar Redis para cachear balances.
+4.  **Testing del Módulo Transactions:**
+    *   Completar pruebas unitarias para reglas de negocio (earn/redeem, límites).
+    *   Implementar pruebas de integración para el flujo DB + Redis + API.
+    *   Desarrollar pruebas E2E para el escenario completo Cliente ↔ Comercio.

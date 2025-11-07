@@ -12,27 +12,44 @@ import {
   Request,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterUserDto } from '@rewards-bolivia/shared-types';
 import { AuthGuard } from '@nestjs/passport';
 import type { Response } from 'express';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { RegisterUserDto } from '@rewards-bolivia/shared-types';
+import { LoginDto } from './dto/login.dto';
 
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiBody({ type: RegisterUserDto })
+  @ApiResponse({ status: 201, description: 'User successfully registered' })
+  @ApiResponse({ status: 400, description: 'Bad request - validation error' })
   async register(@Body() registerUserDto: RegisterUserDto) {
     return this.authService.register(registerUserDto);
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
+  @ApiOperation({ summary: 'Login user' })
+  @ApiBody({ type: LoginDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful, returns access token',
+  })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(
-    @Body() body: { email: string; password: string },
+    @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const user = await this.authService.validateUser(body.email, body.password);
+    const user = await this.authService.validateUser(
+      loginDto.email,
+      loginDto.password,
+    );
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -49,6 +66,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Logout user' })
+  @ApiResponse({ status: 204, description: 'Logout successful' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async logout(@Req() req, @Res({ passthrough: true }) response: Response) {
     await this.authService.logout(req.user.userId);
     response.clearCookie('refresh_token');
@@ -57,6 +77,9 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt-refresh'))
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
+  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   async refreshTokens(
     @Req() req,
     @Res({ passthrough: true }) response: Response,
@@ -76,12 +99,19 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Initiate Google OAuth login' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirect to Google consent screen',
+  })
   async googleAuth(@Req() req) {
     // This route will redirect to Google's consent screen
   }
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Google OAuth callback' })
+  @ApiResponse({ status: 302, description: 'Redirect to frontend with tokens' })
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     const { accessToken, refreshToken } = await this.authService.login(
       req.user,

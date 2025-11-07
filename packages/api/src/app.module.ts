@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { LoggerMiddleware, LoggerService } from '@rewards-bolivia/logger';
 import { TransactionsModule } from './modules/transactions/transactions.module';
+import { RedisModule } from './infrastructure/redis/redis.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
     AuthModule,
     UsersModule,
     TransactionsModule,
+    RedisModule,
   ],
   controllers: [AppController, MetricsController],
   providers: [AppService], // Remove PrismaService from here
