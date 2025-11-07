@@ -55,6 +55,7 @@ describe('API Contract Tests', () => {
 
 
   afterAll(async () => {
+    await prisma.$disconnect();
     await app.close();
   });
 

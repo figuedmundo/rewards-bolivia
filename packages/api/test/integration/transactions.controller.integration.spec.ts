@@ -76,6 +76,9 @@ describe('TransactionsController (integration)', () => {
   });
 
   afterAll(async () => {
+    const redisService = app.get(RedisService);
+    await redisService['redisClient'].quit();
+    await prisma.$disconnect();
     await app.close();
   });
 
