@@ -168,12 +168,20 @@ describe('AuthService', () => {
         firstName: 'New',
         lastName: 'User',
       };
-      mockUsersService.findOne.mockResolvedValue(null);
-      mockUsersService.create.mockResolvedValue({
+      const newUser = {
         id: 'new-id',
         email: dto.email,
         passwordHash: 'hashed_password',
-      });
+      };
+      const tokens = {
+        accessToken: 'test_access_token',
+        refreshToken: 'test_refresh_token',
+      };
+
+      mockUsersService.findOne.mockResolvedValue(null);
+      mockUsersService.create.mockResolvedValue(newUser);
+      // Mock the internal login call
+      jest.spyOn(service, 'login').mockResolvedValue(tokens);
 
       const result = await service.register(dto as any);
 
@@ -183,8 +191,13 @@ describe('AuthService', () => {
         passwordHash: expect.any(String),
         name: `${dto.firstName} ${dto.lastName}`,
       });
-      expect(result).not.toHaveProperty('passwordHash');
-      expect(result.email).toBe(dto.email);
+      expect(service.login).toHaveBeenCalledWith(newUser);
+
+      // Check the new return structure
+      expect(result.user).not.toHaveProperty('passwordHash');
+      expect(result.user.email).toBe(dto.email);
+      expect(result.accessToken).toBe(tokens.accessToken);
+      expect(result.refreshToken).toBe(tokens.refreshToken);
     });
 
     it('should throw ConflictException if email is already registered', async () => {

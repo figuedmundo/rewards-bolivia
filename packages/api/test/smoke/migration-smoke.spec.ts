@@ -234,7 +234,6 @@ describe('Migration Smoke Tests', () => {
         .send({
           customerId: clientUser.id,
           purchaseAmount: 100,
-          businessId: business.id,
         });
 
       expect(earnResponse.status).toBe(201);

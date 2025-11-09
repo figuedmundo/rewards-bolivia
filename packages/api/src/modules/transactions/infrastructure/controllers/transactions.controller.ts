@@ -20,8 +20,9 @@ export class TransactionsController {
 
   @Post('earn')
   @UseGuards(AuthGuard('jwt'))
+  @Roles('business') // Only business role can earn points
   async earnPoints(@Body() earnPointsDto: EarnPointsDto, @Req() req) {
-    const businessOwnerId = req.user.id;
+    const businessOwnerId = req.user.userId;
 
     // Find the business associated with the authenticated owner
     const business = await this.prisma.business.findFirst({
@@ -38,8 +39,9 @@ export class TransactionsController {
 
   @Post('redeem')
   @UseGuards(AuthGuard('jwt')) // Assuming JWT authentication for customers
+  @Roles('customer') // Only customer role can redeem points
   async redeemPoints(@Body() redeemPointsDto: RedeemPointsDto, @Req() req) {
-    const customerId = req.user.userId; // Assuming customer ID is in the 'userId' property of the JWT payload
+    const customerId = req.user.userId; // Correctly access customer ID from JWT payload
     return this.redeemPointsUseCase.execute(redeemPointsDto, customerId);
   }
 

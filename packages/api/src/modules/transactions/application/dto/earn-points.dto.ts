@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsNumber, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class EarnPointsDto {
@@ -17,12 +17,4 @@ export class EarnPointsDto {
   @IsNumber()
   @IsNotEmpty()
   purchaseAmount: number;
-
-  @ApiProperty({
-    example: 'clx000000000000000000001',
-    description: 'ID of the business from which points are earned',
-  })
-  @IsString()
-  @IsNotEmpty()
-  businessId: string;
 }

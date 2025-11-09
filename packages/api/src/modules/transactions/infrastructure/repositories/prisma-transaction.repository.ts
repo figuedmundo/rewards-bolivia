@@ -117,7 +117,7 @@ export class PrismaTransactionRepository implements ITransactionRepository {
           data: {
             type,
             pointsAmount: finalPointsAmount,
-            burnAmount: burnAmount > 0 ? burnAmount : null, // Store burn amount if applicable
+            burnAmount: type === TransactionType.REDEEM ? burnAmount : null, // Store burn amount if applicable
             status,
             auditHash,
             businessId,
@@ -126,10 +126,19 @@ export class PrismaTransactionRepository implements ITransactionRepository {
         });
 
         // 4. Create ledger entries
-        const ledgerEntries = [
+        const ledgerEntriesData: {
+          type: LedgerEntryType;
+          accountId: string;
+          debit: number;
+          credit: number;
+          balanceAfter: number;
+          reason?: string | null;
+          hash?: string | null;
+          transactionId: string;
+        }[] = [
           // Debit from the source
           {
-            type: type === TransactionType.EARN ? 'EARN' : 'REDEEM',
+            type: type === TransactionType.EARN ? LedgerEntryType.EARN : LedgerEntryType.REDEEM,
             accountId: type === TransactionType.EARN ? businessId : customerId,
             debit: pointsAmount,
             credit: 0,
@@ -141,7 +150,7 @@ export class PrismaTransactionRepository implements ITransactionRepository {
           },
           // Credit to the destination
           {
-            type: type === TransactionType.EARN ? 'EARN' : 'REDEEM',
+            type: type === TransactionType.EARN ? LedgerEntryType.EARN : LedgerEntryType.REDEEM,
             accountId: type === TransactionType.EARN ? customerId : businessId,
             debit: 0,
             credit: pointsAmount - burnAmount, // Credit destination with points minus burn
@@ -155,8 +164,8 @@ export class PrismaTransactionRepository implements ITransactionRepository {
 
         // Add BURN ledger entry if applicable
         if (burnAmount > 0) {
-          ledgerEntries.push({
-            type: 'BURN',
+          ledgerEntriesData.push({
+            type: LedgerEntryType.BURN,
             accountId: 'SYSTEM_BURN_ACCOUNT', // A special account for burned points
             debit: 0,
             credit: burnAmount,
@@ -165,24 +174,18 @@ export class PrismaTransactionRepository implements ITransactionRepository {
           });
         }
 
-        await tx.pointLedger.createMany({
-          data: ledgerEntries,
+        const ledgerEntries = await tx.pointLedger.createManyAndReturn({
+          data: ledgerEntriesData,
         });
 
         // Cache new balances after successful transaction
         await this.setCachedBalance(customerBalanceKey, customer.pointsBalance);
         await this.setCachedBalance(businessBalanceKey, business.pointsBalance);
 
-        // Return transaction entity (without ledgerEntries for now, can be extended later)
+        // Return transaction entity
         return {
-          id: dbTransaction.id,
-          type: dbTransaction.type,
-          pointsAmount: dbTransaction.pointsAmount,
-          status: dbTransaction.status,
-          auditHash: dbTransaction.auditHash,
-          businessId: dbTransaction.businessId,
-          customerId: dbTransaction.customerId,
-          burnAmount: dbTransaction.burnAmount,
+          ...dbTransaction,
+          ledgerEntries,
         } as Transaction;
       }, {
         isolationLevel: 'Serializable', // Highest isolation for financial transactions

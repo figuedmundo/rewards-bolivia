@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "End-to-end tests for Rewards Bolivia",
   "scripts": {
-    "test": "playwright test --project=chromium",
+    "test": "PLAYWRIGHT_HTML_OPEN=never playwright test --project=chromium",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
     "report": "playwright show-report"
