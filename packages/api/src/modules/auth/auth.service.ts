@@ -21,7 +21,10 @@ export class AuthService {
     private prisma: PrismaService,
   ) {}
 
-  async validateUser(email: string, pass: string): Promise<any> {
+  async validateUser(
+    email: string,
+    pass: string,
+  ): Promise<Omit<User, 'passwordHash'> | null> {
     const user = await this.usersService.findOne(email);
     if (
       user &&
@@ -38,7 +41,7 @@ export class AuthService {
     const payload = {
       email: user.email,
       sub: user.id,
-      role: (user as any).role,
+      role: user.role,
     };
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = await this.createRefreshToken(user.id);
@@ -90,7 +93,7 @@ export class AuthService {
     const payload = {
       email: user.email,
       sub: user.id,
-      role: (user as any).role,
+      role: user.role,
     };
     const accessToken = this.jwtService.sign(payload);
 
@@ -143,6 +146,7 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.login(newUser);
 
     // Exclude password from the returned user object
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { passwordHash, ...userResult } = newUser;
 
     return { user: userResult, accessToken, refreshToken };
@@ -154,7 +158,7 @@ export class AuthService {
     lastName: string,
     provider: string,
     providerId: string,
-  ): Promise<any> {
+  ): Promise<User> {
     try {
       let user = await this.usersService.findOne(email);
 

@@ -15,6 +15,15 @@ please follow the rules below
 
 ---
 
+## Development Workflow & Best Practices
+
+- **Prioritize Type Safety:** Avoid using `any` wherever possible. Immediately define a clear `interface` or `type` for any data structures that lack them, especially for decoded JWT payloads, strategy validation results, and untyped request/response objects.
+- **Incremental Linting & Building:** After each small, logical change, run the linter and build command for the affected package (e.g., `pnpm --filter api lint` and `pnpm --filter api build`). This catches errors early and makes them easier to fix.
+- **Heed All Linter Rules:** Pay close attention to rules like `no-floating-promises`, `no-misused-promises`, and `unbound-method`. These rules prevent subtle but significant bugs. Ensure all promises are handled correctly (with `await` or `.catch()`) and that `this` is properly scoped.
+- **Assess Configuration on Refactor:** Before moving code between packages, inspect the `tsconfig.json` and linting configurations of both the source and destination to anticipate any new, stricter rules that will be applied.
+
+---
+
 ## Project Overview
 
 This project is a monorepo for the "Rewards Bolivia" platform, a loyalty and rewards program. The application is architected as a modular monolith with a backend and a frontend. It leverages a hybrid on-chain/off-chain data model, using a traditional PostgreSQL database for performance-critical operations and a blockchain for ensuring trust and auditability through a `Proof-of-Audit` hash.

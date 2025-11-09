@@ -9,14 +9,22 @@ import {
   Get,
   Req,
   Res,
-  Request,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
-import type { Response } from 'express';
+import { Request as ExpressRequest, type Response } from 'express';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
-import { RegisterUserDto, LoginDto } from '@rewards-bolivia/shared-types';
+import {
+  RegisterUserDto,
+  LoginDto,
+  RequestUser,
+} from '@rewards-bolivia/shared-types';
+import { User } from '@prisma/client';
+
+interface RequestWithUser extends ExpressRequest {
+  user: RequestUser;
+}
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -63,7 +71,9 @@ export class AuthController {
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    const { accessToken, refreshToken } = await this.authService.login(user);
+    const { accessToken, refreshToken } = await this.authService.login(
+      user as User,
+    );
     response.cookie('refresh_token', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV !== 'development', // Use secure cookies in production
@@ -79,7 +89,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({ status: 204, description: 'Logout successful' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async logout(@Req() req, @Res({ passthrough: true }) response: Response) {
+  async logout(
+    @Req() req: RequestWithUser,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     await this.authService.logout(req.user.userId);
     response.clearCookie('refresh_token');
   }
@@ -91,12 +104,16 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   async refreshTokens(
-    @Req() req,
+    @Req() req: RequestWithUser,
     @Res({ passthrough: true }) response: Response,
   ) {
+    const { refreshToken: incomingRefreshToken } = req.user;
+    if (!incomingRefreshToken) {
+      throw new UnauthorizedException('Refresh token not found.');
+    }
     const { accessToken, refreshToken } = await this.authService.refreshTokens(
       req.user.userId,
-      req.user.refreshToken,
+      incomingRefreshToken,
     );
     response.cookie('refresh_token', refreshToken, {
       httpOnly: true,
@@ -114,7 +131,7 @@ export class AuthController {
     status: 302,
     description: 'Redirect to Google consent screen',
   })
-  async googleAuth(@Req() req) {
+  async googleAuth() {
     // This route will redirect to Google's consent screen
   }
 
@@ -122,9 +139,9 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth callback' })
   @ApiResponse({ status: 302, description: 'Redirect to frontend with tokens' })
-  async googleAuthRedirect(@Req() req, @Res() res: Response) {
+  async googleAuthRedirect(@Req() req: RequestWithUser, @Res() res: Response) {
     const { accessToken, refreshToken } = await this.authService.login(
-      req.user,
+      req.user as unknown as User,
     );
     // Instead of setting a cookie, redirect to a frontend page with tokens in the URL.
     // This is a more robust pattern for SPAs in development.

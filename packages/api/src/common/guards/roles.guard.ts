@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { User } from '@rewards-bolivia/shared-types'; // Import the User interface
+import { RequestUser } from '@rewards-bolivia/shared-types';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -14,7 +14,7 @@ export class RolesGuard implements CanActivate {
     if (!requiredRoles) {
       return true;
     }
-    const { user } = context.switchToHttp().getRequest(); // Type the user object
+    const { user } = context.switchToHttp().getRequest<{ user: RequestUser }>();
     return requiredRoles.some((role) => user.role?.includes(role));
   }
 }

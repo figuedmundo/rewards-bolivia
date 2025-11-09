@@ -82,12 +82,20 @@ The frontend is a React application built with Vite.
 
 #### `packages/shared-types`
 
-This package is crucial for maintaining consistency between the frontend and backend. It contains:
+This package is crucial for maintaining consistency between the frontend and backend. It contains shared TypeScript types and DTOs, organized by domain.
 
-*   **Data Transfer Objects (DTOs):** All DTOs that define the shape of data for API requests and responses. This ensures that both the client and server agree on the API contract.
-*   **Shared Interfaces:** TypeScript interfaces for entities or concepts that are used across multiple packages (e.g., `User`, `Transaction`).
+**Structure:**
 
-By centralizing these types, we avoid code duplication and reduce the risk of integration errors.
+```
+/packages/shared-types/
+├───src/
+│   ├───auth/             # Authentication related DTOs and Interfaces (e.g., LoginDto, JwtPayload, RequestUser)
+│   ├───user/             # User related DTOs and Interfaces (e.g., UserDto, RegisterUserDto, User interface)
+│   ├───transactions/     # Transaction related DTOs (e.g., EarnPointsDto, RedeemPointsDto)
+│   └───index.ts          # Aggregates and exports all types from domain folders
+```
+
+By centralizing and organizing these types by domain, we avoid code duplication, reduce the risk of integration errors, and maintain a clear, scalable structure.
 
 ### Infrastructure (`infra`)
 

@@ -6,7 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { EarnPointsDto } from '@rewards-bolivia/shared-types';
-import { ITransactionRepository } from '../domain/repositories/transaction.repository';
+import { type ITransactionRepository } from '../domain/repositories/transaction.repository';
 import { PrismaService } from '../../../infrastructure/prisma.service';
 import { TransactionType } from '@prisma/client';
 import * as crypto from 'crypto';

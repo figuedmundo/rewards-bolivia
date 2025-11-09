@@ -8,61 +8,64 @@ import {
   ConflictException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthModule } from './auth.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
+import { User } from '@prisma/client';
+import { RegisterUserDto } from '@rewards-bolivia/shared-types';
 
 describe('AuthService', () => {
   let service: AuthService;
   let usersService: UsersService;
-
-  const mockUsersService = {
-    findOne: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    findOneById: jest.fn(),
-  };
-
-  const mockJwtService = {
-    sign: jest.fn(),
-  };
-
-  const mockPrismaService = {
-    refreshToken: {
-      create: jest.fn(),
-      updateMany: jest.fn(),
-      findMany: jest.fn(),
-      update: jest.fn(),
-    },
-  };
+  let prismaService: PrismaService;
+  let jwtService: JwtService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        AuthModule,
-        ConfigModule.forRoot({
-          isGlobal: true,
-          load: [
-            () => ({
-              JWT_SECRET: 'test-secret',
-              GOOGLE_CLIENT_ID: 'test-client-id',
-              GOOGLE_CLIENT_SECRET: 'test-client-secret',
-              GOOGLE_CALLBACK_URL: 'http://localhost:3000/auth/google/callback',
+      providers: [
+        AuthService,
+        {
+          provide: UsersService,
+          useValue: {
+            findOne: jest.fn(),
+            create: jest.fn(),
+            update: jest.fn(),
+            findOneById: jest.fn(),
+          },
+        },
+        {
+          provide: PrismaService,
+          useValue: {
+            refreshToken: {
+              create: jest.fn(),
+              updateMany: jest.fn(),
+              findMany: jest.fn(),
+              update: jest.fn(),
+            },
+          },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            sign: jest.fn(),
+          },
+        },
+        {
+          provide: ConfigModule,
+          useValue: {
+            get: jest.fn((key: string) => {
+              if (key === 'JWT_SECRET') {
+                return 'test-secret';
+              }
+              return null;
             }),
-          ],
-        }),
+          },
+        },
       ],
-    })
-      .overrideProvider(UsersService)
-      .useValue(mockUsersService)
-      .overrideProvider(JwtService)
-      .useValue(mockJwtService)
-      .overrideProvider(PrismaService)
-      .useValue(mockPrismaService)
-      .compile();
+    }).compile();
 
     service = module.get<AuthService>(AuthService);
     usersService = module.get<UsersService>(UsersService);
-    jest.clearAllMocks();
+    prismaService = module.get<PrismaService>(PrismaService);
+    jwtService = module.get<JwtService>(JwtService);
   });
 
   it('should be defined', () => {
@@ -71,20 +74,25 @@ describe('AuthService', () => {
 
   describe('login', () => {
     it('should return access and refresh tokens', async () => {
-      const user = { id: '1', email: 'test@test.com' };
+      const user: Partial<User> = {
+        id: '1',
+        email: 'test@test.com',
+        role: 'client',
+      };
       const accessToken = 'access_token';
       const refreshToken = 'refresh_token';
 
-      mockJwtService.sign.mockReturnValue(accessToken);
+      jest.spyOn(jwtService, 'sign').mockReturnValue(accessToken);
       jest
         .spyOn(service, 'createRefreshToken')
-        .mockResolvedValue({ token: refreshToken });
+        .mockImplementation(() => Promise.resolve({ token: refreshToken }));
 
-      const result = await service.login(user as any);
+      const result = await service.login(user as User);
 
-      expect(mockJwtService.sign).toHaveBeenCalledWith({
+      expect(jwtService.sign).toHaveBeenCalledWith({
         email: user.email,
         sub: user.id,
+        role: user.role,
       });
       expect(service.createRefreshToken).toHaveBeenCalledWith(user.id);
       expect(result).toEqual({ accessToken, refreshToken });
@@ -94,8 +102,11 @@ describe('AuthService', () => {
   describe('logout', () => {
     it('should revoke all refresh tokens for a user', async () => {
       const userId = '1';
+      jest
+        .spyOn(prismaService.refreshToken, 'updateMany')
+        .mockResolvedValue({ count: 1 });
       await service.logout(userId);
-      expect(mockPrismaService.refreshToken.updateMany).toHaveBeenCalledWith({
+      expect(prismaService.refreshToken.updateMany).toHaveBeenCalledWith({
         where: { userId, revokedAt: null },
         data: { revokedAt: expect.any(Date) },
       });
@@ -105,19 +116,25 @@ describe('AuthService', () => {
   describe('refreshTokens', () => {
     const userId = '1';
     const refreshToken = 'valid_refresh_token';
-    const user = { id: userId, email: 'test@test.com' };
+    const user: Partial<User> = {
+      id: userId,
+      email: 'test@test.com',
+      role: 'client',
+    };
 
     it('should throw ForbiddenException if user not found', async () => {
-      mockUsersService.findOneById.mockResolvedValue(null);
+      jest.spyOn(usersService, 'findOneById').mockResolvedValue(null);
       await expect(service.refreshTokens(userId, refreshToken)).rejects.toThrow(
         ForbiddenException,
       );
     });
 
     it('should throw ForbiddenException if no matching token found', async () => {
-      mockUsersService.findOneById.mockResolvedValue(user);
-      mockPrismaService.refreshToken.findMany.mockResolvedValue([]);
-      jest.spyOn(service as any, 'findMatchingToken').mockResolvedValue(null);
+      jest.spyOn(usersService, 'findOneById').mockResolvedValue(user as User);
+      jest.spyOn(prismaService.refreshToken, 'findMany').mockResolvedValue([]);
+      jest
+        .spyOn(service as any, 'findMatchingToken')
+        .mockReturnValue(Promise.resolve(null));
 
       await expect(service.refreshTokens(userId, refreshToken)).rejects.toThrow(
         ForbiddenException,
@@ -129,29 +146,32 @@ describe('AuthService', () => {
       const newAccessToken = 'new_access_token';
       const newRefreshToken = { token: 'new_refresh_token' };
 
-      mockUsersService.findOneById.mockResolvedValue(user);
-      mockPrismaService.refreshToken.findMany.mockResolvedValue([
-        oldTokenRecord,
-      ]);
+      jest.spyOn(usersService, 'findOneById').mockResolvedValue(user as User);
+      jest
+        .spyOn(prismaService.refreshToken, 'findMany')
+        .mockResolvedValue([oldTokenRecord as any]);
       jest
         .spyOn(service as any, 'findMatchingToken')
-        .mockResolvedValue(oldTokenRecord);
-      mockPrismaService.refreshToken.update.mockResolvedValue({} as any);
+        .mockReturnValue(Promise.resolve(oldTokenRecord));
+      jest
+        .spyOn(prismaService.refreshToken, 'update')
+        .mockResolvedValue({} as any);
       jest
         .spyOn(service, 'createRefreshToken')
         .mockResolvedValue(newRefreshToken);
-      mockJwtService.sign.mockReturnValue(newAccessToken);
+      jest.spyOn(jwtService, 'sign').mockReturnValue(newAccessToken);
 
       const result = await service.refreshTokens(userId, refreshToken);
 
-      expect(mockPrismaService.refreshToken.update).toHaveBeenCalledWith({
+      expect(prismaService.refreshToken.update).toHaveBeenCalledWith({
         where: { id: oldTokenRecord.id },
         data: { revokedAt: expect.any(Date) },
       });
       expect(service.createRefreshToken).toHaveBeenCalledWith(userId);
-      expect(mockJwtService.sign).toHaveBeenCalledWith({
+      expect(jwtService.sign).toHaveBeenCalledWith({
         email: user.email,
         sub: user.id,
+        role: user.role,
       });
       expect(result).toEqual({
         accessToken: newAccessToken,
@@ -162,13 +182,13 @@ describe('AuthService', () => {
 
   describe('register', () => {
     it('should register a new user successfully', async () => {
-      const dto = {
+      const dto: RegisterUserDto = {
         email: 'new@user.com',
         password: 'password123',
         firstName: 'New',
         lastName: 'User',
       };
-      const newUser = {
+      const newUser: Partial<User> = {
         id: 'new-id',
         email: dto.email,
         passwordHash: 'hashed_password',
@@ -178,12 +198,11 @@ describe('AuthService', () => {
         refreshToken: 'test_refresh_token',
       };
 
-      mockUsersService.findOne.mockResolvedValue(null);
-      mockUsersService.create.mockResolvedValue(newUser);
-      // Mock the internal login call
+      jest.spyOn(usersService, 'findOne').mockResolvedValue(null);
+      jest.spyOn(usersService, 'create').mockResolvedValue(newUser as User);
       jest.spyOn(service, 'login').mockResolvedValue(tokens);
 
-      const result = await service.register(dto as any);
+      const result = await service.register(dto);
 
       expect(usersService.findOne).toHaveBeenCalledWith(dto.email);
       expect(usersService.create).toHaveBeenCalledWith({
@@ -201,15 +220,17 @@ describe('AuthService', () => {
     });
 
     it('should throw ConflictException if email is already registered', async () => {
-      const dto = {
+      const dto: RegisterUserDto = {
         email: 'existing@user.com',
         password: 'password123',
         firstName: 'Existing',
         lastName: 'User',
       };
-      mockUsersService.findOne.mockResolvedValue({ id: '1', email: dto.email });
+      jest
+        .spyOn(usersService, 'findOne')
+        .mockResolvedValue({ id: '1', email: dto.email } as User);
 
-      await expect(service.register(dto as any)).rejects.toThrow(
+      await expect(service.register(dto)).rejects.toThrow(
         new ConflictException('Email already registered'),
       );
     });
@@ -225,8 +246,11 @@ describe('AuthService', () => {
     };
 
     it('should create a new user if one does not exist', async () => {
-      mockUsersService.findOne.mockResolvedValue(null);
-      mockUsersService.create.mockResolvedValue({ id: '1', ...oauthProfile });
+      jest.spyOn(usersService, 'findOne').mockResolvedValue(null);
+      jest.spyOn(usersService, 'create').mockResolvedValue({
+        id: '1',
+        ...oauthProfile,
+      } as any);
 
       await service.validateOAuthLogin(
         oauthProfile.email,
@@ -245,16 +269,16 @@ describe('AuthService', () => {
     });
 
     it('should link provider to an existing local user', async () => {
-      const localUser = {
+      const localUser: Partial<User> = {
         id: '1',
         email: oauthProfile.email,
         provider: 'local',
       };
-      mockUsersService.findOne.mockResolvedValue(localUser);
-      mockUsersService.update.mockResolvedValue({
+      jest.spyOn(usersService, 'findOne').mockResolvedValue(localUser as User);
+      jest.spyOn(usersService, 'update').mockResolvedValue({
         ...localUser,
         ...oauthProfile,
-      });
+      } as User);
 
       await service.validateOAuthLogin(
         oauthProfile.email,
@@ -271,13 +295,15 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException if provider is different', async () => {
-      const existingUser = {
+      const existingUser: Partial<User> = {
         id: '1',
         email: oauthProfile.email,
         provider: 'facebook',
         providerId: 'facebook-456',
       };
-      mockUsersService.findOne.mockResolvedValue(existingUser);
+      jest
+        .spyOn(usersService, 'findOne')
+        .mockResolvedValue(existingUser as User);
 
       await expect(
         service.validateOAuthLogin(

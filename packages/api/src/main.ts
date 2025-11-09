@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { Request, Response } from 'express';
 
 // OpenTelemetry setup
 import { NodeSDK } from '@opentelemetry/sdk-node';
@@ -14,7 +15,7 @@ const sdk = new NodeSDK({
 
 async function bootstrap() {
   // Start OpenTelemetry
-  await sdk.start();
+  sdk.start();
 
   const app = await NestFactory.create(AppModule);
   app.enableCors({
@@ -34,7 +35,7 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   // Add OpenAPI JSON endpoint for SDK generation
-  app.getHttpAdapter().get('/docs-json', (req, res) => {
+  app.getHttpAdapter().get('/docs-json', (req: Request, res: Response) => {
     res.json(document);
   });
 
@@ -42,13 +43,27 @@ async function bootstrap() {
 }
 
 // Graceful shutdown
-process.on('SIGTERM', async () => {
-  await sdk.shutdown();
-  process.exit(0);
+process.on('SIGTERM', () => {
+  sdk
+    .shutdown()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error('Error during shutdown:', error);
+      process.exit(1);
+    });
 });
 
-process.on('SIGINT', async () => {
-  await sdk.shutdown();
-  process.exit(0);
+process.on('SIGINT', () => {
+  sdk
+    .shutdown()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error('Error during shutdown:', error);
+      process.exit(1);
+    });
 });
-bootstrap();
+
+bootstrap().catch((error) => {
+  console.error('Error during bootstrap:', error);
+  process.exit(1);
+});
