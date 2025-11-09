@@ -19,7 +19,7 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
-import { UserDto } from './dto/user.dto';
+import { UserDto } from '@rewards-bolivia/shared-types';
 import { Prisma } from '@prisma/client';
 
 @ApiTags('Users')

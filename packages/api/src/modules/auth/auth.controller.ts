@@ -16,8 +16,7 @@ import { AuthGuard } from '@nestjs/passport';
 import type { Response } from 'express';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
-import { RegisterUserDto } from '@rewards-bolivia/shared-types';
-import { LoginDto } from './dto/login.dto';
+import { RegisterUserDto, LoginDto } from '@rewards-bolivia/shared-types';
 
 @ApiTags('Authentication')
 @Controller('auth')

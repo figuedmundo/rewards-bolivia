@@ -3,14 +3,14 @@ import { IsString, IsNumber, IsNotEmpty, Min } from 'class-validator';
 export class RedeemPointsDto {
   @IsString()
   @IsNotEmpty()
-  businessId: string;
+  businessId!: string;
 
   @IsNumber()
   @IsNotEmpty()
   @Min(20) // As per economic rules
-  pointsToRedeem: number;
+  pointsToRedeem!: number;
 
   @IsNumber()
   @IsNotEmpty()
-  ticketTotal: number;
+  ticketTotal!: number;
 }

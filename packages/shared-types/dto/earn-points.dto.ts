@@ -8,7 +8,7 @@ export class EarnPointsDto {
   })
   @IsString()
   @IsNotEmpty()
-  customerId: string;
+  customerId!: string;
 
   @ApiProperty({
     example: 150,
@@ -16,5 +16,5 @@ export class EarnPointsDto {
   })
   @IsNumber()
   @IsNotEmpty()
-  purchaseAmount: number;
+  purchaseAmount!: number;
 }

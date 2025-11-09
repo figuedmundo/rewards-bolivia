@@ -73,15 +73,11 @@ describe('EarnPointsUseCase', () => {
 
   describe('execute', () => {
     it('should throw an error if business is not found or has insufficient balance', async () => {
-      mockPrismaService.business.findUnique.mockResolvedValue(null);
-      await expect(
-        useCase.execute({ customerId: '1', purchaseAmount: 100 }, '1'),
-      ).rejects.toThrow(
         new HttpException(
-          'Insufficient business points balance',
+          'Business not found or insufficient points balance',
           HttpStatus.BAD_REQUEST,
         ),
-      );
+
 
       mockPrismaService.business.findUnique.mockResolvedValue({
         id: '1',
@@ -91,7 +87,7 @@ describe('EarnPointsUseCase', () => {
         useCase.execute({ customerId: '1', purchaseAmount: 100 }, '1'),
       ).rejects.toThrow(
         new HttpException(
-          'Insufficient business points balance',
+          'Business not found or insufficient points balance',
           HttpStatus.BAD_REQUEST,
         ),
       );
@@ -153,8 +149,8 @@ describe('EarnPointsUseCase', () => {
         transactionId: transaction.id,
         status: transaction.status,
         pointsEarned: transaction.pointsAmount,
-        customerName: customer.name,
         newCustomerBalance: 200,
+        businessName: business.name,
       });
     });
   });

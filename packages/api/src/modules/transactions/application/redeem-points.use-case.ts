@@ -5,7 +5,7 @@ import {
   HttpStatus,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { RedeemPointsDto } from './dto/redeem-points.dto';
+import { RedeemPointsDto } from '@rewards-bolivia/shared-types';
 import type { ITransactionRepository } from '../domain/repositories/transaction.repository';
 import { PrismaService } from '../../../infrastructure/prisma.service';
 import { TransactionType } from '@prisma/client';

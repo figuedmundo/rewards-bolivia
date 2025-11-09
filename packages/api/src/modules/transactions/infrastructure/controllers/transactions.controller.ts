@@ -9,8 +9,7 @@ import {
 } from '@nestjs/common';
 import { EarnPointsUseCase } from '../../application/earn-points.use-case';
 import { RedeemPointsUseCase } from '../../application/redeem-points.use-case';
-import { EarnPointsDto } from '../../application/dto/earn-points.dto';
-import { RedeemPointsDto } from '../../application/dto/redeem-points.dto';
+import { EarnPointsDto, RedeemPointsDto } from '@rewards-bolivia/shared-types';
 import { AuthGuard } from '@nestjs/passport';
 import { PrismaService } from '../../../../infrastructure/prisma.service';
 import { EconomicControlService } from '../../application/services/economic-control.service';

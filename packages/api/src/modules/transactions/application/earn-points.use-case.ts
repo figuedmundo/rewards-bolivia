@@ -1,12 +1,12 @@
 import {
   Injectable,
   Inject,
+  InternalServerErrorException,
   HttpException,
   HttpStatus,
-  InternalServerErrorException,
 } from '@nestjs/common';
-import { EarnPointsDto } from './dto/earn-points.dto';
-import type { ITransactionRepository } from '../domain/repositories/transaction.repository';
+import { EarnPointsDto } from '@rewards-bolivia/shared-types';
+import { ITransactionRepository } from '../domain/repositories/transaction.repository';
 import { PrismaService } from '../../../infrastructure/prisma.service';
 import { TransactionType } from '@prisma/client';
 import * as crypto from 'crypto';
@@ -32,7 +32,7 @@ export class EarnPointsUseCase {
 
     if (!business || business.pointsBalance < pointsAmount) {
       throw new HttpException(
-        'Insufficient business points balance',
+        'Business not found or insufficient points balance',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -40,7 +40,6 @@ export class EarnPointsUseCase {
     const customer = await this.prisma.user.findUnique({
       where: { id: customerId },
     });
-
     if (!customer) {
       throw new HttpException('Customer not found', HttpStatus.NOT_FOUND);
     }
@@ -79,8 +78,8 @@ export class EarnPointsUseCase {
       transactionId: transaction.id,
       status: transaction.status,
       pointsEarned: transaction.pointsAmount,
-      customerName: updatedCustomer.name,
       newCustomerBalance: updatedCustomer.pointsBalance,
+      businessName: business.name,
     };
   }
 }

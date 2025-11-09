@@ -5,38 +5,38 @@ export class UserDto {
     example: 'clx000000000000000000000',
     description: 'Unique identifier of the user',
   })
-  id: string;
+  id!: string;
 
   @ApiProperty({
     example: 'user@example.com',
     description: 'Email address of the user',
   })
-  email: string;
+  email!: string;
 
   @ApiProperty({ example: 'John Doe', description: 'Full name of the user' })
-  name: string;
+  name!: string;
 
   @ApiProperty({
     example: 'client',
     description: 'Role of the user (client, business, admin)',
   })
-  role: string;
+  role!: string;
 
   @ApiProperty({
     example: 1000,
     description: 'Current points balance of the user',
   })
-  pointsBalance: number;
+  pointsBalance!: number;
 
   @ApiProperty({
     example: '2023-01-01T12:00:00.000Z',
     description: 'Date and time when the user was created',
   })
-  createdAt: Date;
+  createdAt!: Date;
 
   @ApiProperty({
     example: '2023-01-01T12:00:00.000Z',
     description: 'Date and time when the user was last updated',
   })
-  updatedAt: Date;
+  updatedAt!: Date;
 }
