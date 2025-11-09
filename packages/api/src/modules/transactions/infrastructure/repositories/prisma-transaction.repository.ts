@@ -122,63 +122,81 @@ export class PrismaTransactionRepository implements ITransactionRepository {
             data: customerUpdateData,
           });
 
-        // 3. Create the transaction record
-        const finalPointsAmount = type === TransactionType.REDEEM ? -pointsAmount : pointsAmount;
-        const dbTransaction = await tx.transaction.create({
-          data: {
-            type,
-            pointsAmount: finalPointsAmount,
-            burnAmount: burnAmount > 0 ? burnAmount : null, // Store burn amount if applicable
-            status,
-            auditHash,
-            businessId,
-            customerId,
-          },
-        });
-
-        // 4. Create ledger entries
-        const ledgerEntries = [
-          // Debit from the source
-          {
-            type: type === TransactionType.EARN ? 'EARN' : 'REDEEM',
-            accountId: type === TransactionType.EARN ? businessId : customerId,
-            debit: pointsAmount,
-            credit: 0,
-            balanceAfter:
-              type === TransactionType.EARN
-                ? business.pointsBalance
-                : customer.pointsBalance,
-            transactionId: dbTransaction.id,
-          },
-          // Credit to the destination
-          {
-            type: type === TransactionType.EARN ? 'EARN' : 'REDEEM',
-            accountId: type === TransactionType.EARN ? customerId : businessId,
-            debit: 0,
-            credit: pointsAmount - burnAmount, // Credit destination with points minus burn
-            balanceAfter:
-              type === TransactionType.EARN
-                ? customer.pointsBalance
-                : business.pointsBalance,
-            transactionId: dbTransaction.id,
-          },
-        ];
-
-        // Add BURN ledger entry if applicable
-        if (burnAmount > 0) {
-          ledgerEntries.push({
-            type: 'BURN',
-            accountId: 'SYSTEM_BURN_ACCOUNT', // A special account for burned points
-            debit: 0,
-            credit: burnAmount,
-            balanceAfter: 0, // Burned points are removed from circulation
-            transactionId: dbTransaction.id,
+          // 3. Create the transaction record
+          const finalPointsAmount =
+            type === TransactionType.REDEEM ? -pointsAmount : pointsAmount;
+          const dbTransaction = await tx.transaction.create({
+            data: {
+              type,
+              pointsAmount: finalPointsAmount,
+              burnAmount: type === TransactionType.REDEEM ? burnAmount : null, // Store burn amount if applicable
+              status,
+              auditHash,
+              businessId,
+              customerId,
+            },
           });
-        }
 
-        await tx.pointLedger.createMany({
-          data: ledgerEntries,
-        });
+          // 4. Create ledger entries
+          const ledgerEntriesData: {
+            type: LedgerEntryType;
+            accountId: string;
+            debit: number;
+            credit: number;
+            balanceAfter: number;
+            reason?: string | null;
+            hash?: string | null;
+            transactionId: string;
+          }[] = [
+            // Debit from the source
+            {
+              type:
+                type === TransactionType.EARN
+                  ? LedgerEntryType.EARN
+                  : LedgerEntryType.REDEEM,
+              accountId:
+                type === TransactionType.EARN ? businessId : customerId,
+              debit: pointsAmount,
+              credit: 0,
+              balanceAfter:
+                type === TransactionType.EARN
+                  ? business.pointsBalance
+                  : customer.pointsBalance,
+              transactionId: dbTransaction.id,
+            },
+            // Credit to the destination
+            {
+              type:
+                type === TransactionType.EARN
+                  ? LedgerEntryType.EARN
+                  : LedgerEntryType.REDEEM,
+              accountId:
+                type === TransactionType.EARN ? customerId : businessId,
+              debit: 0,
+              credit: pointsAmount - burnAmount, // Credit destination with points minus burn
+              balanceAfter:
+                type === TransactionType.EARN
+                  ? customer.pointsBalance
+                  : business.pointsBalance,
+              transactionId: dbTransaction.id,
+            },
+          ];
+
+          // Add BURN ledger entry if applicable
+          if (burnAmount > 0) {
+            ledgerEntriesData.push({
+              type: LedgerEntryType.BURN,
+              accountId: 'SYSTEM_BURN_ACCOUNT', // A special account for burned points
+              debit: 0,
+              credit: burnAmount,
+              balanceAfter: 0, // Burned points are removed from circulation
+              transactionId: dbTransaction.id,
+            });
+          }
+
+          const ledgerEntries = await tx.pointLedger.createManyAndReturn({
+            data: ledgerEntriesData,
+          });
 
           // Cache new balances after successful transaction
           await this.setCachedBalance(
@@ -190,20 +208,16 @@ export class PrismaTransactionRepository implements ITransactionRepository {
             business.pointsBalance,
           );
 
-        // Return transaction entity (without ledgerEntries for now, can be extended later)
-        return {
-          id: dbTransaction.id,
-          type: dbTransaction.type,
-          pointsAmount: dbTransaction.pointsAmount,
-          status: dbTransaction.status,
-          auditHash: dbTransaction.auditHash,
-          businessId: dbTransaction.businessId,
-          customerId: dbTransaction.customerId,
-          burnAmount: dbTransaction.burnAmount,
-        } as Transaction;
-      }, {
-        isolationLevel: 'Serializable', // Highest isolation for financial transactions
-      });
+          // Return transaction entity
+          return {
+            ...dbTransaction,
+            ledgerEntries,
+          } as Transaction;
+        },
+        {
+          isolationLevel: 'Serializable', // Highest isolation for financial transactions
+        },
+      );
 
       // Publish event AFTER transaction commits (outside transaction boundary)
       this.eventPublisher.publishTransactionCompleted({ transaction });
