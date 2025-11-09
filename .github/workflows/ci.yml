@@ -41,6 +41,11 @@ jobs:
         env:
           DATABASE_URL: postgresql://rewardsuser:rewardspassword@localhost:5432/rewardsdb
 
+      - name: Generate Prisma Client
+        run: pnpm --filter api exec prisma generate
+        env:
+          DATABASE_URL: postgresql://rewardsuser:rewardspassword@localhost:5432/rewardsdb
+
       - name: Run linting
         run: pnpm lint
 
