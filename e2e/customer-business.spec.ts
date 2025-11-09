@@ -107,7 +107,6 @@ test.describe.serial('E2E User Journey: Customer Earns and Redeems Points', () =
     const earnPayload = {
       customerId: customer.id,
       purchaseAmount: 100,
-      businessId: business.id, // DTO requires this field
     };
 
     // Act: Send a POST request to the "earn" endpoint using the business's token
@@ -162,6 +161,11 @@ test.describe.serial('E2E User Journey: Customer Earns and Redeems Points', () =
       ticketTotal: 50,
     };
 
+    const businessBeforeRedeem = await prisma.business.findUnique({
+      where: { id: business.id },
+    });
+    const initialBusinessBalance = businessBeforeRedeem!.pointsBalance;
+
     const burnRate = 0.005; // From EconomicControlService
     const expectedBurnAmount = Math.floor(redeemPayload.pointsToRedeem * burnRate);
     const expectedBusinessCredit = redeemPayload.pointsToRedeem - expectedBurnAmount;
@@ -206,6 +210,6 @@ test.describe.serial('E2E User Journey: Customer Earns and Redeems Points', () =
     const updatedBusiness = await prisma.business.findUnique({
       where: { id: business.id },
     });
-    expect(updatedBusiness?.pointsBalance).toBe(1000 + expectedBusinessCredit); // Initial 1000 + (25 - burnAmount)
+    expect(updatedBusiness?.pointsBalance).toBe(initialBusinessBalance + expectedBusinessCredit); // Balance after earn + (redeem - burn)
   });
 });
