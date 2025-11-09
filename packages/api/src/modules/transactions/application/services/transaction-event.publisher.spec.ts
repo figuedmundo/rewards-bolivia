@@ -21,7 +21,9 @@ describe('TransactionEventPublisher', () => {
       ],
     }).compile();
 
-    publisher = module.get<TransactionEventPublisher>(TransactionEventPublisher);
+    publisher = module.get<TransactionEventPublisher>(
+      TransactionEventPublisher,
+    );
     eventEmitter = module.get<EventEmitter2>(EventEmitter2);
   });
 
@@ -42,6 +44,9 @@ describe('TransactionEventPublisher', () => {
 
     publisher.publishTransactionCompleted(event);
 
-    expect(eventEmitter.emit).toHaveBeenCalledWith('transaction.completed', event);
+    expect(eventEmitter.emit).toHaveBeenCalledWith(
+      'transaction.completed',
+      event,
+    );
   });
 });

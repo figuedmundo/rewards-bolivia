@@ -53,7 +53,6 @@ describe('API Contract Tests', () => {
     await prisma.user.deleteMany();
   });
 
-
   afterAll(async () => {
     await prisma.$disconnect();
     await app.close();

@@ -62,7 +62,9 @@ describe('RedeemPointsUseCase', () => {
     transactionRepository = module.get<ITransactionRepository>(
       'ITransactionRepository',
     );
-    eventPublisher = module.get<TransactionEventPublisher>(TransactionEventPublisher);
+    eventPublisher = module.get<TransactionEventPublisher>(
+      TransactionEventPublisher,
+    );
     jest.clearAllMocks();
   });
 
@@ -144,14 +146,25 @@ describe('RedeemPointsUseCase', () => {
     it('should create a transaction and return the result', async () => {
       const business = { id: '1', name: 'Test Business', pointsBalance: 5000 };
       const customer = { id: '1', pointsBalance: 200 };
-      const transaction = { id: '1', pointsAmount: 100, status: 'COMPLETED', type: TransactionType.REDEEM };
+      const transaction = {
+        id: '1',
+        pointsAmount: 100,
+        status: 'COMPLETED',
+        type: TransactionType.REDEEM,
+      };
 
       mockPrismaService.user.findUnique
         .mockResolvedValueOnce(customer)
-        .mockResolvedValueOnce({ ...customer, pointsBalance: customer.pointsBalance - transaction.pointsAmount });
+        .mockResolvedValueOnce({
+          ...customer,
+          pointsBalance: customer.pointsBalance - transaction.pointsAmount,
+        });
       mockPrismaService.business.findUnique
         .mockResolvedValueOnce(business)
-        .mockResolvedValueOnce({ ...business, pointsBalance: business.pointsBalance + transaction.pointsAmount });
+        .mockResolvedValueOnce({
+          ...business,
+          pointsBalance: business.pointsBalance + transaction.pointsAmount,
+        });
       mockTransactionRepository.redeem.mockResolvedValue(transaction as any);
 
       const result = await useCase.execute(

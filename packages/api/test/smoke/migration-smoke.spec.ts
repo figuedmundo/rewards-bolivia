@@ -20,7 +20,8 @@ describe('Migration Smoke Tests', () => {
     // Set required environment variables for Google OAuth
     process.env.GOOGLE_CLIENT_ID = 'test-client-id';
     process.env.GOOGLE_CLIENT_SECRET = 'test-client-secret';
-    process.env.GOOGLE_CALLBACK_URL = 'http://localhost:3000/auth/google/callback';
+    process.env.GOOGLE_CALLBACK_URL =
+      'http://localhost:3000/auth/google/callback';
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -57,7 +58,12 @@ describe('Migration Smoke Tests', () => {
 
     const businessResponse = await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email: businessEmail, password: 'password', name: 'Business User', role: 'business' });
+      .send({
+        email: businessEmail,
+        password: 'password',
+        name: 'Business User',
+        role: 'business',
+      });
     businessUser = businessResponse.body.user;
     businessToken = businessResponse.body.accessToken;
 
@@ -74,31 +80,43 @@ describe('Migration Smoke Tests', () => {
     // Clean up created test data
     await prisma.pointLedger.deleteMany({ where: {} });
     await prisma.transaction.deleteMany({ where: {} });
-    await prisma.user.deleteMany({ where: { email: { contains: '@example.com' } } });
+    await prisma.user.deleteMany({
+      where: { email: { contains: '@example.com' } },
+    });
     await prisma.business.deleteMany({ where: { ownerId: businessUser.id } });
     await app.close();
   });
 
   describe('Database Schema Integrity', () => {
     it('should have all required tables', async () => {
-      const expectedTables = ['User', 'Business', 'RefreshToken', 'Transaction', 'PointLedger', '_prisma_migrations'];
-      const result: any[] = await prisma.$queryRaw`SELECT tablename FROM pg_tables WHERE schemaname = 'public'`;
-      const tableNames = result.map(r => r.tablename);
+      const expectedTables = [
+        'User',
+        'Business',
+        'RefreshToken',
+        'Transaction',
+        'PointLedger',
+        '_prisma_migrations',
+      ];
+      const result: any[] =
+        await prisma.$queryRaw`SELECT tablename FROM pg_tables WHERE schemaname = 'public'`;
+      const tableNames = result.map((r) => r.tablename);
       for (const table of expectedTables) {
         // Prisma table names are case-sensitive in the client, but table names in postgres are often lowercase.
         // We will check for both cases.
-        const found = tableNames.includes(table) || tableNames.includes(table.toLowerCase());
+        const found =
+          tableNames.includes(table) ||
+          tableNames.includes(table.toLowerCase());
         expect(found).toBe(true);
       }
     });
 
     it('should have correct columns for User table', async () => {
-        const columns: any[] = await prisma.$queryRaw`
+      const columns: any[] = await prisma.$queryRaw`
         SELECT column_name, data_type, is_nullable 
         FROM information_schema.columns 
         WHERE table_name = 'User'`;
-      
-      const columnMap = new Map(columns.map(c => [c.column_name, c]));
+
+      const columnMap = new Map(columns.map((c) => [c.column_name, c]));
 
       expect(columnMap.has('id')).toBe(true);
       expect(columnMap.has('email')).toBe(true);
@@ -107,29 +125,33 @@ describe('Migration Smoke Tests', () => {
     });
 
     it('should have required indexes', async () => {
-        const expectedIndexes = [
-            'User_email_key',
-            'User_provider_providerId_key',
-            'Business_ownerId_idx',
-            'RefreshToken_token_key',
-            'RefreshToken_userId_idx',
-            'Transaction_auditHash_key',
-            'Transaction_businessId_idx',
-            'Transaction_customerId_idx',
-            'PointLedger_accountId_idx',
-        ];
-        const result: any[] = await prisma.$queryRaw`SELECT indexname FROM pg_indexes WHERE schemaname = 'public'`;
-        const indexNames = result.map(i => i.indexname);
+      const expectedIndexes = [
+        'User_email_key',
+        'User_provider_providerId_key',
+        'Business_ownerId_idx',
+        'RefreshToken_token_key',
+        'RefreshToken_userId_idx',
+        'Transaction_auditHash_key',
+        'Transaction_businessId_idx',
+        'Transaction_customerId_idx',
+        'PointLedger_accountId_idx',
+      ];
+      const result: any[] =
+        await prisma.$queryRaw`SELECT indexname FROM pg_indexes WHERE schemaname = 'public'`;
+      const indexNames = result.map((i) => i.indexname);
 
-        for (const index of expectedIndexes) {
-            expect(indexNames).toContain(index);
-        }
+      for (const index of expectedIndexes) {
+        expect(indexNames).toContain(index);
+      }
     });
   });
 
   describe('Data Consistency', () => {
     it('should have valid enum values for User role', async () => {
-      const users = await prisma.user.findMany({ select: { role: true }, take: 10 });
+      const users = await prisma.user.findMany({
+        select: { role: true },
+        take: 10,
+      });
       for (const user of users) {
         if (user.role) {
           expect(['client', 'business', 'admin']).toContain(user.role);
@@ -138,10 +160,15 @@ describe('Migration Smoke Tests', () => {
     });
 
     it('should have valid enum values for TransactionType', async () => {
-        const transactions = await prisma.transaction.findMany({ select: { type: true }, take: 10 });
-        for (const transaction of transactions) {
-            expect(['EARN', 'REDEEM', 'ADJUSTMENT', 'BURN']).toContain(transaction.type);
-        }
+      const transactions = await prisma.transaction.findMany({
+        select: { type: true },
+        take: 10,
+      });
+      for (const transaction of transactions) {
+        expect(['EARN', 'REDEEM', 'ADJUSTMENT', 'BURN']).toContain(
+          transaction.type,
+        );
+      }
     });
   });
 
@@ -176,7 +203,7 @@ describe('Migration Smoke Tests', () => {
       const createResponse = await request(app.getHttpServer())
         .post('/api/auth/register')
         .send({ email, password: 'password', name: 'CRUD Test' });
-      
+
       expect(createResponse.status).toBe(201);
       const user = createResponse.body.user;
       const token = createResponse.body.accessToken;
@@ -185,7 +212,7 @@ describe('Migration Smoke Tests', () => {
       const readResponse = await request(app.getHttpServer())
         .get(`/api/users/${user.id}`)
         .set('Authorization', `Bearer ${token}`);
-      
+
       expect(readResponse.status).toBe(200);
       expect(readResponse.body.email).toBe(email);
 
@@ -202,14 +229,14 @@ describe('Migration Smoke Tests', () => {
       const deleteResponse = await request(app.getHttpServer())
         .delete(`/api/users/${user.id}`)
         .set('Authorization', `Bearer ${token}`);
-      
+
       expect(deleteResponse.status).toBe(200);
 
       // Verify deletion
       const verifyResponse = await request(app.getHttpServer())
         .get(`/api/users/${user.id}`)
         .set('Authorization', `Bearer ${token}`);
-      
+
       expect(verifyResponse.status).toBe(404);
 
       // Verify that deleting a non-existent user returns a 404
@@ -219,7 +246,7 @@ describe('Migration Smoke Tests', () => {
 
       expect(deleteNonExistentResponse.status).toBe(404);
     });
-    
+
     it('should correctly handle EARN and REDEEM transactions', async () => {
       // Seed the business with points
       await prisma.business.update({
@@ -234,15 +261,18 @@ describe('Migration Smoke Tests', () => {
         .send({
           customerId: clientUser.id,
           purchaseAmount: 100,
-          businessId: business.id,
         });
 
       expect(earnResponse.status).toBe(201);
       expect(earnResponse.body.pointsEarned).toBe(100);
 
       // Verify balances
-      let updatedClient = await prisma.user.findUnique({ where: { id: clientUser.id } });
-      let updatedBusiness = await prisma.business.findUnique({ where: { id: business.id } });
+      let updatedClient = await prisma.user.findUnique({
+        where: { id: clientUser.id },
+      });
+      let updatedBusiness = await prisma.business.findUnique({
+        where: { id: business.id },
+      });
 
       expect(updatedClient).not.toBeNull();
       expect(updatedBusiness).not.toBeNull();
@@ -263,8 +293,12 @@ describe('Migration Smoke Tests', () => {
       expect(redeemResponse.body.pointsRedeemed).toBe(50);
 
       // Verify final balances
-      updatedClient = await prisma.user.findUnique({ where: { id: clientUser.id } });
-      updatedBusiness = await prisma.business.findUnique({ where: { id: business.id } });
+      updatedClient = await prisma.user.findUnique({
+        where: { id: clientUser.id },
+      });
+      updatedBusiness = await prisma.business.findUnique({
+        where: { id: business.id },
+      });
 
       expect(updatedClient).not.toBeNull();
       expect(updatedBusiness).not.toBeNull();

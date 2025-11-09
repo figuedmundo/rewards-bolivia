@@ -7,7 +7,7 @@ import { UsersModule } from './modules/users/users.module';
 import { PrismaModule } from './infrastructure/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
-import { LoggerMiddleware, LoggerService } from '@rewards-bolivia/logger';
+import { LoggerMiddleware } from '@rewards-bolivia/logger';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
 

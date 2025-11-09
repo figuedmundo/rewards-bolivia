@@ -248,8 +248,11 @@ describe('TransactionsController (integration)', () => {
       };
 
       const burnRate = 0.005; // From EconomicControlService
-      const expectedBurnAmount = Math.floor(redeemDto.pointsToRedeem * burnRate);
-      const expectedBusinessCredit = redeemDto.pointsToRedeem - expectedBurnAmount;
+      const expectedBurnAmount = Math.floor(
+        redeemDto.pointsToRedeem * burnRate,
+      );
+      const expectedBusinessCredit =
+        redeemDto.pointsToRedeem - expectedBurnAmount;
 
       const redeemResponse = await request(app.getHttpServer())
         .post('/api/transactions/redeem')
@@ -269,7 +272,9 @@ describe('TransactionsController (integration)', () => {
       updatedBusiness = await prisma.business.findUnique({
         where: { id: testBusiness.id },
       });
-      expect(updatedBusiness!.pointsBalance).toBe(4800 + expectedBusinessCredit); // 4800 + (300 - burnAmount)
+      expect(updatedBusiness!.pointsBalance).toBe(
+        4800 + expectedBusinessCredit,
+      ); // 4800 + (300 - burnAmount)
 
       // Verify Redis cache
       const cachedUserBalance = await redisService.get(
@@ -280,7 +285,9 @@ describe('TransactionsController (integration)', () => {
       const cachedBusinessBalance = await redisService.get(
         `business:${testBusiness.id}:balance`,
       );
-      expect(cachedBusinessBalance).toBe((4800 + expectedBusinessCredit).toString());
+      expect(cachedBusinessBalance).toBe(
+        (4800 + expectedBusinessCredit).toString(),
+      );
     });
   });
 
@@ -308,7 +315,8 @@ describe('TransactionsController (integration)', () => {
         purchaseAmount: 1000,
         businessId: testBusiness.id,
       };
-      const { accessToken: businessToken } = await authService.login(businessUser);
+      const { accessToken: businessToken } =
+        await authService.login(businessUser);
       await request(app.getHttpServer())
         .post('/api/transactions/earn')
         .set('Authorization', `Bearer ${businessToken}`)

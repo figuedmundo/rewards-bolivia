@@ -22,18 +22,12 @@ export class EarnPointsUseCase {
   ) {}
 
   async execute(earnPointsDto: EarnPointsDto, businessId: string) {
-    const {
-      customerId,
-      purchaseAmount,
-      businessId: dtoBusinessId,
-    } = earnPointsDto;
-    // Use businessId from parameter if provided, otherwise from DTO
-    const finalBusinessId = businessId || dtoBusinessId;
+    const { customerId, purchaseAmount } = earnPointsDto;
     const pointsAmount = Math.floor(purchaseAmount); // 1:1 ratio
 
-    // 1. Validate business and customer (repository will handle cache)
+    // 1. Validate business and customer
     const business = await this.prisma.business.findUnique({
-      where: { id: finalBusinessId },
+      where: { id: businessId },
     });
 
     if (!business || business.pointsBalance < pointsAmount) {
@@ -54,23 +48,23 @@ export class EarnPointsUseCase {
     // 2. Generate audit hash
     const auditHash = crypto
       .createHash('sha256')
-      .update(`${Date.now()}${finalBusinessId}${customerId}${pointsAmount}`)
+      .update(`${Date.now()}${businessId}${customerId}${pointsAmount}`)
       .digest('hex');
 
-    // 3. Create transaction (repository handles cache updates)
+    // 3. Create transaction (repository handles all balance updates)
     const transaction = await this.transactionRepository.create({
       type: TransactionType.EARN,
       pointsAmount,
       status: 'COMPLETED',
       auditHash,
-      businessId: finalBusinessId,
+      businessId: businessId,
       customerId,
     });
 
     // 4. Publish event
     this.eventPublisher.publishTransactionCompleted({ transaction });
 
-    // 5. Fetch updated balances (repository already cached these)
+    // 5. Fetch updated balances
     const updatedCustomer = await this.prisma.user.findUnique({
       where: { id: customerId },
     });
@@ -78,16 +72,6 @@ export class EarnPointsUseCase {
     if (!updatedCustomer) {
       throw new InternalServerErrorException(
         'Could not retrieve updated customer data.',
-      );
-    }
-
-    const updatedBusiness = await this.prisma.business.findUnique({
-      where: { id: finalBusinessId },
-    });
-    
-    if (!updatedBusiness) {
-      throw new InternalServerErrorException(
-        'Could not retrieve updated business data.',
       );
     }
 

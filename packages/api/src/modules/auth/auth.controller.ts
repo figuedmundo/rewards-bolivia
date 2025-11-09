@@ -33,8 +33,8 @@ export class AuthController {
     @Body() registerUserDto: RegisterUserDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const user = await this.authService.register(registerUserDto);
-    const { accessToken, refreshToken } = await this.authService.login(user);
+    const { user, accessToken, refreshToken } =
+      await this.authService.register(registerUserDto);
     response.cookie('refresh_token', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV !== 'development', // Use secure cookies in production

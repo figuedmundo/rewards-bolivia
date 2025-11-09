@@ -139,9 +139,13 @@ export class AuthService {
       name: `${registerUserDto.firstName} ${registerUserDto.lastName}`,
     });
 
+    // After creating the user, log them in to get tokens
+    const { accessToken, refreshToken } = await this.login(newUser);
+
     // Exclude password from the returned user object
-    const { passwordHash, ...result } = newUser;
-    return result;
+    const { passwordHash, ...userResult } = newUser;
+
+    return { user: userResult, accessToken, refreshToken };
   }
 
   async validateOAuthLogin(

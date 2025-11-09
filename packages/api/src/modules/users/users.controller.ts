@@ -1,4 +1,14 @@
-import { Controller, Get, UseGuards, Request, Param, Patch, Body, Delete, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Request,
+  Param,
+  Patch,
+  Body,
+  Delete,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
@@ -57,10 +67,7 @@ export class UsersController {
     type: UserDto,
   })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async update(
-    @Param('id') id: string,
-    @Body() data: Prisma.UserUpdateInput,
-  ) {
+  async update(@Param('id') id: string, @Body() data: Prisma.UserUpdateInput) {
     return this.usersService.update(id, data);
   }
 

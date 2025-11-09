@@ -8,7 +8,8 @@ export class RedisService implements OnModuleDestroy {
   ) {}
 
   async onModuleDestroy() {
-    if (process.env.JEST_WORKER_ID === undefined) { // Avoid closing Redis connection during tests 
+    if (process.env.JEST_WORKER_ID === undefined) {
+      // Avoid closing Redis connection during tests
       await this.redisClient.quit();
     }
   }

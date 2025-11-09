@@ -47,13 +47,19 @@ describe('EconomicControlService', () => {
           return Promise.resolve({ _sum: { pointsAmount: 1000 } });
         }
         if (args.where.type === TransactionType.REDEEM) {
-          return Promise.resolve({ _sum: { pointsAmount: 500, burnAmount: 5 } });
+          return Promise.resolve({
+            _sum: { pointsAmount: 500, burnAmount: 5 },
+          });
         }
         return Promise.resolve({ _sum: { pointsAmount: 0, burnAmount: 0 } });
       });
 
-      jest.spyOn(prisma.user, 'aggregate').mockResolvedValue({ _sum: { pointsBalance: 300 } });
-      jest.spyOn(prisma.business, 'aggregate').mockResolvedValue({ _sum: { pointsBalance: 200 } });
+      jest
+        .spyOn(prisma.user, 'aggregate')
+        .mockResolvedValue({ _sum: { pointsBalance: 300 } });
+      jest
+        .spyOn(prisma.business, 'aggregate')
+        .mockResolvedValue({ _sum: { pointsBalance: 200 } });
 
       const stats = await service.getEconomyStats();
 
@@ -70,9 +76,15 @@ describe('EconomicControlService', () => {
     });
 
     it('should handle zero values gracefully', async () => {
-      jest.spyOn(prisma.transaction, 'aggregate').mockResolvedValue({ _sum: { pointsAmount: 0, burnAmount: 0 } });
-      jest.spyOn(prisma.user, 'aggregate').mockResolvedValue({ _sum: { pointsBalance: 0 } });
-      jest.spyOn(prisma.business, 'aggregate').mockResolvedValue({ _sum: { pointsBalance: 0 } });
+      jest
+        .spyOn(prisma.transaction, 'aggregate')
+        .mockResolvedValue({ _sum: { pointsAmount: 0, burnAmount: 0 } });
+      jest
+        .spyOn(prisma.user, 'aggregate')
+        .mockResolvedValue({ _sum: { pointsBalance: 0 } });
+      jest
+        .spyOn(prisma.business, 'aggregate')
+        .mockResolvedValue({ _sum: { pointsBalance: 0 } });
 
       const stats = await service.getEconomyStats();
 
@@ -93,7 +105,9 @@ describe('EconomicControlService', () => {
     it('should log a message for now as it is a placeholder', async () => {
       const consoleSpy = jest.spyOn(console, 'log');
       await service.checkAndAdjustEmission();
-      expect(consoleSpy).toHaveBeenCalledWith('Checking and adjusting emission rates (placeholder)');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Checking and adjusting emission rates (placeholder)',
+      );
       consoleSpy.mockRestore();
     });
   });

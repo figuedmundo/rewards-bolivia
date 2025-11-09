@@ -1,4 +1,12 @@
-import { Controller, Post, Body, UseGuards, Req, NotFoundException, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  NotFoundException,
+  Get,
+} from '@nestjs/common';
 import { EarnPointsUseCase } from '../../application/earn-points.use-case';
 import { RedeemPointsUseCase } from '../../application/redeem-points.use-case';
 import { EarnPointsDto } from '../../application/dto/earn-points.dto';
@@ -20,8 +28,9 @@ export class TransactionsController {
 
   @Post('earn')
   @UseGuards(AuthGuard('jwt'))
+  @Roles('business') // Only business role can earn points
   async earnPoints(@Body() earnPointsDto: EarnPointsDto, @Req() req) {
-    const businessOwnerId = req.user.id;
+    const businessOwnerId = req.user.userId;
 
     // Find the business associated with the authenticated owner
     const business = await this.prisma.business.findFirst({
@@ -29,7 +38,9 @@ export class TransactionsController {
     });
 
     if (!business) {
-      throw new NotFoundException(`No business found for owner ID: ${businessOwnerId}`);
+      throw new NotFoundException(
+        `No business found for owner ID: ${businessOwnerId}`,
+      );
     }
 
     // Now, use the correct business ID for the use case
@@ -38,8 +49,9 @@ export class TransactionsController {
 
   @Post('redeem')
   @UseGuards(AuthGuard('jwt')) // Assuming JWT authentication for customers
+  @Roles('customer') // Only customer role can redeem points
   async redeemPoints(@Body() redeemPointsDto: RedeemPointsDto, @Req() req) {
-    const customerId = req.user.userId; // Assuming customer ID is in the 'userId' property of the JWT payload
+    const customerId = req.user.userId; // Correctly access customer ID from JWT payload
     return this.redeemPointsUseCase.execute(redeemPointsDto, customerId);
   }
 

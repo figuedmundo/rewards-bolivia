@@ -62,7 +62,9 @@ describe('EarnPointsUseCase', () => {
     transactionRepository = module.get<ITransactionRepository>(
       'ITransactionRepository',
     );
-    eventPublisher = module.get<TransactionEventPublisher>(TransactionEventPublisher);
+    eventPublisher = module.get<TransactionEventPublisher>(
+      TransactionEventPublisher,
+    );
   });
 
   it('should be defined', () => {
@@ -112,13 +114,24 @@ describe('EarnPointsUseCase', () => {
     it('should create a transaction and return the result', async () => {
       const business = { id: '1', pointsBalance: 200 };
       const customer = { id: '1', name: 'Test Customer', pointsBalance: 100 };
-      const transaction = { id: '1', pointsAmount: 100, status: 'COMPLETED', type: TransactionType.EARN };
+      const transaction = {
+        id: '1',
+        pointsAmount: 100,
+        status: 'COMPLETED',
+        type: TransactionType.EARN,
+      };
 
       mockPrismaService.business.findUnique.mockResolvedValue(business);
       mockPrismaService.user.findUnique.mockResolvedValue(customer);
       mockTransactionRepository.create.mockResolvedValue(transaction);
-      mockPrismaService.user.findUnique.mockResolvedValue({ ...customer, pointsBalance: 200 }); // Updated balance
-      mockPrismaService.business.findUnique.mockResolvedValue({ ...business, pointsBalance: 100 }); // Updated balance
+      mockPrismaService.user.findUnique.mockResolvedValue({
+        ...customer,
+        pointsBalance: 200,
+      }); // Updated balance
+      mockPrismaService.business.findUnique.mockResolvedValue({
+        ...business,
+        pointsBalance: 100,
+      }); // Updated balance
 
       const result = await useCase.execute(
         { customerId: '1', purchaseAmount: 100 },
