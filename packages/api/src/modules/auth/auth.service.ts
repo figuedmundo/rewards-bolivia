@@ -31,6 +31,7 @@ export class AuthService {
       user.passwordHash &&
       (await comparePassword(pass, user.passwordHash))
     ) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { passwordHash, ...result } = user;
       return result;
     }
@@ -185,8 +186,10 @@ export class AuthService {
       }
 
       return user;
-    } catch (error) {
-      throw new UnauthorizedException('OAuth login failed.', error.message);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new UnauthorizedException('OAuth login failed.', errorMessage);
     }
   }
 }

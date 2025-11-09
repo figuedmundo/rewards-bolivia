@@ -75,6 +75,7 @@ export class EconomicControlService {
     // 2. Comparing it against a threshold (e.g., 25%)
     // 3. Adjusting emission rates for promo/Starter plans if the condition is met
     console.log('Checking and adjusting emission rates (placeholder)');
+    await Promise.resolve(); // To satisfy @typescript-eslint/require-await
     // Implementation will be added in a future sprint
   }
 }

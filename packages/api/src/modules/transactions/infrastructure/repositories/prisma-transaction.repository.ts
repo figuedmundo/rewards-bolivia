@@ -10,7 +10,7 @@ import { Transaction } from '../../domain/entities/transaction.entity';
 import { TransactionType, LedgerEntryType } from '@prisma/client';
 import { EconomicControlService } from '../../application/services/economic-control.service';
 import { TransactionEventPublisher } from '../../application/services/transaction-event.publisher';
-import { TransactionCompletedEvent } from '../../domain/events/transaction-completed.event';
+
 import { RedisService } from '../../../../infrastructure/redis/redis.service';
 
 @Injectable()
@@ -36,12 +36,21 @@ export class PrismaTransactionRepository implements ITransactionRepository {
     return `business:${businessId}:balance`;
   }
 
+  private getErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    return String(error);
+  }
+
   private async getCachedBalance(key: string): Promise<number | null> {
     try {
       const cached = await this.redisService.get(key);
       return cached ? parseInt(cached, 10) : null;
     } catch (error) {
-      this.logger.warn(`Cache read failed for key ${key}: ${error.message}`);
+      this.logger.warn(
+        `Cache read failed for key ${key}: ${this.getErrorMessage(error)}`,
+      );
       return null;
     }
   }
@@ -50,7 +59,9 @@ export class PrismaTransactionRepository implements ITransactionRepository {
     try {
       await this.redisService.set(key, balance.toString(), this.CACHE_TTL);
     } catch (error) {
-      this.logger.warn(`Cache write failed for key ${key}: ${error.message}`);
+      this.logger.warn(
+        `Cache write failed for key ${key}: ${this.getErrorMessage(error)}`,
+      );
       // Non-critical error, continue without cache
     }
   }
@@ -63,7 +74,9 @@ export class PrismaTransactionRepository implements ITransactionRepository {
       await this.redisService.del(this.getCustomerBalanceKey(customerId));
       await this.redisService.del(this.getBusinessBalanceKey(businessId));
     } catch (error) {
-      this.logger.warn(`Cache invalidation failed: ${error.message}`);
+      this.logger.warn(
+        `Cache invalidation failed: ${this.getErrorMessage(error)}`,
+      );
     }
   }
 
@@ -78,11 +91,6 @@ export class PrismaTransactionRepository implements ITransactionRepository {
     // Check cache first for balances (cache-aside pattern)
     const customerBalanceKey = this.getCustomerBalanceKey(customerId);
     const businessBalanceKey = this.getBusinessBalanceKey(businessId);
-
-    const cachedCustomerBalance =
-      await this.getCachedBalance(customerBalanceKey);
-    const cachedBusinessBalance =
-      await this.getCachedBalance(businessBalanceKey);
 
     let transaction: Transaction;
 
@@ -225,13 +233,13 @@ export class PrismaTransactionRepository implements ITransactionRepository {
       this.logger.log(`Transaction ${transaction.id} completed successfully`);
       return transaction;
     } catch (error) {
-      this.logger.error(`Transaction failed: ${error.message}`);
+      this.logger.error(`Transaction failed: ${this.getErrorMessage(error)}`);
 
       // Invalidate cache on failure to prevent stale data
       await this.invalidateBalanceCache(customerId, businessId);
 
       throw new InternalServerErrorException(
-        `Transaction failed: ${error.message}`,
+        `Transaction failed: ${this.getErrorMessage(error)}`,
       );
     }
   }

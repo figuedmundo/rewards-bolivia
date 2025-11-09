@@ -3,7 +3,10 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtPayload } from '@rewards-bolivia/shared-types';
+import {
+  JwtPayload,
+  RequestWithRefreshToken,
+} from '@rewards-bolivia/shared-types';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -18,7 +21,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          return request?.cookies?.refresh_token;
+          return (request as RequestWithRefreshToken)?.cookies?.refresh_token;
         },
       ]),
       secretOrKey: secret,
@@ -26,7 +29,10 @@ export class JwtRefreshStrategy extends PassportStrategy(
     });
   }
 
-  validate(req: Request, payload: JwtPayload) {
+  validate(
+    req: RequestWithRefreshToken,
+    payload: JwtPayload,
+  ): JwtPayload & { refreshToken: string } {
     const refreshToken = req.cookies?.refresh_token;
     return { ...payload, refreshToken };
   }

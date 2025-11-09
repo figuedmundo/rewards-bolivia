@@ -9,12 +9,16 @@ import {
 } from '@nestjs/common';
 import { EarnPointsUseCase } from '../../application/earn-points.use-case';
 import { RedeemPointsUseCase } from '../../application/redeem-points.use-case';
-import { EarnPointsDto, RedeemPointsDto } from '@rewards-bolivia/shared-types';
+import {
+  EarnPointsDto,
+  RedeemPointsDto,
+  RequestWithUser,
+} from '@rewards-bolivia/shared-types';
 import { AuthGuard } from '@nestjs/passport';
 import { PrismaService } from '../../../../infrastructure/prisma.service';
 import { EconomicControlService } from '../../application/services/economic-control.service';
-import { RolesGuard } from '../../../../common/guards/roles.guard';
-import { Roles } from '../../../../common/decorators/roles.decorator';
+import { RolesGuard } from 'src/modules/auth/roles.guard';
+import { Roles } from 'src/modules/auth/roles.decorator';
 
 @Controller('transactions')
 export class TransactionsController {
@@ -28,7 +32,10 @@ export class TransactionsController {
   @Post('earn')
   @UseGuards(AuthGuard('jwt'))
   @Roles('business') // Only business role can earn points
-  async earnPoints(@Body() earnPointsDto: EarnPointsDto, @Req() req) {
+  async earnPoints(
+    @Body() earnPointsDto: EarnPointsDto,
+    @Req() req: RequestWithUser,
+  ) {
     const businessOwnerId = req.user.userId;
 
     // Find the business associated with the authenticated owner
@@ -49,7 +56,10 @@ export class TransactionsController {
   @Post('redeem')
   @UseGuards(AuthGuard('jwt')) // Assuming JWT authentication for customers
   @Roles('customer') // Only customer role can redeem points
-  async redeemPoints(@Body() redeemPointsDto: RedeemPointsDto, @Req() req) {
+  async redeemPoints(
+    @Body() redeemPointsDto: RedeemPointsDto,
+    @Req() req: RequestWithUser,
+  ) {
     const customerId = req.user.userId; // Correctly access customer ID from JWT payload
     return this.redeemPointsUseCase.execute(redeemPointsDto, customerId);
   }

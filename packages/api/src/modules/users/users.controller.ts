@@ -19,7 +19,7 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
-import { UserDto } from '@rewards-bolivia/shared-types';
+import { UserDto, RequestWithUser } from '@rewards-bolivia/shared-types';
 import { Prisma } from '@prisma/client';
 
 @ApiTags('Users')
@@ -37,7 +37,7 @@ export class UsersController {
     type: UserDto,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getProfile(@Request() req) {
+  async getProfile(@Request() req: RequestWithUser) {
     return this.usersService.findOneById(req.user.userId);
   }
 
@@ -86,7 +86,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get('admin-only')
-  getAdminData(@Request() req) {
+  getAdminData(@Request() req: RequestWithUser) {
     return { message: 'This is an admin-only route', user: req.user };
   }
 }
