@@ -46,6 +46,9 @@ jobs:
         env:
           DATABASE_URL: postgresql://rewardsuser:rewardspassword@localhost:5432/rewardsdb
 
+      - name: Build Shared Types
+        run: pnpm --filter shared-types build
+
       - name: Run linting
         run: pnpm lint
 
