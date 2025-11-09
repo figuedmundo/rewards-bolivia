@@ -249,7 +249,7 @@ Implementar el núcleo económico del sistema Rewards Bolivia: gestión de trans
     *   La implementación de la lógica de `BusinessPlan` y `blockedPointsBalance` ha sido **pausada y revertida** en el código activo para evitar introducir complejidad prematura. El trabajo (migración de base de datos) se ha conservado para ser retomado al inicio del Sprint 3.
 
 2.  **Implementación de Nuevas Tareas de Control Económico (Epic 5):**
-    *   **T5.9:** Creado el `EconomicControlService` como base para futuras reglas económicas.
+    *   **T5.9:** Creado el `EconomicControlService` como base para futuras reglas económicas (emitidos, redimidos, expirados, quemados).
     *   **T5.10 & T5.11:** Implementada la lógica de **tarifa de transacción (burn)** en las redenciones. El `burnAmount` ahora se calcula, se deduce del balance del negocio y se registra en el `PointLedger`.
     *   **T5.12:** Implementado un sistema de eventos de dominio. El `PrismaTransactionRepository` ahora publica un evento `transaction.completed` tras cada transacción exitosa.
     *   **T5.13:** Creado el endpoint `GET /transactions/economy-stats` para administradores, exponiendo métricas económicas clave.
@@ -265,6 +265,27 @@ Implementar el núcleo económico del sistema Rewards Bolivia: gestión de trans
 
 1.  **Testing del Módulo Transactions:**
     *   **T8.3 & T8.4:** Realizar pruebas de carga con k6 y configurar la generación de reportes automáticos (tareas fuera del alcance de modificación de código directo).
+2.  **Sprint 3 - Próximos Pasos:**
+    *   Re-aplicar la migración de `BusinessPlan` y `blockedPointsBalance`.
+    *   Implementar la lógica condicional en el `PrismaTransactionRepository` para manejar los puntos bloqueados.
+    *   Crear pruebas de integración y E2E específicas para el escenario del "Starter Plan".
+
+--
+## Resumen de Progreso (Actualización) (Saturday 9 November)
+
+### 🚀 Hitos Completados:
+
+1.  **Mejoras en la Calidad del Código y Refactorización:**
+    *   **Configuración de Linting:** Se relajaron las reglas de linting para los archivos de prueba (`.spec.ts`, `.test.ts`) en el paquete `api` para mejorar la experiencia del desarrollador y reducir el ruido en los reportes de linting.
+    *   **Resolución de Errores de Linting:** Se corrigió un error de `no-unused-vars` en `transactions.module.ts` mediante la adición de un comentario para deshabilitar la regla en la línea específica, reconociendo el patrón de inyección de dependencias de NestJS.
+    *   **Refactorización de Tipos:** El tipo `Role` fue centralizado en el paquete `@rewards-bolivia/shared-types` y su uso fue actualizado en `roles.guard.ts` para asegurar consistencia y mejorar la seguridad de tipos en toda la API.
+    *   **Corrección de Importaciones de Tipos:** Se ajustaron las importaciones de `RequestWithUser` en `transactions.controller.ts` y `users.controller.ts` para usar `import type`, cumpliendo con el requisito de `isolatedModules` de TypeScript.
+    *   **Eliminación de Duplicados:** Se identificaron y eliminaron archivos duplicados (`roles.decorator.ts` y `roles.guard.ts`) que no estaban en uso, mejorando la claridad y reduciendo la redundancia en la base de código.
+
+### 🚧 Tareas Pendientes:
+
+1.  **Continuar con las Tareas Pendientes del Sprint 2:**
+    *   **T8.3 & T8.4:** Realizar pruebas de carga con k6 y configurar la generación de reportes automáticos.
 2.  **Sprint 3 - Próximos Pasos:**
     *   Re-aplicar la migración de `BusinessPlan` y `blockedPointsBalance`.
     *   Implementar la lógica condicional en el `PrismaTransactionRepository` para manejar los puntos bloqueados.
