@@ -163,7 +163,7 @@ describe('TransactionsController (integration)', () => {
       const response = await request(app.getHttpServer())
         .post('/api/transactions/redeem')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(redeDto)
+        .send(redeemDto)
         .expect(201);
 
       expect(response.body.pointsRedeemed).toBe(100);
@@ -205,7 +205,7 @@ describe('TransactionsController (integration)', () => {
       return request(app.getHttpServer())
         .post('/api/transactions/redeem')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(redeDto)
+        .send(redeemDto)
         .expect(400);
     });
 

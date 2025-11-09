@@ -10,7 +10,6 @@ import type { ITransactionRepository } from '../domain/repositories/transaction.
 import { PrismaService } from '../../../infrastructure/prisma.service';
 import { TransactionType } from '@prisma/client';
 import * as crypto from 'crypto';
-import { RedisService } from '../../../infrastructure/redis/redis.service';
 import { TransactionEventPublisher } from './services/transaction-event.publisher';
 
 @Injectable()
@@ -19,31 +18,16 @@ export class RedeemPointsUseCase {
     @Inject('ITransactionRepository')
     private readonly transactionRepository: ITransactionRepository,
     private readonly prisma: PrismaService,
-    private readonly redisService: RedisService,
     private readonly eventPublisher: TransactionEventPublisher,
   ) {}
 
   async execute(redeemPointsDto: RedeemPointsDto, customerId: string) {
     const { businessId, pointsToRedeem, ticketTotal } = redeemPointsDto;
-    const customerBalanceKey = `customer:${customerId}:balance`;
 
-    // 1. Validate customer and business
-    const cachedBalance = await this.redisService.get(customerBalanceKey);
-    let customer;
-
-    if (cachedBalance) {
-      customer = { id: customerId, pointsBalance: parseInt(cachedBalance, 10) };
-    } else {
-      customer = await this.prisma.user.findUnique({
-        where: { id: customerId },
-      });
-      if (customer) {
-        await this.redisService.set(
-          customerBalanceKey,
-          customer.pointsBalance.toString(),
-        );
-      }
-    }
+    // 1. Validate customer and business (repository handles cache)
+    const customer = await this.prisma.user.findUnique({
+      where: { id: customerId },
+    });
 
     if (!customer) {
       throw new HttpException('Customer not found', HttpStatus.NOT_FOUND);
@@ -78,7 +62,7 @@ export class RedeemPointsUseCase {
       .update(`${Date.now()}${businessId}${customerId}${pointsToRedeem}`)
       .digest('hex');
 
-    // 4. Create transaction
+    // 4. Create transaction (repository handles cache updates)
     const transaction = await this.transactionRepository.redeem({
       type: TransactionType.REDEEM,
       pointsAmount: pointsToRedeem,
@@ -88,6 +72,7 @@ export class RedeemPointsUseCase {
       customerId,
     });
 
+    // 5. Fetch updated customer data
     const updatedCustomer = await this.prisma.user.findUnique({
       where: { id: customerId },
     });
@@ -97,27 +82,11 @@ export class RedeemPointsUseCase {
       );
     }
 
-    await this.redisService.set(
-      customerBalanceKey,
-      updatedCustomer.pointsBalance.toString(),
-    );
-
-    const businessBalanceKey = `business:${businessId}:balance`;
-    const updatedBusiness = await this.prisma.business.findUnique({
-      where: { id: businessId },
-    });
-    if (updatedBusiness) {
-      await this.redisService.set(
-        businessBalanceKey,
-        updatedBusiness.pointsBalance.toString(),
-      );
-    }
-
     return {
       transactionId: transaction.id,
       status: transaction.status,
-      pointsRedeemed: transaction.pointsAmount,
-      discountValueBs: (transaction.pointsAmount * 0.03).toFixed(2),
+      pointsRedeemed: Math.abs(transaction.pointsAmount),
+      discountValueBs: (Math.abs(transaction.pointsAmount) * 0.03).toFixed(2),
       newCustomerBalance: updatedCustomer.pointsBalance,
       businessName: business.name,
     };

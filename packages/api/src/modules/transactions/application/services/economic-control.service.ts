@@ -18,10 +18,12 @@ export class EconomicControlService {
       where: { type: TransactionType.EARN },
     });
 
-    const totalRedeemed = await this.prisma.transaction.aggregate({
+    const totalRedeemedResult = await this.prisma.transaction.aggregate({
       _sum: { pointsAmount: true },
       where: { type: TransactionType.REDEEM },
     });
+    const totalRedeemed = Math.abs(totalRedeemedResult._sum.pointsAmount || 0);
+
 
     const totalBurned = await this.prisma.transaction.aggregate({
       _sum: { burnAmount: true },
@@ -39,13 +41,13 @@ export class EconomicControlService {
     const totalIssued = (totalEarned._sum.pointsAmount || 0) + (totalBusinessPoints._sum.pointsBalance || 0);
     const totalActive = (totalPointsInCirculation._sum.pointsBalance || 0) + (totalBusinessPoints._sum.pointsBalance || 0);
 
-    const redemptionRate = totalIssued > 0 ? ((totalRedeemed._sum.pointsAmount || 0) / totalIssued) * 100 : 0;
-    const burnRatio = (totalRedeemed._sum.pointsAmount || 0) > 0 ? ((totalBurned._sum.burnAmount || 0) / (totalRedeemed._sum.pointsAmount || 0)) * 100 : 0;
+    const redemptionRate = totalIssued > 0 ? (totalRedeemed / totalIssued) * 100 : 0;
+    const burnRatio = totalRedeemed > 0 ? ((totalBurned._sum.burnAmount || 0) / totalRedeemed) * 100 : 0;
     const activePointsPercentage = totalIssued > 0 ? (totalActive / totalIssued) * 100 : 0;
 
     return {
       totalEarned: totalEarned._sum.pointsAmount || 0,
-      totalRedeemed: totalRedeemed._sum.pointsAmount || 0,
+      totalRedeemed: totalRedeemed,
       totalBurned: totalBurned._sum.burnAmount || 0,
       totalPointsInCirculation: totalPointsInCirculation._sum.pointsBalance || 0,
       totalBusinessPoints: totalBusinessPoints._sum.pointsBalance || 0,

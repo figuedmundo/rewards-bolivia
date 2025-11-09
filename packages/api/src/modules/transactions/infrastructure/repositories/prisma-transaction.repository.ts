@@ -1,19 +1,63 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../infrastructure/prisma.service';
 import { ITransactionRepository } from '../../domain/repositories/transaction.repository';
 import { Transaction } from '../../domain/entities/transaction.entity';
-import { TransactionType } from '@prisma/client';
+import { TransactionType, LedgerEntryType } from '@prisma/client';
 import { EconomicControlService } from '../../application/services/economic-control.service';
 import { TransactionEventPublisher } from '../../application/services/transaction-event.publisher';
 import { TransactionCompletedEvent } from '../../domain/events/transaction-completed.event';
+import { RedisService } from '../../../../infrastructure/redis/redis.service';
 
 @Injectable()
 export class PrismaTransactionRepository implements ITransactionRepository {
+  private readonly logger = new Logger(PrismaTransactionRepository.name);
+  private readonly CACHE_TTL = 300; // 5 minutes in seconds
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly economicControlService: EconomicControlService,
     private readonly eventPublisher: TransactionEventPublisher,
+    private readonly redisService: RedisService,
   ) {}
+
+  /**
+   * Cache helper methods for cache-aside pattern
+   */
+  private getCustomerBalanceKey(customerId: string): string {
+    return `customer:${customerId}:balance`;
+  }
+
+  private getBusinessBalanceKey(businessId: string): string {
+    return `business:${businessId}:balance`;
+  }
+
+  private async getCachedBalance(key: string): Promise<number | null> {
+    try {
+      const cached = await this.redisService.get(key);
+      return cached ? parseInt(cached, 10) : null;
+    } catch (error) {
+      this.logger.warn(`Cache read failed for key ${key}: ${error.message}`);
+      return null;
+    }
+  }
+
+  private async setCachedBalance(key: string, balance: number): Promise<void> {
+    try {
+      await this.redisService.set(key, balance.toString(), this.CACHE_TTL);
+    } catch (error) {
+      this.logger.warn(`Cache write failed for key ${key}: ${error.message}`);
+      // Non-critical error, continue without cache
+    }
+  }
+
+  private async invalidateBalanceCache(customerId: string, businessId: string): Promise<void> {
+    try {
+      await this.redisService.del(this.getCustomerBalanceKey(customerId));
+      await this.redisService.del(this.getBusinessBalanceKey(businessId));
+    } catch (error) {
+      this.logger.warn(`Cache invalidation failed: ${error.message}`);
+    }
+  }
 
   async create(transactionData: Partial<Transaction>): Promise<Transaction> {
     const { customerId, businessId, pointsAmount, type, status, auditHash } =
@@ -25,99 +69,143 @@ export class PrismaTransactionRepository implements ITransactionRepository {
       );
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      let burnAmount = 0;
-      if (type === TransactionType.REDEEM) {
-        const feeRate = this.economicControlService.getBurnFeeRate();
-        burnAmount = Math.floor(pointsAmount * feeRate);
-      }
+    // Check cache first for balances (cache-aside pattern)
+    const customerBalanceKey = this.getCustomerBalanceKey(customerId);
+    const businessBalanceKey = this.getBusinessBalanceKey(businessId);
+    
+    let cachedCustomerBalance = await this.getCachedBalance(customerBalanceKey);
+    let cachedBusinessBalance = await this.getCachedBalance(businessBalanceKey);
 
-      // 1. Update business balance & get new balance
-      const business = await tx.business.update({
-        where: { id: businessId },
-        data: {
-          ...(type === TransactionType.EARN && {
-            pointsBalance: { decrement: pointsAmount },
-          }),
-          ...(type === TransactionType.REDEEM && {
-            pointsBalance: { increment: pointsAmount - burnAmount }, // Business gets points back minus burn amount
-          }),
-        },
-      });
+    let transaction: Transaction;
+    
+    // Execute transaction with proper isolation
+    try {
+      transaction = await this.prisma.$transaction(async (tx) => {
+        let burnAmount = 0;
+        if (type === TransactionType.REDEEM) {
+          const feeRate = this.economicControlService.getBurnFeeRate();
+          burnAmount = Math.floor(pointsAmount * feeRate);
+        }
 
-      // 2. Update customer balance & get new balance
-      const customer = await tx.user.update({
-        where: { id: customerId },
-        data: {
-          ...(type === TransactionType.EARN && {
-            pointsBalance: { increment: pointsAmount },
-          }),
-          ...(type === TransactionType.REDEEM && {
-            pointsBalance: { decrement: pointsAmount },
-          }),
-        },
-      });
-
-      // 3. Create the transaction record
-      const finalPointsAmount = type === TransactionType.REDEEM ? -pointsAmount : pointsAmount;
-      const transaction = await tx.transaction.create({
-        data: {
-          type,
-          pointsAmount: finalPointsAmount,
-          burnAmount: burnAmount > 0 ? burnAmount : null, // Store burn amount if applicable
-          status,
-          auditHash,
-          businessId,
-          customerId,
-        },
-      });
-
-      // 4. Create ledger entries
-      const ledgerEntries = [
-        // Debit from the source
-        {
-          accountId: type === TransactionType.EARN ? businessId : customerId,
-          debit: pointsAmount,
-          credit: 0,
-          balanceAfter:
-            type === TransactionType.EARN
-              ? business.pointsBalance
-              : customer.pointsBalance,
-          transactionId: transaction.id,
-        },
-        // Credit to the destination
-        {
-          accountId: type === TransactionType.EARN ? customerId : businessId,
-          debit: 0,
-          credit: pointsAmount - burnAmount, // Credit destination with points minus burn
-          balanceAfter:
-            type === TransactionType.EARN
-              ? customer.pointsBalance
-              : business.pointsBalance,
-          transactionId: transaction.id,
-        },
-      ];
-
-      // Add BURN ledger entry if applicable
-      if (burnAmount > 0) {
-        ledgerEntries.push({
-          accountId: 'SYSTEM_BURN_ACCOUNT', // A special account for burned points
-          debit: 0,
-          credit: burnAmount,
-          balanceAfter: 0, // Burned points are removed from circulation
-          transactionId: transaction.id,
+        // 1. Update business balance & get new balance
+        const business = await tx.business.update({
+          where: { id: businessId },
+          data: {
+            ...(type === TransactionType.EARN && {
+              pointsBalance: { decrement: pointsAmount },
+            }),
+            ...(type === TransactionType.REDEEM && {
+              pointsBalance: { increment: pointsAmount - burnAmount }, // Business gets points back minus burn amount
+            }),
+          },
         });
-      }
 
-      await tx.pointLedger.createMany({
-        data: ledgerEntries,
+        // 2. Update customer balance & get new balance
+        const customer = await tx.user.update({
+          where: { id: customerId },
+          data: {
+            ...(type === TransactionType.EARN && {
+              pointsBalance: { increment: pointsAmount },
+            }),
+            ...(type === TransactionType.REDEEM && {
+              pointsBalance: { decrement: pointsAmount },
+            }),
+          },
+        });
+
+        // 3. Create the transaction record
+        const finalPointsAmount = type === TransactionType.REDEEM ? -pointsAmount : pointsAmount;
+        const dbTransaction = await tx.transaction.create({
+          data: {
+            type,
+            pointsAmount: finalPointsAmount,
+            burnAmount: burnAmount > 0 ? burnAmount : null, // Store burn amount if applicable
+            status,
+            auditHash,
+            businessId,
+            customerId,
+          },
+        });
+
+        // 4. Create ledger entries
+        const ledgerEntries = [
+          // Debit from the source
+          {
+            type: type === TransactionType.EARN ? 'EARN' : 'REDEEM',
+            accountId: type === TransactionType.EARN ? businessId : customerId,
+            debit: pointsAmount,
+            credit: 0,
+            balanceAfter:
+              type === TransactionType.EARN
+                ? business.pointsBalance
+                : customer.pointsBalance,
+            transactionId: dbTransaction.id,
+          },
+          // Credit to the destination
+          {
+            type: type === TransactionType.EARN ? 'EARN' : 'REDEEM',
+            accountId: type === TransactionType.EARN ? customerId : businessId,
+            debit: 0,
+            credit: pointsAmount - burnAmount, // Credit destination with points minus burn
+            balanceAfter:
+              type === TransactionType.EARN
+                ? customer.pointsBalance
+                : business.pointsBalance,
+            transactionId: dbTransaction.id,
+          },
+        ];
+
+        // Add BURN ledger entry if applicable
+        if (burnAmount > 0) {
+          ledgerEntries.push({
+            type: 'BURN',
+            accountId: 'SYSTEM_BURN_ACCOUNT', // A special account for burned points
+            debit: 0,
+            credit: burnAmount,
+            balanceAfter: 0, // Burned points are removed from circulation
+            transactionId: dbTransaction.id,
+          });
+        }
+
+        await tx.pointLedger.createMany({
+          data: ledgerEntries,
+        });
+
+        // Cache new balances after successful transaction
+        await this.setCachedBalance(customerBalanceKey, customer.pointsBalance);
+        await this.setCachedBalance(businessBalanceKey, business.pointsBalance);
+
+        // Return transaction entity (without ledgerEntries for now, can be extended later)
+        return {
+          id: dbTransaction.id,
+          type: dbTransaction.type,
+          pointsAmount: dbTransaction.pointsAmount,
+          status: dbTransaction.status,
+          auditHash: dbTransaction.auditHash,
+          businessId: dbTransaction.businessId,
+          customerId: dbTransaction.customerId,
+          burnAmount: dbTransaction.burnAmount,
+        } as Transaction;
+      }, {
+        isolationLevel: 'Serializable', // Highest isolation for financial transactions
       });
 
-      // Publish event after successful transaction
+      // Publish event AFTER transaction commits (outside transaction boundary)
       this.eventPublisher.publishTransactionCompleted({ transaction });
 
-      return transaction as Transaction;
-    });
+      this.logger.log(`Transaction ${transaction.id} completed successfully`);
+      return transaction;
+
+    } catch (error) {
+      this.logger.error(`Transaction failed: ${error.message}`);
+      
+      // Invalidate cache on failure to prevent stale data
+      await this.invalidateBalanceCache(customerId, businessId);
+      
+      throw new InternalServerErrorException(
+        `Transaction failed: ${error.message}`,
+      );
+    }
   }
 
   async redeem(transactionData: Partial<Transaction>): Promise<Transaction> {

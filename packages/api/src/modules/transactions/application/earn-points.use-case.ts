@@ -10,7 +10,6 @@ import type { ITransactionRepository } from '../domain/repositories/transaction.
 import { PrismaService } from '../../../infrastructure/prisma.service';
 import { TransactionType } from '@prisma/client';
 import * as crypto from 'crypto';
-import { RedisService } from '../../../infrastructure/redis/redis.service';
 import { TransactionEventPublisher } from './services/transaction-event.publisher';
 
 @Injectable()
@@ -19,7 +18,6 @@ export class EarnPointsUseCase {
     @Inject('ITransactionRepository')
     private readonly transactionRepository: ITransactionRepository,
     private readonly prisma: PrismaService,
-    private readonly redisService: RedisService,
     private readonly eventPublisher: TransactionEventPublisher,
   ) {}
 
@@ -32,30 +30,11 @@ export class EarnPointsUseCase {
     // Use businessId from parameter if provided, otherwise from DTO
     const finalBusinessId = businessId || dtoBusinessId;
     const pointsAmount = Math.floor(purchaseAmount); // 1:1 ratio
-    const businessBalanceKey = `business:${finalBusinessId}:balance`;
-    const customerBalanceKey = `customer:${customerId}:balance`;
 
-    // 1. Validate business and customer
-    const cachedBusinessBalance =
-      await this.redisService.get(businessBalanceKey);
-    let business;
-
-    if (cachedBusinessBalance) {
-      business = {
-        id: finalBusinessId,
-        pointsBalance: parseInt(cachedBusinessBalance, 10),
-      };
-    } else {
-      business = await this.prisma.business.findUnique({
-        where: { id: finalBusinessId },
-      });
-      if (business) {
-        await this.redisService.set(
-          businessBalanceKey,
-          business.pointsBalance.toString(),
-        );
-      }
-    }
+    // 1. Validate business and customer (repository will handle cache)
+    const business = await this.prisma.business.findUnique({
+      where: { id: finalBusinessId },
+    });
 
     if (!business || business.pointsBalance < pointsAmount) {
       throw new HttpException(
@@ -64,26 +43,9 @@ export class EarnPointsUseCase {
       );
     }
 
-    const cachedCustomerBalance =
-      await this.redisService.get(customerBalanceKey);
-    let customer;
-
-    if (cachedCustomerBalance) {
-      customer = {
-        id: customerId,
-        pointsBalance: parseInt(cachedCustomerBalance, 10),
-      };
-    } else {
-      customer = await this.prisma.user.findUnique({
-        where: { id: customerId },
-      });
-      if (customer) {
-        await this.redisService.set(
-          customerBalanceKey,
-          customer.pointsBalance.toString(),
-        );
-      }
-    }
+    const customer = await this.prisma.user.findUnique({
+      where: { id: customerId },
+    });
 
     if (!customer) {
       throw new HttpException('Customer not found', HttpStatus.NOT_FOUND);
@@ -95,7 +57,7 @@ export class EarnPointsUseCase {
       .update(`${Date.now()}${finalBusinessId}${customerId}${pointsAmount}`)
       .digest('hex');
 
-    // 3. Create transaction
+    // 3. Create transaction (repository handles cache updates)
     const transaction = await this.transactionRepository.create({
       type: TransactionType.EARN,
       pointsAmount,
@@ -105,12 +67,12 @@ export class EarnPointsUseCase {
       customerId,
     });
 
+    // 4. Fetch updated balances (repository already cached these)
     const updatedCustomer = await this.prisma.user.findUnique({
       where: { id: customerId },
     });
 
     if (!updatedCustomer) {
-      // This should not happen if the transaction succeeded, but it's a good practice to check
       throw new InternalServerErrorException(
         'Could not retrieve updated customer data.',
       );
@@ -119,20 +81,12 @@ export class EarnPointsUseCase {
     const updatedBusiness = await this.prisma.business.findUnique({
       where: { id: finalBusinessId },
     });
+    
     if (!updatedBusiness) {
       throw new InternalServerErrorException(
         'Could not retrieve updated business data.',
       );
     }
-
-    await this.redisService.set(
-      customerBalanceKey,
-      updatedCustomer.pointsBalance.toString(),
-    );
-    await this.redisService.set(
-      businessBalanceKey,
-      updatedBusiness.pointsBalance.toString(),
-    );
 
     return {
       transactionId: transaction.id,

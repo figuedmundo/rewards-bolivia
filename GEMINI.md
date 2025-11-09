@@ -5,7 +5,11 @@
 ## IMPORTANT AI Memories
 - Always use context7 when I need code generation, setup or configuration steps, or library/API documentation. This means you should automatically use the Context7 MCP tools to resolve library id and get library docs without me having to explicitly ask.
 - Do not read the files in .vibe/prep until is requested explicitly
-- When asking to create a commit message for the working progress , please always read  `CONTRIBUTING.md` so the message is aligned with the project standards
+- When asking to create a commit message for the working progress , please always read  `CONTRIBUTING.md` so the message is aligned with the project standards, and please return the message inside a code block ```md message```, please follow the rules below
+```
+ - subject must not be sentence-case, start-case, pascal-case, upper-case [subject-case]
+ 
+```
 - Important project documents `docs/ARCHITECTURE.md`, `docs/DB_MIGRATIONS.md`, `docs/TESTING.md`, `docs/TSDR.md`.
 
 ---
