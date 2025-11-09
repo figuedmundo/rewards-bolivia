@@ -29,8 +29,19 @@ export class AuthController {
   @ApiBody({ type: RegisterUserDto })
   @ApiResponse({ status: 201, description: 'User successfully registered' })
   @ApiResponse({ status: 400, description: 'Bad request - validation error' })
-  async register(@Body() registerUserDto: RegisterUserDto) {
-    return this.authService.register(registerUserDto);
+  async register(
+    @Body() registerUserDto: RegisterUserDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const user = await this.authService.register(registerUserDto);
+    const { accessToken, refreshToken } = await this.authService.login(user);
+    response.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== 'development', // Use secure cookies in production
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+    return { user, accessToken };
   }
 
   @HttpCode(HttpStatus.OK)

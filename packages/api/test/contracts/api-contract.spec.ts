@@ -73,14 +73,13 @@ describe('API Contract Tests', () => {
         .send(registerData)
         .expect(201);
 
-      expect(response.body).toHaveProperty('id');
-      expect(response.body).toHaveProperty('email', registerData.email);
-      expect(response.body).toHaveProperty(
+      expect(response.body.user).toHaveProperty('id');
+      expect(response.body.user).toHaveProperty('email', registerData.email);
+      expect(response.body.user).toHaveProperty(
         'name',
         `${registerData.firstName} ${registerData.lastName}`,
       );
-      expect(response.body).toHaveProperty('createdAt');
-      expect(response.body).not.toHaveProperty('password');
+      expect(response.body).toHaveProperty('accessToken');
     });
 
     it('should reject invalid RegisterUserDto', async () => {

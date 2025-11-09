@@ -72,7 +72,10 @@ export class RedeemPointsUseCase {
       customerId,
     });
 
-    // 5. Fetch updated customer data
+    // 5. Publish event
+    this.eventPublisher.publishTransactionCompleted({ transaction });
+
+    // 6. Fetch updated customer data
     const updatedCustomer = await this.prisma.user.findUnique({
       where: { id: customerId },
     });

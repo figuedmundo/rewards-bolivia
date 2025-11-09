@@ -67,7 +67,10 @@ export class EarnPointsUseCase {
       customerId,
     });
 
-    // 4. Fetch updated balances (repository already cached these)
+    // 4. Publish event
+    this.eventPublisher.publishTransactionCompleted({ transaction });
+
+    // 5. Fetch updated balances (repository already cached these)
     const updatedCustomer = await this.prisma.user.findUnique({
       where: { id: customerId },
     });

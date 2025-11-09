@@ -87,30 +87,28 @@ export class PrismaTransactionRepository implements ITransactionRepository {
           burnAmount = Math.floor(pointsAmount * feeRate);
         }
 
-        // 1. Update business balance & get new balance
+        // 1. Update business balance
+        const businessUpdateData = {};
+        if (type === TransactionType.EARN) {
+          businessUpdateData['pointsBalance'] = { decrement: pointsAmount };
+        } else if (type === TransactionType.REDEEM) {
+          businessUpdateData['pointsBalance'] = { increment: pointsAmount - burnAmount };
+        }
         const business = await tx.business.update({
           where: { id: businessId },
-          data: {
-            ...(type === TransactionType.EARN && {
-              pointsBalance: { decrement: pointsAmount },
-            }),
-            ...(type === TransactionType.REDEEM && {
-              pointsBalance: { increment: pointsAmount - burnAmount }, // Business gets points back minus burn amount
-            }),
-          },
+          data: businessUpdateData,
         });
 
-        // 2. Update customer balance & get new balance
+        // 2. Update customer balance
+        const customerUpdateData = {};
+        if (type === TransactionType.EARN) {
+          customerUpdateData['pointsBalance'] = { increment: pointsAmount };
+        } else if (type === TransactionType.REDEEM) {
+          customerUpdateData['pointsBalance'] = { decrement: pointsAmount };
+        }
         const customer = await tx.user.update({
           where: { id: customerId },
-          data: {
-            ...(type === TransactionType.EARN && {
-              pointsBalance: { increment: pointsAmount },
-            }),
-            ...(type === TransactionType.REDEEM && {
-              pointsBalance: { decrement: pointsAmount },
-            }),
-          },
+          data: customerUpdateData,
         });
 
         // 3. Create the transaction record

@@ -19,6 +19,7 @@ describe('EarnPointsUseCase', () => {
   const mockPrismaService = {
     business: {
       findUnique: jest.fn(),
+      update: jest.fn(),
     },
     user: {
       findUnique: jest.fn(),
