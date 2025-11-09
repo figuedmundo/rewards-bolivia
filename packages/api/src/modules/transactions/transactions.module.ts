@@ -3,6 +3,7 @@ import { TransactionsController } from './infrastructure/controllers/transaction
 import { EarnPointsUseCase } from './application/earn-points.use-case';
 import { RedeemPointsUseCase } from './application/redeem-points.use-case';
 import { PrismaTransactionRepository } from './infrastructure/repositories/prisma-transaction.repository';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ITransactionRepository } from './domain/repositories/transaction.repository';
 import { PrismaModule } from '../../infrastructure/prisma.module';
 import { RedisModule } from '../../infrastructure/redis/redis.module';

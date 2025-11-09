@@ -9,11 +9,8 @@ import {
 } from '@nestjs/common';
 import { EarnPointsUseCase } from '../../application/earn-points.use-case';
 import { RedeemPointsUseCase } from '../../application/redeem-points.use-case';
-import {
-  EarnPointsDto,
-  RedeemPointsDto,
-  RequestWithUser,
-} from '@rewards-bolivia/shared-types';
+import { EarnPointsDto, RedeemPointsDto } from '@rewards-bolivia/shared-types';
+import type { RequestWithUser } from '@rewards-bolivia/shared-types';
 import { AuthGuard } from '@nestjs/passport';
 import { PrismaService } from '../../../../infrastructure/prisma.service';
 import { EconomicControlService } from '../../application/services/economic-control.service';

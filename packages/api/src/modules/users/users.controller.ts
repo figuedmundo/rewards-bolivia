@@ -19,7 +19,8 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
-import { UserDto, RequestWithUser } from '@rewards-bolivia/shared-types';
+import { UserDto } from '@rewards-bolivia/shared-types';
+import type { RequestWithUser } from '@rewards-bolivia/shared-types';
 import { Prisma } from '@prisma/client';
 
 @ApiTags('Users')
