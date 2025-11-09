@@ -7,7 +7,9 @@ import { UsersModule } from './modules/users/users.module';
 import { PrismaModule } from './infrastructure/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
-import { LoggerMiddleware, LoggerService } from '@rewards-bolivia/logger';
+import { LoggerMiddleware } from '@rewards-bolivia/logger';
+import { TransactionsModule } from './modules/transactions/transactions.module';
+import { RedisModule } from './infrastructure/redis/redis.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { LoggerMiddleware, LoggerService } from '@rewards-bolivia/logger';
     PrismaModule, // Import the new global module
     AuthModule,
     UsersModule,
+    TransactionsModule,
+    RedisModule,
   ],
   controllers: [AppController, MetricsController],
   providers: [AppService], // Remove PrismaService from here

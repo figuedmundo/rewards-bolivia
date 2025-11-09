@@ -122,7 +122,7 @@ The project is a monorepo organized as follows:
 │   ├───web/
 │   ├───worker/
 │   ├───sdk/
-│   ├───shared-types/
+│   ├───shared-types/ # Shared TypeScript types and DTOs, organized by domain (e.g., shared-types/src/auth, shared-types/src/user)
 │   ├───libs/
 │   ├───test-utils/
 │   └───infra-scripts/
@@ -330,6 +330,13 @@ model Transaction {
 3.  **Frontend Implementation:** Once the API is stable, proceed with the frontend changes (Mobile and Web). Use mock data initially if the API is not yet deployed.
 4.  **Integration & E2E Testing:** Connect the frontend to the backend and perform end-to-end testing to validate the complete user flow.
 5.  **Review & Refactor:** Before finalizing, review the code for adherence to project standards and refactor where necessary.
+
+⚙️ **Quality Assurance Loop:**
+- **Lint and Build Incrementally:** After each small, logical change, run the linter and build command for the affected package to catch errors early.
+  - `pnpm --filter <package-name> lint`
+  - `pnpm --filter <package-name> build`
+- **Zero Linting Errors:** Do not consider a task complete until the linter passes without any errors for the modified packages.
+- **Prioritize Type Safety:** Avoid using the `any` type. Define clear `interface` or `type` definitions for all data structures.
 
 ### Communication Preferences
 - Provide a concise summary of the plan before starting.

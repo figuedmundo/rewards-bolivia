@@ -143,3 +143,11 @@ describe('PointsService', () => {
 *   **Relying on external services:** Unit tests should not rely on external services like databases or APIs. Use mocks or stubs instead.
 
 ---
+
+## 6. Code Coverage Standards
+
+We enforce a project-wide baseline of **70% code coverage** for all new or modified code. This threshold is applied to statements, branches, functions, and lines. While this is a minimum, critical modules (e.g., `auth`, `transactions`) should aim for higher coverage (90%+) to ensure maximum reliability.
+
+Code coverage reports are generated automatically during CI/CD and should be reviewed as part of the pull request process. Coverage should be used as a tool to identify untested areas, not as the sole measure of test quality.
+
+---

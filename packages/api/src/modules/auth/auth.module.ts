@@ -17,7 +17,7 @@ import { PrismaModule } from '../../infrastructure/prisma.module';
     PrismaModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: { expiresIn: '15m' },
       }),

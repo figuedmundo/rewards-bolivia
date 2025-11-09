@@ -21,13 +21,17 @@ export class AuthService {
     private prisma: PrismaService,
   ) {}
 
-  async validateUser(email: string, pass: string): Promise<any> {
+  async validateUser(
+    email: string,
+    pass: string,
+  ): Promise<Omit<User, 'passwordHash'> | null> {
     const user = await this.usersService.findOne(email);
     if (
       user &&
       user.passwordHash &&
       (await comparePassword(pass, user.passwordHash))
     ) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { passwordHash, ...result } = user;
       return result;
     }
@@ -38,7 +42,7 @@ export class AuthService {
     const payload = {
       email: user.email,
       sub: user.id,
-      role: (user as any).role,
+      role: user.role,
     };
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = await this.createRefreshToken(user.id);
@@ -90,7 +94,7 @@ export class AuthService {
     const payload = {
       email: user.email,
       sub: user.id,
-      role: (user as any).role,
+      role: user.role,
     };
     const accessToken = this.jwtService.sign(payload);
 
@@ -136,11 +140,17 @@ export class AuthService {
     const newUser = await this.usersService.create({
       email: registerUserDto.email,
       passwordHash: hashedPassword,
+      name: `${registerUserDto.firstName} ${registerUserDto.lastName}`,
     });
 
+    // After creating the user, log them in to get tokens
+    const { accessToken, refreshToken } = await this.login(newUser);
+
     // Exclude password from the returned user object
-    const { passwordHash, ...result } = newUser;
-    return result;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { passwordHash, ...userResult } = newUser;
+
+    return { user: userResult, accessToken, refreshToken };
   }
 
   async validateOAuthLogin(
@@ -149,7 +159,7 @@ export class AuthService {
     lastName: string,
     provider: string,
     providerId: string,
-  ): Promise<any> {
+  ): Promise<User> {
     try {
       let user = await this.usersService.findOne(email);
 
@@ -176,8 +186,10 @@ export class AuthService {
       }
 
       return user;
-    } catch (error) {
-      throw new UnauthorizedException('OAuth login failed.', error.message);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new UnauthorizedException('OAuth login failed.', errorMessage);
     }
   }
 }

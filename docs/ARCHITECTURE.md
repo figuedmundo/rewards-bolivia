@@ -52,7 +52,7 @@ The backend is a NestJS application structured around DDD principles.
 /packages/api/
 ├───prisma/                       # Prisma schema and migrations
 └───src/
-    ├───application/              # Application Logic (Use Cases, DTOs)
+    ├───application/              # Application Logic (Use Cases, Internal DTOs)
     ├───domain/                   # Domain Logic (Entities, Repositories, Domain Services)
     ├───infrastructure/           # Infrastructure (Controllers, Prisma Repositories, Gateways)
     ├───modules/                  # Feature modules (e.g., auth, users)
@@ -77,6 +77,25 @@ The frontend is a React application built with Vite.
 ├───App.tsx
 └───main.tsx
 ```
+
+### Shared Packages
+
+#### `packages/shared-types`
+
+This package is crucial for maintaining consistency between the frontend and backend. It contains shared TypeScript types and DTOs, organized by domain.
+
+**Structure:**
+
+```
+/packages/shared-types/
+├───src/
+│   ├───auth/             # Authentication related DTOs and Interfaces (e.g., LoginDto, JwtPayload, RequestUser)
+│   ├───user/             # User related DTOs and Interfaces (e.g., UserDto, RegisterUserDto, User interface)
+│   ├───transactions/     # Transaction related DTOs (e.g., EarnPointsDto, RedeemPointsDto)
+│   └───index.ts          # Aggregates and exports all types from domain folders
+```
+
+By centralizing and organizing these types by domain, we avoid code duplication, reduce the risk of integration errors, and maintain a clear, scalable structure.
 
 ### Infrastructure (`infra`)
 

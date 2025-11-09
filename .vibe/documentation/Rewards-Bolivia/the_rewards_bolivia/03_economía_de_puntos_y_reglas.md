@@ -37,6 +37,9 @@ Este modelo combina principios de **economía circular**, **contabilidad digital
 > 🎯 Objetivo financiero: mantener la proporción de puntos activos ≤ 80 % de los puntos emitidos (nivel saludable de circulación).
 > 
 
+- Valor contable: **1 punto = Bs 0.03** (no visible al usuario).
+- Objetivo: mantener **% puntos activos ≤ 80%** del total emitido.
+
 ---
 
 ## 💰 3. Emisión de puntos (lado del negocio)
@@ -46,6 +49,8 @@ Este modelo combina principios de **economía circular**, **contabilidad digital
 1. **Planes de suscripción** (mensualidad → incluye puntos preasignados).
 2. **Compra de paquetes adicionales** a tarifa preferencial.
 3. **Promociones especiales** (doble puntos, campañas, etc.).
+4. **Regla de emisión dinámica**: `EconomicControlService` puede reducir automáticamente emisión promocional si la tasa de redención cae por debajo de umbral (configurable, default 25% en 30d).
+
 
 ### 🔹 Costos internos
 
@@ -86,6 +91,16 @@ Este modelo combina principios de **economía circular**, **contabilidad digital
 > 🔄 Resultado: el ecosistema mantiene circulación constante y valor estable.
 > 
 
+- 1 punto = Bs 0.03.
+- Redención máxima configurable por negocio (20–30% del ticket).
+- **Nuevo comportamiento:** al ejecutar una redención, se aplica un **burn fee** configurable (default 0.5%) que:
+  - calcula `burnAmount = floor(pointsUsed * feeRate)`,
+  - decrementa esos puntos del pool total (se registran como `BURN` en `PointLedger`),
+  - reduce la cantidad de puntos que vuelven a la billetera del negocio en la misma proporción (para preservar contabilidad).
+
+**Propósito:** desgastar ligeramente supply activo y desacoplar emisión ilimitada/promos del pasivo contable.
+
+
 ---
 
 ## ⏳ 5. Expiración de puntos
@@ -95,11 +110,13 @@ Este modelo combina principios de **economía circular**, **contabilidad digital
 | **Starter Pack** | ❌ No expira | Hasta activar un plan pago. |
 | **Puntos normales** | ✅ 12 meses desde emisión | Ciclo estándar. |
 | **Campañas promocionales** | ✅ 3–6 meses | Promueve rotación rápida. |
+| **puntos promocionales** | ✅ 3–6 meses |(emisión con costo 0) al expirar se **eliminan (burn)** al 100% y deben registrarse como `EXPIRE` en `PointLedger`. |
 | **Puntos comprados** | ✅ 12 meses | Según paquete. |
 | **Clientes inactivos** | ✅ 18 meses sin actividad | Limpieza automática de cuentas. |
 
 > 🧭 Razonamiento: la expiración mantiene el flujo económico vivo y reduce la carga contable.
 > 
+
 
 ---
 
@@ -110,7 +127,7 @@ Este modelo combina principios de **economía circular**, **contabilidad digital
 | Cliente → Comercio | ✅ | Redención natural. |
 | Comercio → Cliente | ✅ | Recompensa o campaña. |
 | Cliente → Cliente | 🚫 | Evita especulación o abuso. |
-| Comercio → Comercio | ⚠️ | Solo a través de clientes. |
+| Comercio → Comercio | ⚠️ | Solo a través de clientes., solo a través de reglas controladas (API admin). |
 | Starter → Cliente | ✅ | Permite experimentar el sistema. |
 
 ---
@@ -131,6 +148,15 @@ Cada punto tiene:
 > 🔐 Esto garantiza seguridad y transparencia sin requerir conocimientos técnicos del usuario o negocio.
 > 
 
+```md
+- Doble registro:
+  - **Off-chain:** DB operativa (fast reads/writes).
+  - **On-chain (audit):** batch diario con hash SHA256 (incluye eventos EMIT, REDEEM, BURN, EXPIRE).
+- Cada movimiento en `PointLedger` contiene:
+  - `id` (UUID), `type` (EMIT/REDEEM/TRANSFER/BURN/EXPIRE), `amount`, `balanceBefore`, `balanceAfter`, `relatedTxId`, `timestamp`, `reason`, `hash`.
+- `EconomicControlService` expone snapshot diario: emitidos, redimidos, expirados, quemados.
+```
+
 ---
 
 ## 📈 8. Indicadores clave de salud económica
@@ -142,6 +168,15 @@ Cada punto tiene:
 | **Conversión Starter → Plan pago** | Negocios que pasan al plan pago tras usar Starter | ≥ 40 % después de 2 meses |
 | **Pasivo digital controlado** | % de puntos activos sobre puntos emitidos | ≤ 80 % |
 | **Valor promedio por punto** | Relación Bs / punto redimido | 0.03 constante |
+
+Formulas
+
+| Indicador | Fórmula | Meta |
+|---|---:|---|
+| Tasa de emisión | Pts emitidos / mes | ≥ 10% crecimiento objetivo |
+| Tasa de redención | (Pts redimidos / Pts emitidos) × 100 | 25–45% |
+| Burn ratio | (Pts quemados / Pts redimidos) × 100 | 0.5–1% (configurable) |
+| Puntos activos (%) | (Activos / Emitidos) × 100 | ≤ 80% |
 
 ---
 
@@ -160,4 +195,14 @@ Rewards Bolivia se inspira en las mejores prácticas de programas globales como:
 > pero sin fricción, sin complejidad y sin lenguaje técnico.
 > 
 
+### Fórmulas y reglas automáticas (para backend)
+- `burnAmount = floor(pointsUsed * feeRate)` (feeRate default = 0.005).
+- Update ledger:
+  - `PointLedger.create({ type: 'REDEEM', amount: pointsUsed, relatedTxId })`
+  - `PointLedger.create({ type: 'BURN', amount: burnAmount, relatedTxId, reason: 'operational_fee' })`
+- `EconomicControlService` recalcula diariamente y dispara alertas si `%activos > 80%` o `tasaRedención < 25%`.
+
 ---
+
+## 🌍 10. Filosofía y nota final
+Combinamos **fluidez UX** con **contabilidad estricta**: el usuario no percibe complejidad, pero el sistema mantiene la integridad del pasivo digital mediante expiraciones, quema operativa y reglas dinámicas de emisión. Esto está alineado con la propuesta de valor y arquitectura definidas. :contentReference[oaicite:8]{index=8} :contentReference[oaicite:9]{index=9}

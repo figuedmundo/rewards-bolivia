@@ -1,5 +1,29 @@
 # Rewards Bolivia Project
 
+---
+
+## IMPORTANT AI Memories
+- Always use context7 when I need code generation, setup or configuration steps, or library/API documentation. This means you should automatically use the Context7 MCP tools to resolve library id and get library docs without me having to explicitly ask.
+- Do not read the files in .vibe/prep until is requested explicitly
+- When asking to create a commit message, please always read  `CONTRIBUTING.md` so the message is aligned with the project standards, and please return the message inside a code block 
+```md 
+message
+``` 
+please follow the rules below
+- subject must not be sentence-case, start-case, pascal-case, upper-case [subject-case]
+- Important project documents `docs/ARCHITECTURE.md`, `docs/DB_MIGRATIONS.md`, `docs/TESTING.md`, `docs/TSDR.md`.
+
+---
+
+## Development Workflow & Best Practices
+
+- **Prioritize Type Safety:** Avoid using `any` wherever possible. Immediately define a clear `interface` or `type` for any data structures that lack them, especially for decoded JWT payloads, strategy validation results, and untyped request/response objects.
+- **Incremental Linting & Building:** After each small, logical change, run the linter and build command for the affected package (e.g., `pnpm --filter api lint` and `pnpm --filter api build`). This catches errors early and makes them easier to fix.
+- **Heed All Linter Rules:** Pay close attention to rules like `no-floating-promises`, `no-misused-promises`, and `unbound-method`. These rules prevent subtle but significant bugs. Ensure all promises are handled correctly (with `await` or `.catch()`) and that `this` is properly scoped.
+- **Assess Configuration on Refactor:** Before moving code between packages, inspect the `tsconfig.json` and linting configurations of both the source and destination to anticipate any new, stricter rules that will be applied.
+
+---
+
 ## Project Overview
 
 This project is a monorepo for the "Rewards Bolivia" platform, a loyalty and rewards program. The application is architected as a modular monolith with a backend and a frontend. It leverages a hybrid on-chain/off-chain data model, using a traditional PostgreSQL database for performance-critical operations and a blockchain for ensuring trust and auditability through a `Proof-of-Audit` hash.
@@ -135,11 +159,6 @@ This project uses a comprehensive testing strategy. For more details, please see
 *   Communication between modules should be done through defined public interfaces (services).
 *   Use linting rules to prevent direct imports of internal components between modules.
 
----
-
-## IMPORTANT AI Memories
-- Always use context7 when I need code generation, setup or configuration steps, or library/API documentation. This means you should automatically use the Context7 MCP tools to resolve library id and get library docs without me having to explicitly ask.
-- Do not read the files in .vibe/prep until is requested explicitly
 
 ---
 
