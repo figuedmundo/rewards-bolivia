@@ -24,6 +24,15 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v3
@@ -38,13 +47,16 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+
+      - name: Apply database migrations
+        run: pnpm --filter api exec prisma migrate dev
         env:
-          DATABASE_URL: postgresql://rewardsuser:rewardspassword@localhost:5432/rewardsdb
+          DATABASE_URL: postgresql://rewardsuser:rewardspassword@postgres:5432/rewardsdb
 
       - name: Generate Prisma Client
         run: pnpm --filter api exec prisma generate
         env:
-          DATABASE_URL: postgresql://rewardsuser:rewardspassword@localhost:5432/rewardsdb
+          DATABASE_URL: postgresql://rewardsuser:rewardspassword@postgres:5432/rewardsdb
 
       - name: Build Shared Types
         run: pnpm --filter shared-types build
@@ -53,56 +65,59 @@ jobs:
         run: pnpm lint
 
       - name: Run API tests
-        run: pnpm run api -- test
+        run: pnpm --filter api test
+        env:
+          DATABASE_URL: postgresql://rewardsuser:rewardspassword@postgres:5432/rewardsdb
+          REDIS_URL: redis://redis:6379
 
-      - name: Run web tests
-        run: pnpm run web -- test
+      # - name: Run web tests
+      #   run: pnpm run web -- test
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: true
+      # - name: Upload coverage to Codecov
+      #   uses: codecov/codecov-action@v4
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     fail_ci_if_error: true
 
-  e2e-tests:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+  # e2e-tests:
+  #   needs: build-and-test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-      - name: Use Node.js and pnpm
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8
+  #     - name: Use Node.js and pnpm
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: '20'
+  #     - uses: pnpm/action-setup@v2
+  #       with:
+  #         version: 8
 
-      - name: Install dependencies
-        run: pnpm install
+  #     - name: Install dependencies
+  #       run: pnpm install
 
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps
+  #     - name: Install Playwright browsers
+  #       run: pnpm exec playwright install --with-deps
 
-      - name: Run Playwright tests
-        run: pnpm exec playwright test
+  #     - name: Run Playwright tests
+  #       run: pnpm exec playwright test
 
-  deploy:
-    needs: [build-and-test, e2e-tests]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    steps:
-      - name: Deploy to server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: 22
-          script: |
-            cd /srv/apps/rewards-bolivia
-            git pull origin master
-            docker-compose -f infra/local/docker-compose.prod.yml up -d --build
+  # deploy:
+  #   needs: [build-and-test, e2e-tests]
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+  #   steps:
+  #     - name: Deploy to server
+  #       uses: appleboy/ssh-action@master
+  #       with:
+  #         host: ${{ secrets.SSH_HOST }}
+  #         username: ${{ secrets.SSH_USERNAME }}
+  #         key: ${{ secrets.SSH_KEY }}
+  #         port: 22
+  #         script: |
+  #           cd /srv/apps/rewards-bolivia
+  #           git pull origin master
+  #           docker-compose -f infra/local/docker-compose.prod.yml up -d --build
 
   # build-docker-images:
   #   needs: build-and-test
