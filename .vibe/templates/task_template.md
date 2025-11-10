@@ -83,14 +83,13 @@
 
 ## 3. Project Context & Current State
 
-### Technology Stack & Architecture
+### Technology Stack
 This feature will be built within the established Rewards Bolivia technical environment.
 
 ```yaml
 Project Name: Rewards Bolivia
 Technology Stack:
   Backend: NestJS (Node.js + TypeScript)
-  Mobile App: Flutter
   Web App (Dashboard): React (Vite + Tailwind CSS + shadcn/ui)
   Database (Primary): PostgreSQL
   ORM / DB Toolkit: Prisma
@@ -99,11 +98,61 @@ Technology Stack:
   Infrastructure: Docker & Kubernetes (K8s)
   CI/CD: GitHub Actions
   Testing: Jest (Unit), Playwright (E2E), k6 (Load)
+```
+
+### Architecture
+```yaml
 Key Architectural Patterns:
   - Modular Monolith
+  - Domain-Driven Design (DDD)
+  - Clean Architecture
   - Hybrid Off-chain/On-chain (Proof-of-Audit)
   - Event-driven (for asynchronous tasks)
 ```
+For more details, see the [Architecture Guide](../../docs/ARCHITECTURE.md).
+
+### Project Structure
+The project is a monorepo organized as follows:
+```
+/rewards-bolivia
+├───e2e/
+├───infra/
+├───packages/
+│   ├───api/
+│   ├───web/
+│   ├───worker/
+│   ├───sdk/
+│   ├───shared-types/ # Shared TypeScript types and DTOs, organized by domain (e.g., shared-types/src/auth, shared-types/src/user)
+│   ├───libs/
+│   ├───test-utils/
+│   └───infra-scripts/
+├───.github/
+└───docs/
+```
+For more details, see the [Architecture Guide](../../docs/ARCHITECTURE.md).
+
+### Naming Conventions
+-   **Files:** `name.type.ts` (e.g., `create-user.use-case.ts`). `kebab-case` for multi-word names.
+-   **Classes:** `PascalCase` with suffixes (e.g., `AuthService`, `UsersController`).
+-   **Methods & Variables:** `camelCase`.
+-   **Interfaces:** `PascalCase` with `I` prefix (e.g., `IUserRepository`).
+
+For more details, see the [Architecture Guide](../../docs/ARCHITECTURE.md).
+
+### Testing Guidelines
+-   **Unit Tests:** Colocated with source files (`.spec.ts`).
+-   **Integration Tests:** In `test/integration` folder within each package.
+-   **E2E Tests:** In top-level `e2e/` or package-level `e2e/` folders.
+-   **Test Utilities:** In `packages/test-utils`.
+
+For a complete guide, refer to the [Testing Documentation](../../docs/TESTING.md).
+
+### Best Practices
+-   Follow DDD principles for backend development.
+-   Enforce separation of concerns (Domain, Application, Infrastructure).
+-   Write tests for all new features.
+-   Follow the established migration policy for database changes.
+-   Keep documentation up-to-date.
 
 ### Current State
 [Describe what exists today - what's working, what's broken, what's missing relevant to this new feature. e.g., "Currently, users can earn points, but the redemption flow is not implemented. The user wallet UI exists but the 'Redeem' button is disabled."]
@@ -281,6 +330,13 @@ model Transaction {
 3.  **Frontend Implementation:** Once the API is stable, proceed with the frontend changes (Mobile and Web). Use mock data initially if the API is not yet deployed.
 4.  **Integration & E2E Testing:** Connect the frontend to the backend and perform end-to-end testing to validate the complete user flow.
 5.  **Review & Refactor:** Before finalizing, review the code for adherence to project standards and refactor where necessary.
+
+⚙️ **Quality Assurance Loop:**
+- **Lint and Build Incrementally:** After each small, logical change, run the linter and build command for the affected package to catch errors early.
+  - `pnpm --filter <package-name> lint`
+  - `pnpm --filter <package-name> build`
+- **Zero Linting Errors:** Do not consider a task complete until the linter passes without any errors for the modified packages.
+- **Prioritize Type Safety:** Avoid using the `any` type. Define clear `interface` or `type` definitions for all data structures.
 
 ### Communication Preferences
 - Provide a concise summary of the plan before starting.

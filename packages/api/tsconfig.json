@@ -14,13 +14,16 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
+    "paths": {
+      "@rewards-bolivia/shared-types": ["../shared-types/dist"],
+      "@rewards-bolivia/logger": ["../libs/logger/dist"]
+    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false,
-    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"]
+    "noFallthroughCasesInSwitch": false
   }
 }

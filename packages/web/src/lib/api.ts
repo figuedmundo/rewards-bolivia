@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 
-class ApiService {
+export class ApiService {
   private static instance: ApiService;
   public api: AxiosInstance;
 

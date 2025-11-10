@@ -1,28 +1,217 @@
-# Rewards Bolivia: Project Review & Strategic Recommendations
+# Rewards Bolivia
 
-This document contains a high-level strategic review of the Rewards Bolivia project, based on the extensive initial documentation. It is intended to serve as a guiding reference for the development team.
+![Project Banner](https://via.placeholder.com/1200x300.png?text=Rewards+Bolivia)
 
-## Overall Impression
+<p align="center">
+  <img src="https://img.shields.io/github/actions/workflow/status/figuedmundo/rewards-bolivia/ci.yml?branch=main&style=for-the-badge" alt="Build Status">
+  <img src="https://img.shields.io/github/license/figuedmundo/rewards-bolivia?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/github/last-commit/figuedmundo/rewards-bolivia?style=for-the-badge" alt="Last Commit">
+</p>
 
-This is an exceptionally well-conceived and meticulously planned project. The documentation is comprehensive, coherent, and seamlessly connects a high-level strategic vision to a detailed, execution-ready technical backlog. It demonstrates a deep understanding of the target market, a pragmatic approach to technology, and a clear path to building a valuable product.
+> A modern loyalty and rewards platform for businesses and customers in Bolivia, built with a focus on speed, security, and user experience.
 
-## Key Strengths
+## ✨ Key Features
 
-1.  **Pragmatic Innovation (Hybrid Off-chain/On-chain Model):** The standout feature is the hybrid architecture. It masterfully uses a traditional database for speed and a blockchain for trust (via a `Proof-of-Audit` hash), keeping the complexity of Web3 completely invisible to the user. This is the right way to apply blockchain concepts to a real-world business problem.
-2.  **Brilliant Go-to-Market Strategy:** The "Starter Pack" with blocked points is a masterclass in freemium conversion. It lets businesses experience the system's value with zero risk and creates a powerful, tangible incentive to subscribe. The agent-based cash top-up model is a critical insight for the target market.
-3.  **Execution-Ready Planning:** The project is broken down into a functional BRD and a detailed technical backlog with sprints, user stories, and acceptance criteria. This makes the project immediately actionable for a development team, significantly reducing ambiguity.
-4.  **Mature Architectural Choice:** The decision to opt for a **Modular Monolith** over microservices for the MVP is a sign of engineering maturity. It prioritizes development velocity, reduces operational overhead, and simplifies transactional integrity—all of which are critical for an early-stage product.
+-   **Instantaneous Transactions:** Sub-1.5-second point redemptions for a seamless user experience.
+-   **Hybrid On-chain/Off-chain Model:** Combines the speed of a traditional database with the trust and auditability of a blockchain.
+-   **Modular Monolith Architecture:** A scalable and maintainable codebase that is easy to develop and deploy.
+-   **Modern Tech Stack:** Built with NestJS, React, Flutter (planned), and other modern technologies.
+-   **Comprehensive Testing:** A robust testing strategy ensures code quality and reliability.
 
-## Potential Risks & Areas for Vigilance
+## 🚀 Tech Stack
 
-1.  **Operational Complexity of the Agent Network:** While strategically necessary, managing a network of cash-handling agents is operationally intensive and introduces risks of fraud and reconciliation errors. The success of this model hinges on flawless execution.
-2.  **The "Chicken and Egg" Problem:** The project's success depends on achieving critical mass on both sides of the network (customers and businesses). The "Hyper-Local Blitzkrieg" strategy is the right approach, but it will be an intense, on-the-ground execution battle.
-3.  **Maintaining Architectural Discipline:** The modular monolith requires strong discipline to maintain clean boundaries between modules. Without this, it could devolve into a "spaghetti" monolith, making future maintenance and scaling difficult.
+-   **Backend:** NestJS (Node.js + TypeScript)
+-   **Frontend (Web Dashboard):** React (Vite + Tailwind CSS + shadcn/ui)
+-   **Mobile App (Planned):** Flutter
+-   **Database:** PostgreSQL
+-   **ORM:** Prisma
+-   **Caching:** Redis
+-   **Blockchain (Proof-of-Audit):** Polygon (PoS)
+-   **Infrastructure:** Docker, Kubernetes
+-   **CI/CD:** GitHub Actions
 
-## Strategic Recommendations for Development
+## 📂 Project Structure
 
-1.  **Prioritize the Agent Playbook:** The highest operational risk is the agent network. The team should prototype and document the entire operational flow for agents (recruitment, training, cash settlement, fraud detection) before deep investment in the core product code. Consider building a simple admin/tool for agents early on.
-2.  **Obsess Over the "Magic Moments":** The first time a customer earns points and the first time a business sees a redemption are the critical moments that will drive word-of-mouth. The UI/UX for these flows must be incredibly fast, simple, and filled with positive, celebratory feedback.
-3.  **Formalize Module Boundaries in Code:** To ensure the long-term health of the modular monolith, enforce architectural boundaries from day one. Use techniques like:
-    *   Defining clear `public_api.ts` or `index.ts` files for each module in the NestJS backend.
-    *   Using linting rules (e.g., ESLint with `eslint-plugin-import`) to prevent direct imports of internal components between modules. This forces communication through the defined public interfaces (services).
+This project is a monorepo using pnpm workspaces. The main packages are:
+
+```
+/rewards-bolivia
+├───e2e/             # End-to-end tests
+├───infra/           # Infrastructure as Code (Docker, K8s)
+├───packages/
+│   ├───api/         # NestJS Backend (Modular Monolith)
+│   ├───web/         # React Frontend (Dashboard)
+│   ├───worker/      # Background job processor
+│   ├───sdk/         # Auto-generated API client
+│   ├───shared-types/# Shared TypeScript types and DTOs
+│   ├───libs/        # Shared libraries (auth, logger, etc.)
+│   └───test-utils/  # Test utilities and fixtures
+└───docs/            # Project documentation
+```
+
+For a more detailed explanation of the architecture, please see [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md).
+
+## 🏁 Getting Started
+
+### Prerequisites
+
+-   [Node.js](https://nodejs.org/) (v20 or higher)
+-   [pnpm](https://pnpm.io/) (v8 or higher)
+-   [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
+
+### Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/figuedmundo/rewards-bolivia.git
+    cd rewards-bolivia
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    pnpm install
+    ```
+
+3.  **Set up environment variables:**
+    ```bash
+    cp .env.example .env
+    ```
+    *Fill in the required variables in the `.env` file.*
+
+## 🏃 Running the Project
+
+You can run this project in two ways: using Docker Compose for the entire stack, or running the backend and frontend services locally while using Docker for the database and cache.
+
+### Option 1: Run Everything with Docker (Recommended)
+
+This method uses Docker Compose to build and run the entire application stack, including the API, web frontend, database, and cache. It's the simplest way to get started.
+
+1.  **Ensure Docker is running.**
+2.  **Build and start the services:**
+    ```bash
+    docker-compose -f infra/local/docker-compose.yml --env-file .env up --build
+    ```
+    This command will:
+    -   Build the Docker images for the `api` and `web` services.
+    -   Start all the services defined in the `docker-compose.yml` file.
+    -   Automatically apply database migrations.
+    -   Mount your local source code into the containers, so changes will trigger hot-reloading.
+
+### Option 2: Hybrid Setup (Local Development)
+
+This method is for developers who prefer to run the Node.js services (API, web, worker) directly on their host machine for easier debugging, while still using Docker for the database and cache.
+
+1.  **Start the infrastructure (Database & Cache):**
+    ```bash
+    docker-compose -f infra/local/docker-compose.yml up -d postgres redis
+    ```
+    *This starts only the `postgres` and `redis` services.*
+
+2.  **Run database migrations:**
+    ```bash
+    pnpm --filter api exec prisma migrate dev
+    ```
+
+3.  **Start the development servers:**
+    Run each of the following commands in a separate terminal:
+
+    ```bash
+    # Terminal 1: Start the API backend
+    pnpm --filter api start:dev
+
+    # Terminal 2: Start the web frontend
+    pnpm --filter web dev
+
+    # Terminal 3: Start the worker
+    pnpm --filter @rewards-bolivia/worker dev
+    ```
+
+### Accessing the Application
+
+Once the application is running (using either method), it will be available at the following URLs:
+-   **Web App:** `http://localhost:5173`
+-   **API:** `http://localhost:3001`
+
+## 🧪 Running Tests
+
+This project uses a comprehensive testing strategy. For more details, please see [`docs/TESTING.md`](./docs/TESTING.md).
+
+-   **Run all unit and integration tests:**
+    ```bash
+    pnpm test
+    ```
+
+-   **Run tests for a specific package:**
+    ```bash
+    # For the API
+    pnpm --filter api test
+
+    # For the Web App
+    pnpm --filter web test
+    ```
+
+-   **Run E2E tests:**
+    ```bash
+    pnpm --filter e2e test
+    ```
+    - To run in headed mode: `pnpm --filter e2e test:headed`
+    - To open the Playwright UI: `pnpm --filter e2e test:ui`
+    - To run tests for a specific browser (e.g., Chromium): `pnpm --filter e2e test --project=chromium`
+    - To view the last report: `pnpm --filter e2e report`
+
+### Code Coverage
+
+This project uses `vitest` to generate code coverage reports for the `web` package. The report is generated in LCOV format, which provides a detailed, interactive HTML view of your test coverage.
+
+**What is an LCOV Report?**
+
+LCOV is a tool that creates a graphical front-end for `gcov`, a code coverage analysis tool. The `lcov-report` is a directory containing a set of HTML files that allow you to visualize your code coverage. You can browse through your source code and see exactly which lines of code have been executed by your tests and which have not. This is an invaluable tool for identifying gaps in your testing and improving the quality of your codebase.
+
+**How to Generate the Report**
+
+To generate the code coverage report for the `web` package, run the following command from the root of the project:
+
+```bash
+pnpm run --filter=web test -- --coverage
+```
+
+This command runs the tests for the `web` package with the `--coverage` flag, which instructs `vitest` to collect coverage data and generate the report.
+
+**Viewing the Report**
+
+Once the command has finished, you will find the generated report in the `packages/web/coverage/` directory. To view the report, open the `index.html` file in that directory in your web browser:
+
+```bash
+# On macOS
+open packages/web/coverage/index.html
+
+# On Windows
+start packages/web/coverage/index.html
+
+# On Linux
+xdg-open packages/web/coverage/index.html
+```
+
+This will open the interactive HTML report, where you can explore the coverage data for each file in the `web` package.
+
+## 💅 Code Quality and Git Hooks
+
+This project uses [Husky](https://typicode.github.io/husky/) to enforce code quality standards and consistent commit messages. The following Git hooks are configured:
+
+-   **`pre-commit`:** Before each commit, `lint-staged` is run to automatically lint and format staged files. This ensures that no code that violates the project's style guide is committed.
+-   **`commit-msg`:** When you write a commit message, `commitlint` checks it to ensure it follows the [Conventional Commits](https://www.conventionalcommits.org/) specification.
+
+You don't need to do anything to activate these hooks; they run automatically when you commit your changes.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read our [Contributing Guidelines](./CONTRIBUTING.md) to get started.
+
+## 📜 License
+
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+
+## 📞 Contact
+
+-   **Project Maintainer:** Edmundo Figueroa - [figuedmundol@gmail.com]
+-   **GitHub Issues:** [https://github.com/figuedmundo/rewards-bolivia/issues](https://github.com/figuedmundo/rewards-bolivia/issues)
