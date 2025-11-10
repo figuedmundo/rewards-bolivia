@@ -8,7 +8,6 @@ import { PrismaService } from '../../../../infrastructure/prisma.service';
 import { ITransactionRepository } from '../../domain/repositories/transaction.repository';
 import { Transaction } from '../../domain/entities/transaction.entity';
 import { TransactionType, LedgerEntryType } from '@prisma/client';
-import { EconomicControlService } from '../../application/services/economic-control.service';
 import { TransactionEventPublisher } from '../../application/services/transaction-event.publisher';
 
 import { RedisService } from '../../../../infrastructure/redis/redis.service';
@@ -20,7 +19,6 @@ export class PrismaTransactionRepository implements ITransactionRepository {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly economicControlService: EconomicControlService,
     private readonly eventPublisher: TransactionEventPublisher,
     private readonly redisService: RedisService,
   ) {}
@@ -80,7 +78,10 @@ export class PrismaTransactionRepository implements ITransactionRepository {
     }
   }
 
-  async create(transactionData: Partial<Transaction>): Promise<Transaction> {
+  async create(
+    transactionData: Partial<Transaction>,
+    burnAmount = 0,
+  ): Promise<Transaction> {
     const { customerId, businessId, pointsAmount, type, status, auditHash } =
       transactionData;
 
@@ -98,12 +99,6 @@ export class PrismaTransactionRepository implements ITransactionRepository {
     try {
       transaction = await this.prisma.$transaction(
         async (tx) => {
-          let burnAmount = 0;
-          if (type === TransactionType.REDEEM) {
-            const feeRate = this.economicControlService.getBurnFeeRate();
-            burnAmount = Math.floor(pointsAmount * feeRate);
-          }
-
           // 1. Update business balance
           const businessUpdateData = {};
           if (type === TransactionType.EARN) {
@@ -244,7 +239,10 @@ export class PrismaTransactionRepository implements ITransactionRepository {
     }
   }
 
-  async redeem(transactionData: Partial<Transaction>): Promise<Transaction> {
-    return this.create(transactionData);
+  async redeem(
+    transactionData: Partial<Transaction>,
+    burnAmount = 0,
+  ): Promise<Transaction> {
+    return this.create(transactionData, burnAmount);
   }
 }

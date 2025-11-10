@@ -340,7 +340,7 @@ describe('TransactionsController (integration)', () => {
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
 
-      expect(response.body).toHaveProperty('totalEarned');
+      expect(response.body).toHaveProperty('totalPointsIssued');
       expect(response.body).toHaveProperty('totalRedeemed');
       expect(response.body).toHaveProperty('totalBurned');
       expect(response.body).toHaveProperty('redemptionRate');
@@ -348,7 +348,7 @@ describe('TransactionsController (integration)', () => {
       expect(response.body).toHaveProperty('activePointsPercentage');
 
       // Basic check for non-zero values after transactions
-      expect(response.body.totalEarned).toBeGreaterThan(0);
+      expect(response.body.totalPointsIssued).toBeGreaterThan(0);
       expect(response.body.totalRedeemed).toBeGreaterThan(0);
       expect(response.body.totalBurned).toBeGreaterThan(0);
       expect(response.body.redemptionRate).toBeGreaterThan(0);

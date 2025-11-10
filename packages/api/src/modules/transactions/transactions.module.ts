@@ -10,6 +10,8 @@ import { RedisModule } from '../../infrastructure/redis/redis.module';
 import { EconomicControlService } from './application/services/economic-control.service';
 import { TransactionEventPublisher } from './application/services/transaction-event.publisher';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ILedgerRepository } from './domain/repositories/ledger.repository';
+import { PrismaLedgerRepository } from './infrastructure/repositories/prisma-ledger.repository';
 
 @Module({
   imports: [PrismaModule, RedisModule, EventEmitterModule.forRoot()],
@@ -19,9 +21,14 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     RedeemPointsUseCase,
     EconomicControlService,
     TransactionEventPublisher,
+    PrismaLedgerRepository,
     {
       provide: 'ITransactionRepository',
       useClass: PrismaTransactionRepository,
+    },
+    {
+      provide: 'ILedgerRepository',
+      useClass: PrismaLedgerRepository,
     },
   ],
 })

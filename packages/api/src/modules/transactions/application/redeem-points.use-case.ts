@@ -11,6 +11,7 @@ import { PrismaService } from '../../../infrastructure/prisma.service';
 import { TransactionType } from '@prisma/client';
 import * as crypto from 'crypto';
 import { TransactionEventPublisher } from './services/transaction-event.publisher';
+import { EconomicControlService } from './services/economic-control.service';
 
 @Injectable()
 export class RedeemPointsUseCase {
@@ -19,6 +20,7 @@ export class RedeemPointsUseCase {
     private readonly transactionRepository: ITransactionRepository,
     private readonly prisma: PrismaService,
     private readonly eventPublisher: TransactionEventPublisher,
+    private readonly economicControlService: EconomicControlService,
   ) {}
 
   async execute(redeemPointsDto: RedeemPointsDto, customerId: string) {
@@ -62,20 +64,27 @@ export class RedeemPointsUseCase {
       .update(`${Date.now()}${businessId}${customerId}${pointsToRedeem}`)
       .digest('hex');
 
-    // 4. Create transaction (repository handles cache updates)
-    const transaction = await this.transactionRepository.redeem({
-      type: TransactionType.REDEEM,
-      pointsAmount: pointsToRedeem,
-      status: 'COMPLETED',
-      auditHash,
-      businessId,
-      customerId,
-    });
+    // 4. Calculate burn amount
+    const burnFeeRate = this.economicControlService.getBurnFeeRate();
+    const burnAmount = Math.floor(pointsToRedeem * burnFeeRate);
 
-    // 5. Publish event
+    // 5. Create transaction (repository handles cache updates)
+    const transaction = await this.transactionRepository.redeem(
+      {
+        type: TransactionType.REDEEM,
+        pointsAmount: pointsToRedeem,
+        status: 'COMPLETED',
+        auditHash,
+        businessId,
+        customerId,
+      },
+      burnAmount,
+    );
+
+    // 6. Publish event
     this.eventPublisher.publishTransactionCompleted({ transaction });
 
-    // 6. Fetch updated customer data
+    // 7. Fetch updated customer data
     const updatedCustomer = await this.prisma.user.findUnique({
       where: { id: customerId },
     });

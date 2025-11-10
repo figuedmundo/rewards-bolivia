@@ -1,81 +1,64 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/infrastructure/prisma.service';
-import { TransactionType } from '@prisma/client';
+import { ILedgerRepository } from '../../domain/repositories/ledger.repository';
+
+export interface EconomicStats {
+  totalPointsIssued: number;
+  totalPointsRedeemed: number;
+  totalPointsBurned: number;
+  burnRatio: number;
+  activePointsPercentage: number;
+  redemptionRate: number;
+}
 
 @Injectable()
 export class EconomicControlService {
-  private readonly BURN_FEE_RATE = 0.005; // 0.5% burn rate
+  constructor(private readonly ledgerRepository: ILedgerRepository) {}
 
-  constructor(private readonly prisma: PrismaService) {}
+  async getEconomicStats(): Promise<EconomicStats> {
+    const totalPointsIssued = await this.ledgerRepository.getTotalPointsIssued();
+    const totalPointsRedeemed =
+      await this.ledgerRepository.getTotalPointsRedeemed();
+    const totalPointsBurned = await this.ledgerRepository.getTotalPointsBurned();
 
-  getBurnFeeRate(): number {
-    return this.BURN_FEE_RATE;
-  }
-
-  async getEconomyStats() {
-    const totalEarned = await this.prisma.transaction.aggregate({
-      _sum: { pointsAmount: true },
-      where: { type: TransactionType.EARN },
-    });
-
-    const totalRedeemedResult = await this.prisma.transaction.aggregate({
-      _sum: { pointsAmount: true },
-      where: { type: TransactionType.REDEEM },
-    });
-    const totalRedeemed = Math.abs(totalRedeemedResult._sum.pointsAmount || 0);
-
-    const totalBurned = await this.prisma.transaction.aggregate({
-      _sum: { burnAmount: true },
-      where: { type: TransactionType.REDEEM }, // Burn happens during redeem
-    });
-
-    const totalPointsInCirculation = await this.prisma.user.aggregate({
-      _sum: { pointsBalance: true },
-    });
-
-    const totalBusinessPoints = await this.prisma.business.aggregate({
-      _sum: { pointsBalance: true },
-    });
-
-    const totalIssued =
-      (totalEarned._sum.pointsAmount || 0) +
-      (totalBusinessPoints._sum.pointsBalance || 0);
-    const totalActive =
-      (totalPointsInCirculation._sum.pointsBalance || 0) +
-      (totalBusinessPoints._sum.pointsBalance || 0);
-
-    const redemptionRate =
-      totalIssued > 0 ? (totalRedeemed / totalIssued) * 100 : 0;
     const burnRatio =
-      totalRedeemed > 0
-        ? ((totalBurned._sum.burnAmount || 0) / totalRedeemed) * 100
+      totalPointsRedeemed > 0
+        ? totalPointsBurned / totalPointsRedeemed
         : 0;
+    const activePoints = totalPointsIssued - totalPointsBurned;
     const activePointsPercentage =
-      totalIssued > 0 ? (totalActive / totalIssued) * 100 : 0;
+      totalPointsIssued > 0 ? activePoints / totalPointsIssued : 0;
+    const redemptionRate =
+      totalPointsIssued > 0
+        ? totalPointsRedeemed / totalPointsIssued
+        : 0;
 
     return {
-      totalEarned: totalEarned._sum.pointsAmount || 0,
-      totalRedeemed: totalRedeemed,
-      totalBurned: totalBurned._sum.burnAmount || 0,
-      totalPointsInCirculation:
-        totalPointsInCirculation._sum.pointsBalance || 0,
-      totalBusinessPoints: totalBusinessPoints._sum.pointsBalance || 0,
-      totalIssued: totalIssued,
-      totalActive: totalActive,
-      redemptionRate: redemptionRate,
-      burnRatio: burnRatio,
-      activePointsPercentage: activePointsPercentage,
+      totalPointsIssued,
+      totalPointsRedeemed,
+      totalPointsBurned,
+      burnRatio,
+      activePointsPercentage,
+      redemptionRate,
     };
   }
 
-  async checkAndAdjustEmission(): Promise<void> {
-    // Placeholder for future dynamic emission adjustment logic
-    // This would involve:
-    // 1. Calculating redemption rate over a trailing period (e.g., 30 days)
-    // 2. Comparing it against a threshold (e.g., 25%)
-    // 3. Adjusting emission rates for promo/Starter plans if the condition is met
+  /**
+   * Placeholder for future dynamic rule adjustments.
+   */
+  async checkAndAdjustEmissionRates(): Promise<void> {
+    // In the future, this method could contain logic to:
+    // 1. Fetch redemption rates over the last 30 days.
+    // 2. Compare against a threshold (e.g., 25%).
+    // 3. If below threshold, temporarily reduce emission rates for promotional campaigns.
     console.log('Checking and adjusting emission rates (placeholder)');
-    await Promise.resolve(); // To satisfy @typescript-eslint/require-await
-    // Implementation will be added in a future sprint
+  }
+
+  /**
+   * Returns the current burn fee rate.
+   * @returns The burn fee rate.
+   */
+  getBurnFeeRate(): number {
+    // TODO: Make this configurable
+    return 0.005; // 0.5%
   }
 }
