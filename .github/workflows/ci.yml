@@ -24,6 +24,15 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v3
@@ -38,13 +47,16 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+
+      - name: Apply database migrations
+        run: pnpm --filter api exec prisma migrate dev
         env:
-          DATABASE_URL: postgresql://rewardsuser:rewardspassword@localhost:5432/rewardsdb
+          DATABASE_URL: postgresql://rewardsuser:rewardspassword@postgres:5432/rewardsdb
 
       - name: Generate Prisma Client
         run: pnpm --filter api exec prisma generate
         env:
-          DATABASE_URL: postgresql://rewardsuser:rewardspassword@localhost:5432/rewardsdb
+          DATABASE_URL: postgresql://rewardsuser:rewardspassword@postgres:5432/rewardsdb
 
       - name: Build Shared Types
         run: pnpm --filter shared-types build
@@ -52,8 +64,11 @@ jobs:
       - name: Run linting
         run: pnpm lint
 
-      # - name: Run API tests
-      #   run: pnpm run api -- test
+      - name: Run API tests
+        run: pnpm --filter api test
+        env:
+          DATABASE_URL: postgresql://rewardsuser:rewardspassword@postgres:5432/rewardsdb
+          REDIS_URL: redis://redis:6379
 
       # - name: Run web tests
       #   run: pnpm run web -- test
