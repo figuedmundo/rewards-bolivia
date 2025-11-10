@@ -52,7 +52,9 @@ jobs:
           REDIS_URL: redis://redis:6379
 
       - name: Apply database migrations
-        run: pnpm --filter api exec prisma migrate dev
+        run: |
+          sleep 10
+          pnpm --filter api exec prisma migrate dev
         env:
           DATABASE_URL: postgresql://rewardsuser:rewardspassword@postgres:5432/rewardsdb
 
