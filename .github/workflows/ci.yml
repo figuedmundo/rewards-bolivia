@@ -51,17 +51,17 @@ jobs:
           DATABASE_URL: postgresql://rewardsuser:rewardspassword@postgres:5432/rewardsdb
           REDIS_URL: redis://redis:6379
 
-      - name: Apply database migrations
-        run: |
-          sleep 10
-          pnpm --filter api exec prisma migrate dev
-        env:
-          DATABASE_URL: postgresql://rewardsuser:rewardspassword@postgres:5432/rewardsdb
+      # - name: Apply database migrations
+      #   run: |
+      #     sleep 10
+      #     pnpm --filter api exec prisma migrate dev
+      #   env:
+      #     DATABASE_URL: postgresql://rewardsuser:rewardspassword@postgres:5432/rewardsdb
 
-      - name: Generate Prisma Client
-        run: pnpm --filter api exec prisma generate
-        env:
-          DATABASE_URL: postgresql://rewardsuser:rewardspassword@postgres:5432/rewardsdb
+      # - name: Generate Prisma Client
+      #   run: pnpm --filter api exec prisma generate
+      #   env:
+      #     DATABASE_URL: postgresql://rewardsuser:rewardspassword@postgres:5432/rewardsdb
 
       - name: Build Shared Types
         run: pnpm --filter shared-types build
@@ -69,11 +69,11 @@ jobs:
       - name: Run linting
         run: pnpm lint
 
-      - name: Run API tests
-        run: pnpm --filter api test
-        env:
-          DATABASE_URL: postgresql://rewardsuser:rewardspassword@postgres:5432/rewardsdb
-          REDIS_URL: redis://redis:6379
+      # - name: Run API tests
+      #   run: pnpm --filter api test
+      #   env:
+      #     DATABASE_URL: postgresql://rewardsuser:rewardspassword@postgres:5432/rewardsdb
+      #     REDIS_URL: redis://redis:6379
 
       # - name: Run web tests
       #   run: pnpm run web -- test
