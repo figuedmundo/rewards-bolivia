@@ -65,8 +65,8 @@ Implementar el núcleo económico del sistema Rewards Bolivia: gestión de trans
 ### Nuevas tareas para control económico y trazabilidad
 | ID | Tarea | Descripción | Estimación |
 |----|-------|-------------|-----------:|
-| **T5.9** | `EconomicControlService` | Servicio central para métricas y reglas económicas (emitidos, redimidos, expirados, quemados). Expone funciones para decidir ajustes dinámicos. | 1 d |
-| **T5.10** | *Transaction fee* (burn leve) | Al procesar `redeem`, calcular y quemar `burnAmount = floor(pointsUsed * feeRate)`; feeRate configurable (default 0.5%). Registrar `BURN` ledger entry. | 0.5 d |
+| **T5.9** | `EconomicControlService` | (done) Servicio central para métricas y reglas económicas (emitidos, redimidos, expirados, quemados). Expone funciones para decidir ajustes dinámicos. | 1 d |
+| **T5.10** | *Transaction fee* (burn leve) | (done) Al procesar `redeem`, calcular y quemar `burnAmount = floor(pointsUsed * feeRate)`; feeRate configurable (default 0.5%). Registrar `BURN` ledger entry. | 0.5 d |
 | **T5.11** | Registrar `BURN` en `PointLedger` | Nuevo tipo `BURN` con referencia `transactionId`, reason, amount, timestamp. | 0.5 d |
 | **T5.12** | Hook contable post-tx (domain event) | Subscriber `onTransactionCompleted` que actualiza métricas: puntosRedimidos, puntosQuemados, puntosExpirados; dispara alertas si %activos > 80%. | 1 d |
 | **T5.13** | GET `/transactions/economy-stats` | Endpoint admin: emisión mensual, redención, burnRatio, % puntos activos, recomendaciones. | 0.5 d |
@@ -285,6 +285,29 @@ Implementar el núcleo económico del sistema Rewards Bolivia: gestión de trans
 ### 🚧 Tareas Pendientes:
 
 1.  **Continuar con las Tareas Pendientes del Sprint 2:**
+    *   **T8.3 & T8.4:** Realizar pruebas de carga con k6 y configurar la generación de reportes automáticos.
+2.  **Sprint 3 - Próximos Pasos:**
+    *   Re-aplicar la migración de `BusinessPlan` y `blockedPointsBalance`.
+    *   Implementar la lógica condicional en el `PrismaTransactionRepository` para manejar los puntos bloqueados.
+    *   Crear pruebas de integración y E2E específicas para el escenario del "Starter Plan".
+
+--
+## Resumen de Progreso (Actualización) (Monday 10 November)
+
+### 🚀 Hitos Completados:
+
+1.  **Implementación del Núcleo de Control Económico (T5.9 & T5.10):**
+    *   **`EconomicControlService`:** Se implementó el servicio para centralizar los cálculos de métricas económicas.
+    *   **`ILedgerRepository`:** Se creó una nueva abstracción de repositorio para consultas de solo lectura al `PointLedger`, mejorando la separación de responsabilidades.
+    *   **Refactorización de Dependencias:** Se eliminó una dependencia circular entre el `PrismaTransactionRepository` y el `EconomicControlService`. La lógica de cálculo de la tarifa de *burn* ahora reside en el `RedeemPointsUseCase`, que la pasa al repositorio.
+    *   **Pruebas:** Se crearon pruebas unitarias para el `EconomicControlService` y se actualizaron las pruebas de integración existentes para validar los cambios.
+    *   **Documentación:** Se creó un nuevo documento de tarea para `T5.10` para registrar el trabajo realizado.
+
+### 🚧 Tareas Pendientes:
+
+1.  **Continuar con las Tareas Pendientes del Sprint 2:**
+    *   **T5.11:** Implementar el registro explícito de `BURN` en `PointLedger` (aunque la lógica ya existe, se puede refinar).
+    *   **T5.12:** Implementar el hook post-transacción para actualizar métricas y disparar alertas.
     *   **T8.3 & T8.4:** Realizar pruebas de carga con k6 y configurar la generación de reportes automáticos.
 2.  **Sprint 3 - Próximos Pasos:**
     *   Re-aplicar la migración de `BusinessPlan` y `blockedPointsBalance`.

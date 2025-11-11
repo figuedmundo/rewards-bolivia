@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { ILedgerRepository } from '../../domain/repositories/ledger.repository';
+import { Injectable, Inject } from '@nestjs/common';
+import type { ILedgerRepository } from '../../domain/repositories/ledger.repository';
 
 export interface EconomicStats {
   totalPointsIssued: number;
@@ -12,7 +12,10 @@ export interface EconomicStats {
 
 @Injectable()
 export class EconomicControlService {
-  constructor(private readonly ledgerRepository: ILedgerRepository) {}
+  constructor(
+    @Inject('ILedgerRepository')
+    private readonly ledgerRepository: ILedgerRepository,
+  ) {}
 
   async getEconomicStats(): Promise<EconomicStats> {
     const totalPointsIssued = await this.ledgerRepository.getTotalPointsIssued();
@@ -32,7 +35,7 @@ export class EconomicControlService {
         ? totalPointsRedeemed / totalPointsIssued
         : 0;
 
-    return {
+    const stats = {
       totalPointsIssued,
       totalPointsRedeemed,
       totalPointsBurned,
@@ -40,6 +43,8 @@ export class EconomicControlService {
       activePointsPercentage,
       redemptionRate,
     };
+
+    return stats;
   }
 
   /**

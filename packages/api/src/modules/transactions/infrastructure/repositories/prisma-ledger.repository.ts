@@ -34,12 +34,12 @@ export class PrismaLedgerRepository implements ILedgerRepository {
   async getTotalPointsBurned(): Promise<number> {
     const result = await this.prisma.pointLedger.aggregate({
       _sum: {
-        credit: true,
+        debit: true,
       },
       where: {
         type: LedgerEntryType.BURN,
       },
     });
-    return result._sum.credit ?? 0;
+    return result._sum.debit ?? 0;
   }
 }

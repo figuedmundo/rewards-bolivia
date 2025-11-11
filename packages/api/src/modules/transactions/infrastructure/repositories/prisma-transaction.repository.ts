@@ -186,13 +186,15 @@ export class PrismaTransactionRepository implements ITransactionRepository {
           ];
 
           // Add BURN ledger entry if applicable
-          if (burnAmount > 0) {
+          if (type === TransactionType.REDEEM && burnAmount > 0) {
             ledgerEntriesData.push({
               type: LedgerEntryType.BURN,
-              accountId: 'SYSTEM_BURN_ACCOUNT', // A special account for burned points
-              debit: 0,
-              credit: burnAmount,
-              balanceAfter: 0, // Burned points are removed from circulation
+              accountId: businessId,
+              debit: burnAmount,
+              credit: 0,
+              balanceAfter: business.pointsBalance, // Final correct balance
+              reason: 'OPERATIONAL_FEE',
+              hash: null,
               transactionId: dbTransaction.id,
             });
           }
