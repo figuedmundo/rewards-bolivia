@@ -67,10 +67,10 @@ Implementar el núcleo económico del sistema Rewards Bolivia: gestión de trans
 |----|-------|-------------|-----------:|
 | **T5.9** | `EconomicControlService` | (done) Servicio central para métricas y reglas económicas (emitidos, redimidos, expirados, quemados). Expone funciones para decidir ajustes dinámicos. | 1 d |
 | **T5.10** | *Transaction fee* (burn leve) | (done) Al procesar `redeem`, calcular y quemar `burnAmount = floor(pointsUsed * feeRate)`; feeRate configurable (default 0.5%). Registrar `BURN` ledger entry. | 0.5 d |
-| **T5.11** | Registrar `BURN` en `PointLedger` | Nuevo tipo `BURN` con referencia `transactionId`, reason, amount, timestamp. | 0.5 d | done |
-| **T5.12** | Hook contable post-tx (domain event) | Subscriber `onTransactionCompleted` que actualiza métricas: puntosRedimidos, puntosQuemados, puntosExpirados; dispara alertas si %activos > 80%. | 1 d |
-| **T5.13** | GET `/transactions/economy-stats` | Endpoint admin: emisión mensual, redención, burnRatio, % puntos activos, recomendaciones. | 0.5 d |
-| **T5.14** | Ajuste dinámico de emisión (beta) | Regla: si tasa de redención < 25% en trailing 30d → reducir emisión promo/Starter. | 1 d |
+| **T5.11** | Registrar `BURN` en `PointLedger` | Nuevo tipo `BURN` con referencia `transactionId`, reason, amount, timestamp. | 0.5 d | [done](../../../../../../.vibe/tasks/sprint2/10_T5.11_register_burn_in_pointledger.md) |
+| **T5.12** | Hook contable post-tx (domain event) | Subscriber `onTransactionCompleted` que actualiza métricas: puntosRedimidos, puntosQuemados, puntosExpirados; dispara alertas si %activos > 80%. | 1 d | [done](../../../../../../.vibe/tasks/sprint2/11_T5.12_post_transaction_hook.md) |
+| **T5.13** | GET `/transactions/economy-stats` | Endpoint admin: emisión mensual, redención, burnRatio, % puntos activos, recomendaciones. | 0.5 d | [done](../../../../../../.vibe/tasks/sprint2/12_T5.13_economy_stats_endpoint.md) |
+| **T5.14** | Ajuste dinámico de emisión (beta) | Regla: si tasa de redención < 25% en trailing 30d → reducir emisión promo/Starter. | 1 d | [done](../../../../../../.vibe/tasks/sprint2/13_T5.14_dynamic_emission_adjustment.md) |
 | **T5.15** | Auditoría ampliada (BURN/EXPIRE) | Incluir `BURN` y `EXPIRE` en batch hash diario on-chain. | 0.5 d |
 
 ---
@@ -308,6 +308,46 @@ Implementar el núcleo económico del sistema Rewards Bolivia: gestión de trans
 1.  **Continuar con las Tareas Pendientes del Sprint 2:**
     *   **T5.11:** Implementar el registro explícito de `BURN` en `PointLedger` (aunque la lógica ya existe, se puede refinar).
     *   **T5.12:** Implementar el hook post-transacción para actualizar métricas y disparar alertas.
+    *   **T8.3 & T8.4:** Realizar pruebas de carga con k6 y configurar la generación de reportes automáticos.
+2.  **Sprint 3 - Próximos Pasos:**
+    *   Re-aplicar la migración de `BusinessPlan` y `blockedPointsBalance`.
+    *   Implementar la lógica condicional en el `PrismaTransactionRepository` para manejar los puntos bloqueados.
+    *   Crear pruebas de integración y E2E específicas para el escenario del "Starter Plan".
+
+--
+## Resumen de Progreso (Actualización) (Wednesday 13 November)
+
+### 🚀 Hitos Completados:
+
+1.  **Finalización de T5.12 - Hook Contable Post-Transacción:**
+    *   **`TransactionCompletedSubscriber`:** Implementado y completamente funcional.
+    *   **Métricas en Tiempo Real:** El subscriber actualiza métricas económicas en Redis después de cada transacción.
+    *   **Sistema de Alertas:** Implementado con detección de umbrales (>80% puntos activos, <25% tasa de redención).
+    *   **Throttling de Alertas:** Mecanismo de cooldown de 1 hora para prevenir spam de alertas.
+    *   **Manejo de Errores Robusto:** Error handling que no afecta el flujo principal de transacciones.
+    *   **Pruebas Unitarias:** 6 tests pasando con 84% de cobertura de código.
+    *   **Calidad de Código:** Cero errores de linting, TypeScript compilando correctamente.
+    *   **Modelo `EconomicAlert`:** Ya presente en el schema de Prisma, sin necesidad de nueva migración.
+
+2.  **Documentación de Tareas:**
+    *   **T5.13 Documentada:** Creado documento detallado usando el template oficial para documentar el endpoint `GET /transactions/economy-stats`.
+    *   **T5.14 Implementada y Completada:** Sistema de ajuste dinámico de emisión implementado con:
+        - 2 nuevas tablas Prisma (`EmissionRateRecommendation`, `EmissionRateConfig`)
+        - Métodos de cálculo de ventana de 30 días en repositorio
+        - `EmissionRateAdjusterService` con lógica de recomendación
+        - `EmissionRateController` con 4 endpoints admin
+        - `CheckEmissionRatesJob` con cron diario a las 2 AM
+        - 14 pruebas unitarias con 89% de cobertura
+        - Seed script para configuraciones iniciales
+        - Integración completa en TransactionsModule
+    *   **Sprint Backlog Actualizado:** Referencias cruzadas añadidas a las tareas T5.11, T5.12, T5.13, y T5.14.
+    *   **Mejora del Template:** Se identificaron áreas de mejora para el template de tareas basadas en la experiencia de uso.
+
+### 🚧 Tareas Pendientes:
+
+1.  **Continuar con las Tareas Pendientes del Sprint 2:**
+    *   **T5.14:** Implementar ajuste dinámico de emisión basado en tasas de redención.
+    *   **T5.15:** Ampliar auditoría para incluir transacciones BURN y EXPIRE en el hash diario.
     *   **T8.3 & T8.4:** Realizar pruebas de carga con k6 y configurar la generación de reportes automáticos.
 2.  **Sprint 3 - Próximos Pasos:**
     *   Re-aplicar la migración de `BusinessPlan` y `blockedPointsBalance`.
