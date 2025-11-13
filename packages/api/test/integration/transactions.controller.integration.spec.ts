@@ -150,13 +150,13 @@ describe('TransactionsController (integration)', () => {
         .expect(401);
     });
 
-    it('should successfully redeem points for a customer', async () => {
+    it('should successfully redeem points and create a BURN ledger entry', async () => {
       const { accessToken } = await authService.login(testUser);
       const userToken = accessToken;
 
       const redeemDto = {
         businessId: testBusiness.id,
-        pointsToRedeem: 100,
+        pointsToRedeem: 200, // Changed from 100 to trigger burn
         ticketTotal: 50,
       };
 
@@ -166,30 +166,59 @@ describe('TransactionsController (integration)', () => {
         .send(redeemDto)
         .expect(201);
 
-      expect(response.body.pointsRedeemed).toBe(100);
-      expect(response.body.newCustomerBalance).toBe(900);
+      expect(response.body.pointsRedeemed).toBe(200);
+      expect(response.body.newCustomerBalance).toBe(800); // 1000 - 200
 
       // Verify db state
       const updatedUser = await prisma.user.findUnique({
         where: { id: testUser.id },
       });
-      expect(updatedUser!.pointsBalance).toBe(900);
+      expect(updatedUser!.pointsBalance).toBe(800);
 
       const updatedBusiness = await prisma.business.findUnique({
         where: { id: testBusiness.id },
       });
-      expect(updatedBusiness!.pointsBalance).toBe(5000 + 100);
+      const expectedBurnAmount = Math.floor(redeemDto.pointsToRedeem * 0.005); // 1
+      const expectedBusinessCredit =
+        redeemDto.pointsToRedeem - expectedBurnAmount; // 199
+      expect(updatedBusiness!.pointsBalance).toBe(
+        5000 + expectedBusinessCredit,
+      );
 
       // Verify Redis cache
       const cachedUserBalance = await redisService.get(
         `customer:${testUser.id}:balance`,
       );
-      expect(cachedUserBalance).toBe('900');
+      expect(cachedUserBalance).toBe('800');
 
       const cachedBusinessBalance = await redisService.get(
         `business:${testBusiness.id}:balance`,
       );
-      expect(cachedBusinessBalance).toBe('5100');
+      expect(cachedBusinessBalance).toBe(
+        (5000 + expectedBusinessCredit).toString(),
+      );
+
+      // Verify Ledger Entries
+      const ledgerEntries = await prisma.pointLedger.findMany({
+        where: { transactionId: response.body.transactionId },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      expect(ledgerEntries).toHaveLength(3); // Now expecting BURN entry
+
+      const redeemEntry = ledgerEntries.find(
+        (e) => e.type === 'REDEEM' && e.accountId === testUser.id,
+      );
+      const creditEntry = ledgerEntries.find(
+        (e) => e.type === 'REDEEM' && e.accountId === testBusiness.id,
+      );
+      const burnEntry = ledgerEntries.find((e) => e.type === 'BURN');
+
+      expect(redeemEntry.debit).toBe(200);
+      expect(creditEntry.credit).toBe(expectedBusinessCredit);
+      expect(burnEntry.debit).toBe(expectedBurnAmount);
+      expect(burnEntry.accountId).toBe(testBusiness.id);
+      expect(burnEntry.reason).toBe('OPERATIONAL_FEE');
     });
 
     it('should fail if redemption exceeds 30% of ticket total', async () => {
@@ -288,6 +317,27 @@ describe('TransactionsController (integration)', () => {
       expect(cachedBusinessBalance).toBe(
         (4800 + expectedBusinessCredit).toString(),
       );
+
+      // Verify Ledger Entries
+      const ledgerEntries = await prisma.pointLedger.findMany({
+        where: { transactionId: redeemResponse.body.transactionId },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      expect(ledgerEntries).toHaveLength(3);
+      const redeemEntry = ledgerEntries.find(
+        (e) => e.type === 'REDEEM' && e.accountId === testUser.id,
+      );
+      const creditEntry = ledgerEntries.find(
+        (e) => e.type === 'REDEEM' && e.accountId === testBusiness.id,
+      );
+      const burnEntry = ledgerEntries.find((e) => e.type === 'BURN');
+
+      expect(redeemEntry.debit).toBe(300);
+      expect(creditEntry.credit).toBe(expectedBusinessCredit);
+      expect(burnEntry.debit).toBe(expectedBurnAmount);
+      expect(burnEntry.accountId).toBe(testBusiness.id);
+      expect(burnEntry.reason).toBe('OPERATIONAL_FEE');
     });
   });
 
@@ -340,17 +390,10 @@ describe('TransactionsController (integration)', () => {
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
 
-      expect(response.body).toHaveProperty('totalEarned');
-      expect(response.body).toHaveProperty('totalRedeemed');
-      expect(response.body).toHaveProperty('totalBurned');
-      expect(response.body).toHaveProperty('redemptionRate');
-      expect(response.body).toHaveProperty('burnRatio');
-      expect(response.body).toHaveProperty('activePointsPercentage');
-
       // Basic check for non-zero values after transactions
-      expect(response.body.totalEarned).toBeGreaterThan(0);
-      expect(response.body.totalRedeemed).toBeGreaterThan(0);
-      expect(response.body.totalBurned).toBeGreaterThan(0);
+      expect(response.body.totalPointsIssued).toBeGreaterThan(0);
+      expect(response.body.totalPointsRedeemed).toBeGreaterThan(0);
+      expect(response.body.totalPointsBurned).toBeGreaterThan(0);
       expect(response.body.redemptionRate).toBeGreaterThan(0);
       expect(response.body.burnRatio).toBeGreaterThan(0);
     });

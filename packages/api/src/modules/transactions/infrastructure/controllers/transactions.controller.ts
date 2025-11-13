@@ -65,6 +65,6 @@ export class TransactionsController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('admin')
   async getEconomyStats() {
-    return this.economicControlService.getEconomyStats();
+    return this.economicControlService.getEconomicStats();
   }
 }

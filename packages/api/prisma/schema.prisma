@@ -111,3 +111,57 @@ model PointLedger {
 
   @@index([accountId])
 }
+
+model EconomicAlert {
+  id              String   @id @default(cuid())
+  alertType       String
+  severity        String
+  message         String
+  metricsSnapshot Json
+  acknowledged    Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  @@index([alertType])
+  @@index([createdAt])
+  @@index([acknowledged])
+}
+
+model EmissionRateRecommendation {
+  id                      String    @id @default(cuid())
+  currentEmissionRate     Decimal   @db.Decimal(10, 6)
+  recommendedEmissionRate Decimal   @db.Decimal(10, 6)
+  adjustmentPercentage    Decimal   @db.Decimal(5, 2)
+  reason                  String
+  redemptionRate30d       Decimal   @db.Decimal(5, 4)
+  metricsSnapshot         Json
+  status                  String    // 'PENDING', 'APPROVED', 'REJECTED', 'EXPIRED'
+  approvedBy              String?
+  approvedAt              DateTime?
+  appliedAt               DateTime?
+  createdAt               DateTime  @default(now())
+  expiresAt               DateTime
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model EmissionRateConfig {
+  id             String    @id @default(cuid())
+  rateType       String    @unique // 'BASE', 'PROMOTIONAL', 'STARTER_PLAN'
+  emissionRate   Decimal   @db.Decimal(10, 6)
+  lastAdjustedAt DateTime?
+  lastAdjustedBy String?
+  updatedAt      DateTime  @updatedAt
+}
+
+model DailyAuditHash {
+  id               String   @id @default(cuid())
+  date             DateTime @unique @db.Date
+  hash             String
+  entryCount       Int
+  transactionTypes Json     // Array of included types: ["EARN", "REDEEM", "BURN", "EXPIRE"]
+  blockchainTxHash String?  // Optional blockchain anchor for future
+  createdAt        DateTime @default(now())
+
+  @@index([createdAt])
+}

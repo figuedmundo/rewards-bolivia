@@ -6,6 +6,7 @@ import { RedisService } from '../../../infrastructure/redis/redis.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { TransactionEventPublisher } from './services/transaction-event.publisher';
 import { TransactionType } from '@prisma/client';
+import { EconomicControlService } from './services/economic-control.service';
 
 describe('RedeemPointsUseCase', () => {
   let useCase: RedeemPointsUseCase;
@@ -15,6 +16,12 @@ describe('RedeemPointsUseCase', () => {
   const mockTransactionRepository = {
     redeem: jest.fn(),
     create: jest.fn(),
+  };
+
+  const mockLedgerRepository = {
+    getTotalPointsIssued: jest.fn(),
+    getTotalPointsRedeemed: jest.fn(),
+    getTotalPointsBurned: jest.fn(),
   };
 
   const mockPrismaService = {
@@ -39,9 +46,14 @@ describe('RedeemPointsUseCase', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RedeemPointsUseCase,
+        EconomicControlService,
         {
           provide: 'ITransactionRepository',
           useValue: mockTransactionRepository,
+        },
+        {
+          provide: 'ILedgerRepository',
+          useValue: mockLedgerRepository,
         },
         {
           provide: PrismaService,
@@ -172,14 +184,17 @@ describe('RedeemPointsUseCase', () => {
         '1',
       );
 
-      expect(transactionRepository.redeem).toHaveBeenCalledWith({
-        type: TransactionType.REDEEM,
-        pointsAmount: 100,
-        status: 'COMPLETED',
-        auditHash: expect.any(String),
-        businessId: '1',
-        customerId: '1',
-      });
+      expect(transactionRepository.redeem).toHaveBeenCalledWith(
+        {
+          type: TransactionType.REDEEM,
+          pointsAmount: 100,
+          status: 'COMPLETED',
+          auditHash: expect.any(String),
+          businessId: '1',
+          customerId: '1',
+        },
+        0,
+      );
       expect(eventPublisher.publishTransactionCompleted).toHaveBeenCalledWith({
         transaction: expect.objectContaining({
           id: '1',
