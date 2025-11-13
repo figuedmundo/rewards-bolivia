@@ -153,3 +153,15 @@ model EmissionRateConfig {
   lastAdjustedBy String?
   updatedAt      DateTime  @updatedAt
 }
+
+model DailyAuditHash {
+  id               String   @id @default(cuid())
+  date             DateTime @unique @db.Date
+  hash             String
+  entryCount       Int
+  transactionTypes Json     // Array of included types: ["EARN", "REDEEM", "BURN", "EXPIRE"]
+  blockchainTxHash String?  // Optional blockchain anchor for future
+  createdAt        DateTime @default(now())
+
+  @@index([createdAt])
+}

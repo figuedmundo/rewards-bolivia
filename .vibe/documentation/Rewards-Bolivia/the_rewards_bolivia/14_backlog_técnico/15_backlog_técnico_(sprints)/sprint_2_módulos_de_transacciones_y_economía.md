@@ -71,7 +71,7 @@ Implementar el núcleo económico del sistema Rewards Bolivia: gestión de trans
 | **T5.12** | Hook contable post-tx (domain event) | Subscriber `onTransactionCompleted` que actualiza métricas: puntosRedimidos, puntosQuemados, puntosExpirados; dispara alertas si %activos > 80%. | 1 d | [done](../../../../../../.vibe/tasks/sprint2/11_T5.12_post_transaction_hook.md) |
 | **T5.13** | GET `/transactions/economy-stats` | Endpoint admin: emisión mensual, redención, burnRatio, % puntos activos, recomendaciones. | 0.5 d | [done](../../../../../../.vibe/tasks/sprint2/12_T5.13_economy_stats_endpoint.md) |
 | **T5.14** | Ajuste dinámico de emisión (beta) | Regla: si tasa de redención < 25% en trailing 30d → reducir emisión promo/Starter. | 1 d | [done](../../../../../../.vibe/tasks/sprint2/13_T5.14_dynamic_emission_adjustment.md) |
-| **T5.15** | Auditoría ampliada (BURN/EXPIRE) | Incluir `BURN` y `EXPIRE` en batch hash diario on-chain. | 0.5 d |
+| **T5.15** | Auditoría ampliada (BURN/EXPIRE) | Incluir `BURN` y `EXPIRE` en batch hash diario on-chain. | 0.5 d | [done](../../../../../../.vibe/tasks/sprint2/14_T5.15_expanded_audit_system.md) |
 
 ---
 
@@ -340,16 +340,46 @@ Implementar el núcleo económico del sistema Rewards Bolivia: gestión de trans
         - 14 pruebas unitarias con 89% de cobertura
         - Seed script para configuraciones iniciales
         - Integración completa en TransactionsModule
-    *   **Sprint Backlog Actualizado:** Referencias cruzadas añadidas a las tareas T5.11, T5.12, T5.13, y T5.14.
+    *   **T5.15 Planificada:** Creado documento de planificación completo para expansión del sistema de auditoría. Incluye:
+        - Análisis estratégico de 4 opciones (expansión de hash existente, hashes separados, Merkle tree, híbrido)
+        - Recomendación: expandir hash existente para incluir BURN/EXPIRE (simplicidad MVP)
+        - Diseño de tabla `DailyAuditHash` para almacenamiento de hashes diarios
+        - Especificación detallada del algoritmo SHA256 para auditores externos
+        - `AuditHashService` para generación y verificación de hashes
+        - `AuditController` con endpoints admin para consulta/verificación
+        - `GenerateDailyAuditHashJob` con cron diario a las 3 AM
+        - Estrategia de testing completa (determinismo, verificación, edge cases)
+        - Documentación del proceso de verificación para stakeholders
+    *   **Sprint Backlog Actualizado:** Referencias cruzadas añadidas a las tareas T5.11-T5.15.
     *   **Mejora del Template:** Se identificaron áreas de mejora para el template de tareas basadas en la experiencia de uso.
+
+2.  **Finalización de T5.14 - Sistema de Ajuste Dinámico de Emisión:**
+    *   **`EmissionRateAdjusterService`:** Servicio implementado con lógica de recomendación automática.
+    *   **Tablas Prisma:** Añadidas `EmissionRateRecommendation` y `EmissionRateConfig`.
+    *   **Workflow Semi-Automático:** Sistema genera recomendaciones, admin aprueba/rechaza.
+    *   **Endpoints Admin:** 4 endpoints para gestionar recomendaciones y configuraciones.
+    *   **Job Programado:** `CheckEmissionRatesJob` ejecutándose diariamente a las 2 AM UTC.
+    *   **Guardrails de Seguridad:** Límites de ajuste (5-20%), cooldown de 7 días, validación de muestra mínima.
+    *   **Pruebas Unitarias:** 14 tests con 89% de cobertura.
+    *   **Documentación:** Documento de tarea completo con análisis estratégico y especificaciones.
+
+3.  **Finalización de T5.15 - Sistema de Auditoría Expandido:**
+    *   **`AuditHashService`:** Servicio implementado con generación y verificación de hashes SHA256.
+    *   **Tabla `DailyAuditHash`:** Almacenamiento de hashes diarios con metadata (tipos de transacciones, conteo).
+    *   **Cobertura Completa:** Hash incluye TODOS los tipos de ledger (EARN, REDEEM, BURN, EXPIRE, ADJUSTMENT).
+    *   **Endpoints Admin:** 4 endpoints para consulta, verificación y generación manual de hashes.
+    *   **Job Programado:** `GenerateDailyAuditHashJob` ejecutándose diariamente a las 3 AM UTC.
+    *   **Hash Determinístico:** Algoritmo documentado con sorting consistente (createdAt ASC, id ASC).
+    *   **Pruebas Unitarias:** 15 tests con 100% statement coverage, 90% branch coverage.
+    *   **Preparado para Blockchain:** Campo `blockchainTxHash` para futuro anclaje on-chain.
 
 ### 🚧 Tareas Pendientes:
 
 1.  **Continuar con las Tareas Pendientes del Sprint 2:**
-    *   **T5.14:** Implementar ajuste dinámico de emisión basado en tasas de redención.
-    *   **T5.15:** Ampliar auditoría para incluir transacciones BURN y EXPIRE en el hash diario.
     *   **T8.3 & T8.4:** Realizar pruebas de carga con k6 y configurar la generación de reportes automáticos.
 2.  **Sprint 3 - Próximos Pasos:**
     *   Re-aplicar la migración de `BusinessPlan` y `blockedPointsBalance`.
     *   Implementar la lógica condicional en el `PrismaTransactionRepository` para manejar los puntos bloqueados.
     *   Crear pruebas de integración y E2E específicas para el escenario del "Starter Plan".
+    *   Pruebas de integración E2E para T5.14 y T5.15 (flujo completo de ajuste de emisión y verificación de auditoría).
+    *   Implementar alerting para fallos en jobs programados (CheckEmissionRatesJob, GenerateDailyAuditHashJob).

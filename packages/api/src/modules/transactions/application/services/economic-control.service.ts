@@ -27,7 +27,7 @@ export class EconomicControlService {
 
     const burnRatio =
       totalPointsRedeemed > 0 ? totalPointsBurned / totalPointsRedeemed : 0;
-    const activePoints = totalPointsIssued - totalPointsBurned;
+    const activePoints = totalPointsIssued - totalPointsRedeemed;
     const activePointsPercentage =
       totalPointsIssued > 0 ? activePoints / totalPointsIssued : 0;
     const redemptionRate =

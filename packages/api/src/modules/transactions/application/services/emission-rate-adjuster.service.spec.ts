@@ -130,7 +130,9 @@ describe('EmissionRateAdjusterService', () => {
       const result = await service.generateRecommendationIfNeeded();
 
       expect(result).toBeDefined();
-      expect(prismaService.emissionRateRecommendation.create).toHaveBeenCalled();
+      expect(
+        prismaService.emissionRateRecommendation.create,
+      ).toHaveBeenCalled();
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'emission.recommendation.created',
         expect.any(Object),

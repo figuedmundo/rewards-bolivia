@@ -45,9 +45,9 @@ describe('EconomicControlService', () => {
       expect(stats.totalPointsIssued).toBe(1000);
       expect(stats.totalPointsRedeemed).toBe(500);
       expect(stats.totalPointsBurned).toBe(10);
-      expect(stats.burnRatio).toBe(10 / 500);
-      expect(stats.activePointsPercentage).toBe((1000 - 10) / 1000);
-      expect(stats.redemptionRate).toBe(500 / 1000);
+      expect(stats.burnRatio).toBe(10 / 500); // burned / redeemed = 2%
+      expect(stats.activePointsPercentage).toBe((1000 - 500) / 1000); // (issued - redeemed) / issued = 50%
+      expect(stats.redemptionRate).toBe(500 / 1000); // redeemed / issued = 50%
     });
 
     it('should handle division by zero gracefully', async () => {
