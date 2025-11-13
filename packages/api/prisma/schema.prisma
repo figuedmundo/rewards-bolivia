@@ -111,3 +111,17 @@ model PointLedger {
 
   @@index([accountId])
 }
+
+model EconomicAlert {
+  id              String   @id @default(cuid())
+  alertType       String
+  severity        String
+  message         String
+  metricsSnapshot Json
+  acknowledged    Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  @@index([alertType])
+  @@index([createdAt])
+  @@index([acknowledged])
+}

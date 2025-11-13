@@ -67,7 +67,7 @@ Implementar el núcleo económico del sistema Rewards Bolivia: gestión de trans
 |----|-------|-------------|-----------:|
 | **T5.9** | `EconomicControlService` | (done) Servicio central para métricas y reglas económicas (emitidos, redimidos, expirados, quemados). Expone funciones para decidir ajustes dinámicos. | 1 d |
 | **T5.10** | *Transaction fee* (burn leve) | (done) Al procesar `redeem`, calcular y quemar `burnAmount = floor(pointsUsed * feeRate)`; feeRate configurable (default 0.5%). Registrar `BURN` ledger entry. | 0.5 d |
-| **T5.11** | Registrar `BURN` en `PointLedger` | Nuevo tipo `BURN` con referencia `transactionId`, reason, amount, timestamp. | 0.5 d |
+| **T5.11** | Registrar `BURN` en `PointLedger` | Nuevo tipo `BURN` con referencia `transactionId`, reason, amount, timestamp. | 0.5 d | done |
 | **T5.12** | Hook contable post-tx (domain event) | Subscriber `onTransactionCompleted` que actualiza métricas: puntosRedimidos, puntosQuemados, puntosExpirados; dispara alertas si %activos > 80%. | 1 d |
 | **T5.13** | GET `/transactions/economy-stats` | Endpoint admin: emisión mensual, redención, burnRatio, % puntos activos, recomendaciones. | 0.5 d |
 | **T5.14** | Ajuste dinámico de emisión (beta) | Regla: si tasa de redención < 25% en trailing 30d → reducir emisión promo/Starter. | 1 d |

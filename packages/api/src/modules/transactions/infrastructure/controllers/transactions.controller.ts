@@ -16,8 +16,6 @@ import { PrismaService } from '../../../../infrastructure/prisma.service';
 import { EconomicControlService } from '../../application/services/economic-control.service';
 import { RolesGuard } from 'src/modules/auth/roles.guard';
 import { Roles } from 'src/modules/auth/roles.decorator';
-import { ApiResponse } from '@nestjs/swagger';
-
 
 @Controller('transactions')
 export class TransactionsController {

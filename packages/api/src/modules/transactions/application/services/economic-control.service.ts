@@ -18,22 +18,20 @@ export class EconomicControlService {
   ) {}
 
   async getEconomicStats(): Promise<EconomicStats> {
-    const totalPointsIssued = await this.ledgerRepository.getTotalPointsIssued();
+    const totalPointsIssued =
+      await this.ledgerRepository.getTotalPointsIssued();
     const totalPointsRedeemed =
       await this.ledgerRepository.getTotalPointsRedeemed();
-    const totalPointsBurned = await this.ledgerRepository.getTotalPointsBurned();
+    const totalPointsBurned =
+      await this.ledgerRepository.getTotalPointsBurned();
 
     const burnRatio =
-      totalPointsRedeemed > 0
-        ? totalPointsBurned / totalPointsRedeemed
-        : 0;
+      totalPointsRedeemed > 0 ? totalPointsBurned / totalPointsRedeemed : 0;
     const activePoints = totalPointsIssued - totalPointsBurned;
     const activePointsPercentage =
       totalPointsIssued > 0 ? activePoints / totalPointsIssued : 0;
     const redemptionRate =
-      totalPointsIssued > 0
-        ? totalPointsRedeemed / totalPointsIssued
-        : 0;
+      totalPointsIssued > 0 ? totalPointsRedeemed / totalPointsIssued : 0;
 
     const stats = {
       totalPointsIssued,
@@ -50,7 +48,7 @@ export class EconomicControlService {
   /**
    * Placeholder for future dynamic rule adjustments.
    */
-  async checkAndAdjustEmissionRates(): Promise<void> {
+  checkAndAdjustEmissionRates(): void {
     // In the future, this method could contain logic to:
     // 1. Fetch redemption rates over the last 30 days.
     // 2. Compare against a threshold (e.g., 25%).
