@@ -2,7 +2,7 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 import type { ILedgerRepository } from '../../domain/repositories/ledger.repository';
 import { PrismaService } from '../../../../infrastructure/prisma.service';
-import type { EmissionRateRecommendation } from '@prisma/client';
+import { Prisma, type EmissionRateRecommendation } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
 export interface Trailing30DayMetrics {
@@ -141,7 +141,7 @@ export class EmissionRateAdjusterService {
         adjustmentPercentage: new Decimal(-adjustmentPercentage * 100), // Store as negative percentage
         reason: `Low redemption rate detected: ${(metrics.redemptionRate * 100).toFixed(2)}% (threshold: ${(this.REDEMPTION_THRESHOLD * 100).toFixed(2)}%). Recommending ${(adjustmentPercentage * 100).toFixed(2)}% reduction in emission rate to balance economy.`,
         redemptionRate30d: new Decimal(metrics.redemptionRate),
-        metricsSnapshot: metrics,
+        metricsSnapshot: metrics as unknown as Prisma.InputJsonValue,
         status: 'PENDING',
         expiresAt,
       },

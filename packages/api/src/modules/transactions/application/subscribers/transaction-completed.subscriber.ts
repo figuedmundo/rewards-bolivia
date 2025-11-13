@@ -8,7 +8,7 @@ import {
 } from '../services/economic-control.service';
 import { RedisService } from '../../../../infrastructure/redis/redis.service';
 import { PrismaService } from '../../../../infrastructure/prisma.service';
-import { TransactionType } from '@prisma/client';
+import { Prisma, TransactionType } from '@prisma/client';
 
 interface CachedEconomicStats extends EconomicStats {
   lastUpdated: number;
@@ -198,7 +198,7 @@ export class TransactionCompletedSubscriber {
           alertType,
           severity,
           message,
-          metricsSnapshot: metrics as unknown as Record<string, unknown>,
+          metricsSnapshot: metrics as unknown as Prisma.InputJsonValue,
           acknowledged: false,
         },
       });
