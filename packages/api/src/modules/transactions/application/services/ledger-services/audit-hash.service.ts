@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { createHash } from 'crypto';
-import { PrismaService } from '../../../../infrastructure/prisma.service';
+import { PrismaService } from '../../../../../infrastructure/prisma.service';
 import type { DailyAuditHash, PointLedger } from '@prisma/client';
 
 export interface HashVerificationResult {

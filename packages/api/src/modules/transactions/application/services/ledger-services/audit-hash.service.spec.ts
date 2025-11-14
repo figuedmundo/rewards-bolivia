@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuditHashService } from './audit-hash.service';
-import { PrismaService } from '../../../../infrastructure/prisma.service';
+import { PrismaService } from '../../../../../infrastructure/prisma.service';
 import { LedgerEntryType } from '@prisma/client';
 import type { DailyAuditHash, PointLedger } from '@prisma/client';
 

@@ -11,12 +11,12 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../../../auth/roles.guard';
 import { Roles } from '../../../auth/roles.decorator';
-import { AuditHashService } from '../../application/services/audit-hash.service';
+import { AuditHashService } from '../../application/services/ledger-services/audit-hash.service';
 
 @Controller('admin/audit')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Roles('admin')
-export class AuditController {
+export class AdminAuditController {
   constructor(private readonly auditHashService: AuditHashService) {}
 
   /**

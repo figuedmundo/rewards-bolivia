@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TransactionsController } from './infrastructure/controllers/transactions.controller';
 import { EmissionRateController } from './infrastructure/controllers/emission-rate.controller';
-import { AuditController } from './infrastructure/controllers/audit.controller';
+import { AdminAuditController } from './infrastructure/controllers/admin-audit.controller';
+import { LedgerController } from './infrastructure/controllers/ledger.controller';
 import { EarnPointsUseCase } from './application/earn-points.use-case';
 import { RedeemPointsUseCase } from './application/redeem-points.use-case';
 import { PrismaTransactionRepository } from './infrastructure/repositories/prisma-transaction.repository';
@@ -10,7 +11,9 @@ import { PrismaModule } from '../../infrastructure/prisma.module';
 import { RedisModule } from '../../infrastructure/redis/redis.module';
 import { EconomicControlService } from './application/services/economic-control.service';
 import { EmissionRateAdjusterService } from './application/services/emission-rate-adjuster.service';
-import { AuditHashService } from './application/services/audit-hash.service';
+import { AuditHashService } from './application/services/ledger-services/audit-hash.service';
+import { LedgerHashService } from './application/services/ledger-services/ledger-hash.service';
+import { LedgerCreationHelper } from './application/services/ledger-services/ledger-creation.helper';
 import { TransactionEventPublisher } from './application/services/transaction-event.publisher';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PrismaLedgerRepository } from './infrastructure/repositories/prisma-ledger.repository';
@@ -28,7 +31,8 @@ import { GenerateDailyAuditHashJob } from './application/jobs/generate-daily-aud
   controllers: [
     TransactionsController,
     EmissionRateController,
-    AuditController,
+    AdminAuditController,
+    LedgerController,
   ],
   providers: [
     EarnPointsUseCase,
@@ -36,6 +40,8 @@ import { GenerateDailyAuditHashJob } from './application/jobs/generate-daily-aud
     EconomicControlService,
     EmissionRateAdjusterService,
     AuditHashService,
+    LedgerHashService,
+    LedgerCreationHelper,
     TransactionEventPublisher,
     PrismaLedgerRepository,
     TransactionCompletedSubscriber,
