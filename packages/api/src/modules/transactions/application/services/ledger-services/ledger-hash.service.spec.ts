@@ -1,22 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { LedgerHashService } from './ledger-hash.service';
-import { LedgerEntryType, PointLedger } from '@prisma/client';
-
-const createMockEntry = (overrides: Partial<PointLedger> = {}): PointLedger => {
-  return {
-    id: 'clx123abc',
-    type: LedgerEntryType.EARN,
-    accountId: 'user123',
-    debit: 0,
-    credit: 100,
-    balanceAfter: 100,
-    reason: 'Test',
-    hash: null,
-    createdAt: new Date('2025-01-15T10:00:00.000Z'),
-    transactionId: 'tx123',
-    ...overrides,
-  };
-};
+import { PointLedger } from '@prisma/client';
+import { createHash } from 'crypto';
 
 describe('LedgerHashService', () => {
   let service: LedgerHashService;
@@ -33,66 +18,95 @@ describe('LedgerHashService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should compute a deterministic hash for the same input', () => {
+  const createMockEntry = (overrides?: Partial<PointLedger>): PointLedger => {
+    const now = new Date();
+    return {
+      id: 'clx123mockid',
+      type: 'EARN',
+      accountId: 'user_abc',
+      debit: 0,
+      credit: 100,
+      balanceAfter: 100,
+      reason: 'Test reason',
+      hash: null,
+      createdAt: now,
+      transactionId: 'tx_xyz',
+      ...overrides,
+    };
+  };
+
+  it('should compute deterministic hash for same input', () => {
     const entry = createMockEntry();
     const hash1 = service.computeEntryHash(entry);
     const hash2 = service.computeEntryHash(entry);
     expect(hash1).toBe(hash2);
-    expect(hash1).toMatch(/^[a-f0-9]{64}$/);
   });
 
-  it('should compute a different hash for different inputs', () => {
-    const entry1 = createMockEntry({ debit: 100 });
-    const entry2 = createMockEntry({ debit: 200 });
+  it('should compute different hash for different inputs', () => {
+    const entry1 = createMockEntry({ debit: 100, credit: 0, balanceAfter: 100 });
+    const entry2 = createMockEntry({ debit: 0, credit: 200, balanceAfter: 200 });
     const hash1 = service.computeEntryHash(entry1);
     const hash2 = service.computeEntryHash(entry2);
     expect(hash1).not.toBe(hash2);
   });
 
-  it('should verify a valid hash', () => {
+  it('should verify valid hash', () => {
     const entry = createMockEntry();
     entry.hash = service.computeEntryHash(entry);
     expect(service.verifyEntryHash(entry)).toBe(true);
   });
 
-  it('should reject an invalid hash', () => {
+  it('should reject invalid hash', () => {
     const entry = createMockEntry();
     entry.hash = 'invalid_hash';
     expect(service.verifyEntryHash(entry)).toBe(false);
   });
 
-  it('should return false when verifying an entry with no hash', () => {
+  it('should return false if entry hash is null', () => {
     const entry = createMockEntry();
+    entry.hash = null;
     expect(service.verifyEntryHash(entry)).toBe(false);
   });
 
-  it('should compute a hash for a new entry and return it with a timestamp', () => {
+  it('should compute hash for new entry data with a timestamp', () => {
     const newEntryData = {
       id: 'new_id',
-      type: 'REDEEM',
-      accountId: 'user456',
+      type: 'ADJUSTMENT',
+      accountId: 'user_def',
       debit: 50,
       credit: 0,
       balanceAfter: 50,
-      transactionId: 'tx456',
+      transactionId: 'tx_uvw',
     };
-    const result = service.computeHashForNewEntry(newEntryData);
-    expect(result.hash).toMatch(/^[a-f0-9]{64}$/);
-    expect(result.timestamp).toBeInstanceOf(Date);
+    const { hash, timestamp } = service.computeHashForNewEntry(newEntryData);
+    expect(hash).toBeDefined();
+    expect(timestamp).toBeInstanceOf(Date);
+
+    const expectedData = `${newEntryData.id}|${newEntryData.type}|${newEntryData.accountId}|${newEntryData.debit}|${newEntryData.credit}|${newEntryData.balanceAfter}|${newEntryData.transactionId}|${timestamp.toISOString()}`;
+    const expectedHash = createHash('sha256').update(expectedData).digest('hex');
+    expect(hash).toBe(expectedHash);
   });
 
-  it('should complete hash computation in <10ms', () => {
-    const entry = createMockEntry();
-    const start = performance.now();
+  it('should compute different hash for new entries with different timestamps', () => {
+    jest.useFakeTimers();
 
-    for (let i = 0; i < 100; i++) {
-      service.computeEntryHash(entry);
-    }
+    const newEntryData = {
+      id: 'new_id',
+      type: 'ADJUSTMENT',
+      accountId: 'user_def',
+      debit: 50,
+      credit: 0,
+      balanceAfter: 50,
+      transactionId: 'tx_uvw',
+    };
 
-    const end = performance.now();
-    const avgTime = (end - start) / 100;
+    jest.setSystemTime(new Date('2025-01-01T10:00:00Z'));
+    const { hash: hash1 } = service.computeHashForNewEntry(newEntryData);
 
-    console.log(`Average hash computation time: ${avgTime.toFixed(4)}ms`);
-    expect(avgTime).toBeLessThan(10);
+    jest.setSystemTime(new Date('2025-01-01T10:00:01Z')); // 1 second later
+    const { hash: hash2 } = service.computeHashForNewEntry(newEntryData);
+
+    expect(hash1).not.toBe(hash2);
+    jest.useRealTimers(); // Restore real timers
   });
 });

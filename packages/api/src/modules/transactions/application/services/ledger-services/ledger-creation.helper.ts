@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../../../infrastructure/prisma.service';
+import { Injectable, Inject } from '@nestjs/common';
+import { PrismaService } from '@/infrastructure/prisma.service';
 import { LedgerHashService } from './ledger-hash.service';
 import type { PointLedger, Prisma } from '@prisma/client';
 import { createId } from '@paralleldrive/cuid2';
@@ -16,7 +16,7 @@ export class LedgerCreationHelper {
    * Uses transaction context if provided
    */
   async createLedgerEntry(
-    data: Omit<Prisma.PointLedgerCreateInput, 'hash' | 'id'>,
+    data: Omit<Prisma.PointLedgerCreateInput, 'hash' | 'id' | 'createdAt'>,
     tx?: Prisma.TransactionClient,
   ): Promise<PointLedger> {
     const client = tx || this.prisma;
@@ -32,7 +32,7 @@ export class LedgerCreationHelper {
       debit: data.debit,
       credit: data.credit,
       balanceAfter: data.balanceAfter,
-      transactionId: data.transaction.connect.id,
+      transactionId: data.transaction?.connect?.id,
     });
 
     // Create entry with hash in single DB call

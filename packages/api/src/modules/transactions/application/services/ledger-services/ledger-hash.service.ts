@@ -6,10 +6,10 @@ import type { PointLedger } from '@prisma/client';
 export class LedgerHashService {
   /**
    * Compute SHA256 hash for a single ledger entry
-   * Format: SHA256(id|type|accountId|debit|credit|balanceAfter|transactionId|createdAt)
+   * Format: id|type|accountId|debit|credit|balanceAfter|transactionId|createdAt
    */
   computeEntryHash(entry: PointLedger | LedgerEntryData): string {
-    const data = `${entry.id}|${entry.type}|${entry.accountId}|${entry.debit}|${entry.credit}|${entry.balanceAfter}|${entry.transactionId}|${entry.createdAt.toISOString()}`;
+    const data = `${entry.id}|${entry.type}|${entry.accountId}|${entry.debit}|${entry.credit}|${entry.balanceAfter}|${entry.transactionId ?? ''}|${entry.createdAt.toISOString()}`;
     return createHash('sha256').update(data).digest('hex');
   }
 
@@ -44,7 +44,7 @@ interface LedgerEntryData {
   debit: number;
   credit: number;
   balanceAfter: number;
-  transactionId: string;
+  transactionId?: string | null;
   createdAt: Date;
 }
 
@@ -55,5 +55,5 @@ interface NewLedgerEntryData {
   debit: number;
   credit: number;
   balanceAfter: number;
-  transactionId: string;
+  transactionId?: string | null;
 }

@@ -12,7 +12,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../../../auth/get-user.decorator';
 import type { User } from '@prisma/client';
-import { ILedgerRepository } from '../../domain/repositories/ledger.repository';
+import type { ILedgerRepository } from '../../domain/repositories/ledger.repository';
 import { LedgerHashService } from '../../application/services/ledger-services/ledger-hash.service';
 import { RolesGuard } from '../../../auth/roles.guard';
 import { Roles } from '../../../auth/roles.decorator';

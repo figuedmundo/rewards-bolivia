@@ -7,9 +7,10 @@ import {
 import { PrismaService } from '../../../../infrastructure/prisma.service';
 import { ITransactionRepository } from '../../domain/repositories/transaction.repository';
 import { Transaction } from '../../domain/entities/transaction.entity';
-import { TransactionType, LedgerEntryType } from '@prisma/client';
+import { TransactionType, LedgerEntryType, PointLedger } from '@prisma/client';
 import { TransactionEventPublisher } from '../../application/services/transaction-event.publisher';
 import { LedgerCreationHelper } from '../../application/services/ledger-services/ledger-creation.helper';
+
 
 import { RedisService } from '../../../../infrastructure/redis/redis.service';
 
@@ -143,7 +144,7 @@ export class PrismaTransactionRepository implements ITransactionRepository {
           });
 
           // 4. Create ledger entries using the helper
-          const ledgerEntries = [];
+          const ledgerEntries: PointLedger[] = [];
 
           // Debit from the source
           const sourceEntry = await this.ledgerCreationHelper.createLedgerEntry(

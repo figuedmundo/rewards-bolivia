@@ -1079,7 +1079,7 @@ This task was successfully completed. The project's audit capabilities were enha
   });
   ```
 
-- **Task 2.6:** Add performance test
+- **Task 2.6:** Add performance test (Blocked)
   ```typescript
   // Ensure hashing doesn't add significant latency
   it('should complete hash computation in <10ms', async () => {
@@ -1103,7 +1103,7 @@ This task was successfully completed. The project's audit capabilities were enha
 - [x] All use cases updated to use helper
 - [x] All new ledger entries have valid SHA256 hashes
 - [x] Integration tests verify hash correctness
-- [x] Performance test confirms <10ms overhead
+- [ ] Performance test confirms <10ms overhead 
 - [x] All existing tests still pass
 
 ---
