@@ -7,8 +7,9 @@ import {
 import { PrismaService } from '../../../../infrastructure/prisma.service';
 import { ITransactionRepository } from '../../domain/repositories/transaction.repository';
 import { Transaction } from '../../domain/entities/transaction.entity';
-import { TransactionType, LedgerEntryType } from '@prisma/client';
+import { TransactionType, LedgerEntryType, PointLedger } from '@prisma/client';
 import { TransactionEventPublisher } from '../../application/services/transaction-event.publisher';
+import { LedgerCreationHelper } from '../../application/services/ledger-services/ledger-creation.helper';
 
 import { RedisService } from '../../../../infrastructure/redis/redis.service';
 
@@ -21,6 +22,7 @@ export class PrismaTransactionRepository implements ITransactionRepository {
     private readonly prisma: PrismaService,
     private readonly eventPublisher: TransactionEventPublisher,
     private readonly redisService: RedisService,
+    private readonly ledgerCreationHelper: LedgerCreationHelper,
   ) {}
 
   /**
@@ -140,18 +142,11 @@ export class PrismaTransactionRepository implements ITransactionRepository {
             },
           });
 
-          // 4. Create ledger entries
-          const ledgerEntriesData: {
-            type: LedgerEntryType;
-            accountId: string;
-            debit: number;
-            credit: number;
-            balanceAfter: number;
-            reason?: string | null;
-            hash?: string | null;
-            transactionId: string;
-          }[] = [
-            // Debit from the source
+          // 4. Create ledger entries using the helper
+          const ledgerEntries: PointLedger[] = [];
+
+          // Debit from the source
+          const sourceEntry = await this.ledgerCreationHelper.createLedgerEntry(
             {
               type:
                 type === TransactionType.EARN
@@ -165,9 +160,14 @@ export class PrismaTransactionRepository implements ITransactionRepository {
                 type === TransactionType.EARN
                   ? business.pointsBalance
                   : customer.pointsBalance,
-              transactionId: dbTransaction.id,
+              transaction: { connect: { id: dbTransaction.id } },
             },
-            // Credit to the destination
+            tx,
+          );
+          ledgerEntries.push(sourceEntry);
+
+          // Credit to the destination
+          const destEntry = await this.ledgerCreationHelper.createLedgerEntry(
             {
               type:
                 type === TransactionType.EARN
@@ -181,27 +181,28 @@ export class PrismaTransactionRepository implements ITransactionRepository {
                 type === TransactionType.EARN
                   ? customer.pointsBalance
                   : business.pointsBalance,
-              transactionId: dbTransaction.id,
+              transaction: { connect: { id: dbTransaction.id } },
             },
-          ];
+            tx,
+          );
+          ledgerEntries.push(destEntry);
 
           // Add BURN ledger entry if applicable
           if (type === TransactionType.REDEEM && burnAmount > 0) {
-            ledgerEntriesData.push({
-              type: LedgerEntryType.BURN,
-              accountId: businessId,
-              debit: burnAmount,
-              credit: 0,
-              balanceAfter: business.pointsBalance, // Final correct balance
-              reason: 'OPERATIONAL_FEE',
-              hash: null,
-              transactionId: dbTransaction.id,
-            });
+            const burnEntry = await this.ledgerCreationHelper.createLedgerEntry(
+              {
+                type: LedgerEntryType.BURN,
+                accountId: businessId,
+                debit: burnAmount,
+                credit: 0,
+                balanceAfter: business.pointsBalance, // Final correct balance
+                reason: 'OPERATIONAL_FEE',
+                transaction: { connect: { id: dbTransaction.id } },
+              },
+              tx,
+            );
+            ledgerEntries.push(burnEntry);
           }
-
-          const ledgerEntries = await tx.pointLedger.createManyAndReturn({
-            data: ledgerEntriesData,
-          });
 
           // Cache new balances after successful transaction
           await this.setCachedBalance(

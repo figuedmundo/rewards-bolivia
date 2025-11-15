@@ -95,4 +95,80 @@ export class PrismaLedgerRepository implements ILedgerRepository {
     });
     return count;
   }
+
+  async findLedgerEntriesByAccount(
+    accountId: string,
+    options: import('../../domain/repositories/ledger.repository').QueryOptions = {},
+  ): Promise<{
+    entries: import('@prisma/client').PointLedger[];
+    total: number;
+  }> {
+    const { limit = 50, offset = 0 } = options;
+
+    const [entries, total] = await this.prisma.$transaction([
+      this.prisma.pointLedger.findMany({
+        where: { accountId },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        take: limit,
+        skip: offset,
+      }),
+      this.prisma.pointLedger.count({
+        where: { accountId },
+      }),
+    ]);
+
+    return { entries, total };
+  }
+
+  async findLedgerEntriesByTransaction(
+    transactionId: string,
+  ): Promise<import('@prisma/client').PointLedger[]> {
+    return this.prisma.pointLedger.findMany({
+      where: { transactionId },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    });
+  }
+
+  async findLedgerEntriesByDateRange(
+    startDate: Date,
+    endDate: Date,
+    options: import('../../domain/repositories/ledger.repository').QueryOptions = {},
+  ): Promise<{
+    entries: import('@prisma/client').PointLedger[];
+    total: number;
+  }> {
+    const { limit = 50, offset = 0 } = options;
+
+    const [entries, total] = await this.prisma.$transaction([
+      this.prisma.pointLedger.findMany({
+        where: {
+          createdAt: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        take: limit,
+        skip: offset,
+      }),
+      this.prisma.pointLedger.count({
+        where: {
+          createdAt: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+      }),
+    ]);
+
+    return { entries, total };
+  }
+
+  async findLedgerEntryById(
+    id: string,
+  ): Promise<import('@prisma/client').PointLedger | null> {
+    return this.prisma.pointLedger.findUnique({
+      where: { id },
+    });
+  }
 }

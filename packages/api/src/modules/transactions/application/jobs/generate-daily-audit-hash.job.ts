@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { AuditHashService } from '../services/audit-hash.service';
+import { AuditHashService } from '../services/ledger-services/audit-hash.service';
 
 @Injectable()
 export class GenerateDailyAuditHashJob {

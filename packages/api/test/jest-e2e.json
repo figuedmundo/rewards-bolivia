@@ -1,10 +1,22 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
-  "rootDir": ".",
+  "rootDir": "..",
   "testEnvironment": "node",
-  "testRegex": ".e2e-spec.ts$",
+  "testMatch": ["<rootDir>/test/**/*.e2e-spec.ts"],
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
-  "setupFiles": ["<rootDir>/test/setup-e2e.ts"]
+  "transformIgnorePatterns": [
+    "/node_modules/(?!uuid|jest-mock-extended|@paralleldrive/cuid2)"
+  ],
+  "setupFiles": ["<rootDir>/test/setup-e2e.ts"],
+  "moduleDirectories": [
+    "node_modules",
+    "../../node_modules"
+  ],
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/src/$1",
+    "^src/(.*)$": "<rootDir>/src/$1",
+    "@paralleldrive/cuid2": "<rootDir>/test/mocks/cuid2-partial.js"
+  }
 }

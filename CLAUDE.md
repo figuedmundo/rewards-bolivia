@@ -188,6 +188,76 @@ The transactions module includes an `EconomicControlService` that:
 
 When working on transactions, always consider economic impact and ensure proper ledger entries.
 
+## Ledger & Audit System
+
+The project implements a **dual-level hashing strategy** for comprehensive audit coverage:
+
+### Per-Transaction Hashing (Epic 6)
+
+Every `PointLedger` entry has a SHA256 hash stored in the `hash` field:
+
+- **Hash Format:** `SHA256(id|type|accountId|debit|credit|balanceAfter|transactionId|createdAt)`
+- **Computation:** Automatic during ledger entry creation via `LedgerCreationHelper`
+- **Purpose:** Enable real-time verification and instant proof-of-entry
+- **Verification:** Via `GET /ledger/entries/:id/verify` endpoint
+- **Implementation:** [LedgerHashService](packages/api/src/modules/transactions/application/services/ledger-services/ledger-hash.service.ts)
+
+### Daily Batch Hashing (Epic 5)
+
+All ledger entries for a given day are aggregated into a single hash:
+
+- **Timing:** Generated automatically at 3 AM UTC via `GenerateDailyAuditHashJob`
+- **Storage:** `DailyAuditHash` table
+- **Purpose:** Enable blockchain anchoring (gas-efficient) and compliance audits
+- **Implementation:** [AuditHashService](packages/api/src/modules/transactions/application/services/ledger-services/audit-hash.service.ts)
+
+### API Endpoints
+
+**Granular Ledger Queries (User-Scoped):**
+- `GET /api/ledger/entries` - Query entries by account/transaction/date range
+- `GET /api/ledger/entries/:id` - Get single entry with hash
+- `GET /api/ledger/entries/:id/verify` - Verify entry integrity
+
+**Daily Audit Operations (Admin-Only):**
+- `GET /api/admin/audit/hash/:date` - Get daily hash
+- `GET /api/admin/audit/verify/:date` - Verify daily hash
+- `POST /api/admin/audit/generate/:date` - Manual hash generation
+- `GET /api/admin/audit/hashes` - List recent daily hashes
+
+### Module Organization
+
+```
+packages/api/src/modules/transactions/
+├── application/
+│   ├── services/
+│   │   └── ledger-services/
+│   │       ├── audit-hash.service.ts (daily batch hashing)
+│   │       ├── ledger-hash.service.ts (per-transaction hashing)
+│   │       └── ledger-creation.helper.ts (hash-aware creation)
+│   └── jobs/
+│       ├── generate-daily-audit-hash.job.ts (cron @ 3 AM UTC)
+│       └── backfill-ledger-hashes.job.ts (one-time backfill)
+├── domain/
+│   └── repositories/
+│       └── ledger.repository.ts (ILedgerRepository interface)
+└── infrastructure/
+    ├── controllers/
+    │   ├── ledger.controller.ts (granular queries)
+    │   └── admin-audit.controller.ts (daily audit operations)
+    └── repositories/
+        └── prisma-ledger.repository.ts (implementation)
+```
+
+### Legacy Entry Backfill
+
+Entries created before Epic 6 may lack hashes. Run the backfill job:
+
+```bash
+pnpm --filter api exec ts-node src/modules/transactions/application/jobs/backfill-ledger-hashes.job.ts
+```
+
+For full documentation, see [Ledger Endpoints Guide](docs/api/ledger-endpoints.md).
+
 ## Environment Variables
 
 Required for local development (see `.env.example`):

@@ -77,13 +77,14 @@ describe('Migration Smoke Tests', () => {
   });
 
   afterAll(async () => {
-    // Clean up created test data
+    // Clean up created test data (careful with foreign key constraints)
     await prisma.pointLedger.deleteMany({ where: {} });
     await prisma.transaction.deleteMany({ where: {} });
+    await prisma.business.deleteMany({ where: { ownerId: businessUser.id } });
+    await prisma.refreshToken.deleteMany({ where: {} });
     await prisma.user.deleteMany({
       where: { email: { contains: '@example.com' } },
     });
-    await prisma.business.deleteMany({ where: { ownerId: businessUser.id } });
     await app.close();
   });
 

@@ -15,8 +15,10 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
+      "@/*": ["src/*"],
       "@rewards-bolivia/shared-types": ["../shared-types/dist"],
-      "@rewards-bolivia/logger": ["../libs/logger/dist"]
+      "@rewards-bolivia/logger": ["../libs/logger/dist"],
+      "jest-mock-extended": ["../../node_modules/jest-mock-extended"]
     },
     "incremental": true,
     "skipLibCheck": true,
