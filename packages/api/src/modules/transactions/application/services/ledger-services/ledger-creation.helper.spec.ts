@@ -7,11 +7,11 @@ import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 
 // Mock the entire @paralleldrive/cuid2 module
 jest.mock('@paralleldrive/cuid2', () => ({
-  cuid: jest.fn(() => 'mocked_cuid'),
+  createId: jest.fn(() => 'mocked_cuid'),
 }));
 
-// Import the mocked cuid function
-import { cuid } from '@paralleldrive/cuid2';
+// Import the mocked createId function
+import { createId } from '@paralleldrive/cuid2';
 
 describe('LedgerCreationHelper', () => {
   let helper: LedgerCreationHelper;
@@ -20,8 +20,8 @@ describe('LedgerCreationHelper', () => {
 
   beforeEach(async () => {
     // Reset the mock before each test
-    (cuid as jest.Mock).mockClear();
-    (cuid as jest.Mock).mockReturnValue('mocked_cuid'); // Set default mock value
+    (createId as jest.Mock).mockClear();
+    (createId as jest.Mock).mockReturnValue('mocked_cuid'); // Set default mock value
 
     prisma = mockDeep<PrismaService>();
     ledgerHashService = mockDeep<LedgerHashService>();
@@ -78,7 +78,7 @@ describe('LedgerCreationHelper', () => {
 
     const result = await helper.createLedgerEntry(createInput);
 
-    expect(cuid).toHaveBeenCalledTimes(1); // Verify cuid was called
+    expect(createId).toHaveBeenCalledTimes(1); // Verify createId was called
     expect(ledgerHashService.computeHashForNewEntry).toHaveBeenCalledWith({
       id: mockCuid,
       type: createInput.type,
@@ -132,7 +132,7 @@ describe('LedgerCreationHelper', () => {
 
     const result = await helper.createLedgerEntry(createInput, mockTxClient);
 
-    expect(cuid).toHaveBeenCalledTimes(1); // Verify cuid was called
+    expect(createId).toHaveBeenCalledTimes(1); // Verify createId was called
     expect(mockTxClient.pointLedger.create).toHaveBeenCalledWith({
       data: {
         ...createInput,
