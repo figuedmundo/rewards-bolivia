@@ -43,8 +43,16 @@ describe('LedgerHashService', () => {
   });
 
   it('should compute different hash for different inputs', () => {
-    const entry1 = createMockEntry({ debit: 100, credit: 0, balanceAfter: 100 });
-    const entry2 = createMockEntry({ debit: 0, credit: 200, balanceAfter: 200 });
+    const entry1 = createMockEntry({
+      debit: 100,
+      credit: 0,
+      balanceAfter: 100,
+    });
+    const entry2 = createMockEntry({
+      debit: 0,
+      credit: 200,
+      balanceAfter: 200,
+    });
     const hash1 = service.computeEntryHash(entry1);
     const hash2 = service.computeEntryHash(entry2);
     expect(hash1).not.toBe(hash2);
@@ -83,7 +91,9 @@ describe('LedgerHashService', () => {
     expect(timestamp).toBeInstanceOf(Date);
 
     const expectedData = `${newEntryData.id}|${newEntryData.type}|${newEntryData.accountId}|${newEntryData.debit}|${newEntryData.credit}|${newEntryData.balanceAfter}|${newEntryData.transactionId}|${timestamp.toISOString()}`;
-    const expectedHash = createHash('sha256').update(expectedData).digest('hex');
+    const expectedHash = createHash('sha256')
+      .update(expectedData)
+      .digest('hex');
     expect(hash).toBe(expectedHash);
   });
 

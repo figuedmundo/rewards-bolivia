@@ -1265,11 +1265,11 @@ This task was successfully completed. The project's audit capabilities were enha
   ```
 
 **Success Criteria:**
-- [x] Interface updated with new methods
-- [x] Implementation complete in Prisma repository
-- [x] Unit tests for all new methods
-- [x] Integration tests verifying database queries
-- [x] All tests pass
+- [ ] Interface updated with new methods
+- [ ] Implementation complete in Prisma repository
+- [ ] Unit tests for all new methods
+- [ ] Integration tests verifying database queries
+- [ ] All tests pass
 
 ---
 
@@ -1615,12 +1615,12 @@ This task was successfully completed. The project's audit capabilities were enha
   ```
 
 **Success Criteria:**
-- [x] DTOs created in shared-types
-- [x] `LedgerController` implemented with all endpoints
-- [x] Authorization checks in place (users can only access own entries)
-- [x] Admin role can access all entries
-- [x] E2E tests for all endpoints
-- [x] All tests pass
+- [ ] DTOs created in shared-types
+- [ ] `LedgerController` implemented with all endpoints
+- [ ] Authorization checks in place (users can only access own entries)
+- [ ] Admin role can access all entries
+- [ ] E2E tests for all endpoints
+- [ ] All tests pass
 
 ---
 

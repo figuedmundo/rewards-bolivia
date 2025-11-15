@@ -11,7 +11,6 @@ import { TransactionType, LedgerEntryType, PointLedger } from '@prisma/client';
 import { TransactionEventPublisher } from '../../application/services/transaction-event.publisher';
 import { LedgerCreationHelper } from '../../application/services/ledger-services/ledger-creation.helper';
 
-
 import { RedisService } from '../../../../infrastructure/redis/redis.service';
 
 @Injectable()

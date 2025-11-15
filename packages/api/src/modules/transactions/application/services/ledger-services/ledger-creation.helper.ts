@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/infrastructure/prisma.service';
 import { LedgerHashService } from './ledger-hash.service';
 import type { PointLedger, Prisma } from '@prisma/client';

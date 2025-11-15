@@ -54,9 +54,15 @@ describe('LedgerCreationHelper', () => {
 
     jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
     // No need to mock cuid here, it's already mocked globally
-    ledgerHashService.computeHashForNewEntry.mockReturnValue({ hash: mockHash, timestamp: mockDate });
+    ledgerHashService.computeHashForNewEntry.mockReturnValue({
+      hash: mockHash,
+      timestamp: mockDate,
+    });
 
-    const createInput: Omit<Prisma.PointLedgerCreateInput, 'hash' | 'id' | 'createdAt'> = {
+    const createInput: Omit<
+      Prisma.PointLedgerCreateInput,
+      'hash' | 'id' | 'createdAt'
+    > = {
       type: 'EARN',
       accountId: 'user123',
       debit: 0,
@@ -108,9 +114,15 @@ describe('LedgerCreationHelper', () => {
 
     jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
     // No need to mock cuid here
-    ledgerHashService.computeHashForNewEntry.mockReturnValue({ hash: mockHash, timestamp: mockDate });
+    ledgerHashService.computeHashForNewEntry.mockReturnValue({
+      hash: mockHash,
+      timestamp: mockDate,
+    });
 
-    const createInput: Omit<Prisma.PointLedgerCreateInput, 'hash' | 'id' | 'createdAt'> = {
+    const createInput: Omit<
+      Prisma.PointLedgerCreateInput,
+      'hash' | 'id' | 'createdAt'
+    > = {
       type: 'REDEEM',
       accountId: 'user789',
       debit: 50,
