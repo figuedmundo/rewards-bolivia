@@ -1475,16 +1475,31 @@ const handleSubmit = (data: FormData) => {
 
 ## 📘 Type Definitions
 
-### Shared Types (from @rewards-bolivia/shared-types)
+### Generated SDK Types (from @rewards-bolivia/sdk)
+
+All types are auto-generated from the backend OpenAPI spec. Import directly from the SDK:
 
 ```typescript
-// Already defined in shared-types package
+// Import all types from generated SDK (pnpm generate:sdk)
+import type {
+  UserDto,
+  LedgerEntryDto,
+  TransactionDto,
+  EarnPointsDto,
+  RedeemPointsDto,
+  RegisterUserDto,
+  LoginDto,
+} from '@rewards-bolivia/sdk';
+
+// Type definitions (auto-generated - DO NOT EDIT)
 export interface UserDto {
   id: string;
   email: string;
+  name: string;
+  role: string;  // 'client', 'business', 'admin'
   pointsBalance: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface LedgerEntryDto {
@@ -1497,8 +1512,8 @@ export interface LedgerEntryDto {
   transactionId?: string;
   description?: string;
   hash?: string;
-  expiresAt?: Date;
-  createdAt: Date;
+  expiresAt?: string;
+  createdAt: string;
 }
 
 export interface TransactionDto {
@@ -1508,7 +1523,7 @@ export interface TransactionDto {
   userId: string;
   businessId: string;
   balanceAfter: number;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export interface RedeemPointsDto {
@@ -1518,12 +1533,17 @@ export interface RedeemPointsDto {
 }
 
 export interface EarnPointsDto {
-  points: number;
-  userId: string;
-  businessId: string;
+  customerId: string;
   purchaseAmount: number;
 }
 ```
+
+**Benefits of SDK-Generated Types:**
+- ✅ Auto-generated from OpenAPI spec
+- ✅ Always in sync with backend
+- ✅ No manual type maintenance
+- ✅ Strong type safety enforced by compiler
+- ✅ Never out of date
 
 ### Frontend-Specific Types
 

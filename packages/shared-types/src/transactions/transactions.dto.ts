@@ -33,3 +33,18 @@ export class RedeemPointsDto {
   @IsNotEmpty()
   ticketTotal!: number;
 }
+
+// Frontend-facing transaction response DTO
+// Combines data from different endpoints
+export interface TransactionDto {
+  id: string;
+  type: 'EARN' | 'REDEEM' | 'BURN' | 'EXPIRE' | 'ADJUSTMENT';
+  amount: number;
+  timestamp: string;
+  status: 'PENDING' | 'COMPLETED' | 'FAILED';
+  details?: {
+    businessId?: string;
+    customerId?: string;
+    purchaseAmount?: number;
+  };
+}

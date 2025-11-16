@@ -7,7 +7,7 @@ export interface LedgerEntryDto {
   balanceAfter: number;
   reason?: string;
   hash: string;
-  createdAt: Date;
+  createdAt: string;
   transactionId: string;
 }
 

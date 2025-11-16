@@ -2,10 +2,12 @@
 
 **Sprint:** Sprint 2
 **Epic ID:** Epic 7
-**Status:** 📋 Ready to Start
+**Status:** ✅ Ready to Start Implementation
 **Scope:** Tasks T7.1 - T7.5 (Admin dashboard T7.6 deferred)
 **Estimated Duration:** 3.5 days
 **Created:** 2025-11-15
+
+> 🚀 **NEW TO THIS EPIC?** Start with `EPIC_7_READY_TO_START.md` for a quick orientation and step-by-step getting started guide!
 
 ---
 
@@ -86,46 +88,114 @@ pnpm --filter api start:dev
 pnpm --filter web dev
 ```
 
-### 2. SDK Generation (Alternative Approach)
+### 2. SDK Generation (REQUIRED for Epic 7)
 
-**Issue Identified:** `pnpm generate:sdk` requires Java Runtime (not installed) and running Redis.
+**Status:** ✅ REQUIRED - Essential part of API integration strategy
 
-**✅ APPROVED ALTERNATIVE: Typed API Client with Shared DTOs**
+**Current Approach: Generated TypeScript-Axios SDK** ✅
 
-Instead of generating an SDK, we'll use **typed API client** because:
-- ✅ Shared types already exist in `@rewards-bolivia/shared-types`
-- ✅ Axios client already configured in `packages/web/src/lib/api.ts`
-- ✅ No additional dependencies or build steps required
-- ✅ Type-safe without SDK generation overhead
-- ✅ No Java installation needed
+We use **SDK generation** for Epic 7 because:
+- ✅ Auto-generated types always in sync with backend OpenAPI spec
+- ✅ Eliminates manual type maintenance and drift risk
+- ✅ Type safety is critical for financial transactions (points/redemptions)
+- ✅ Generated client includes validation and error handling
+- ✅ OpenAPI contract enforced automatically
+- ✅ Single source of truth (backend spec → SDK)
 
-**Implementation:**
+**SDK Generation Setup:**
+
+```bash
+# Prerequisites (all already met):
+# - Java Runtime (17+) ✅ installed
+# - Docker daemon running ✅ (for Redis)
+# - Backend API running ✅ (pnpm --filter api start:dev)
+# - Redis running ✅ (docker-compose up redis)
+
+# Generate SDK from backend OpenAPI spec
+pnpm generate:sdk
+
+# Output location:
+# packages/sdk/
+# ├── api.ts                # Auto-generated API client with all methods & types
+# ├── configuration.ts      # Configuration setup
+# ├── common.ts             # Common utilities
+# ├── base.ts               # Base API class
+# ├── index.ts              # Barrel export (exports api + configuration)
+# └── package.json          # SDK package definition
+
+# The SDK is available as @rewards-bolivia/sdk workspace package
+```
+
+**SDK Generation Requirements:**
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Java 17+ | ✅ Installed | Required for OpenAPI generator |
+| Docker daemon | ✅ Running | Required to run generator in container |
+| Backend API | ✅ Running | Must be accessible on http://localhost:3001 |
+| Redis | ✅ Running | Required by backend |
+| OpenAPI spec | ✅ Generated | Exposed at http://localhost:3001/api/spec |
+
+**Generated SDK Structure:**
+
+The SDK is generated as a workspace package (`@rewards-bolivia/sdk`) containing all API types and client methods in a single `api.ts` file:
+
 ```typescript
-// packages/web/src/lib/wallet-api.ts
-import { api } from './api';
+// Import types and API methods from generated SDK
 import type {
   UserDto,
+  LedgerEntryDto,
   TransactionDto,
-  LedgerEntryDto
-} from '@rewards-bolivia/shared-types';
+  EarnPointsDto,
+  RegisterUserDto,
+  LoginDto
+} from '@rewards-bolivia/sdk';
 
-export const walletApi = {
-  getBalance: async (userId: string): Promise<number> => {
-    const { data } = await api.get<UserDto>(`/users/${userId}`);
-    return data.pointsBalance;
-  },
+// Import API client factory/methods
+// Note: The SDK exports factory functions for creating API clients
+import {
+  AdminAuditApi,
+  LedgerApi,
+  TransactionsApi,
+  UsersApi,
+  AuthApi
+} from '@rewards-bolivia/sdk';
 
-  getLedgerEntries: async (params: LedgerQueryParams) => {
-    const { data } = await api.get<PaginatedLedgerResponse>('/ledger/entries', { params });
-    return data;
-  },
+// SDK client instances (initialized in wallet-api.ts)
+const usersApi = new UsersApi();
+const transactionsApi = new TransactionsApi();
+const ledgerApi = new LedgerApi();
 
-  redeemPoints: async (payload: RedeemPointsDto) => {
-    const { data } = await api.post<TransactionDto>('/transactions/redeem', payload);
-    return data;
-  }
+// Usage in hooks
+export const useWalletBalance = () => {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['balance', user?.id],
+    queryFn: () => usersApi.getUser(user!.id).then(r => r.pointsBalance),
+  });
 };
 ```
+
+**SDK Key Features:**
+- ✅ All types auto-generated in `api.ts`
+- ✅ All API client classes exported (UsersApi, TransactionsApi, LedgerApi, etc.)
+- ✅ Configuration management in `configuration.ts`
+- ✅ No manual type maintenance needed
+- ✅ Changes to backend → regenerate SDK → no manual updates
+
+**Why SDK Over Manual Types:**
+
+| Issue | Manual Types | SDK |
+|-------|--------------|-----|
+| Type accuracy | 🟡 Manual (error-prone) | 🟢 Auto-generated |
+| API changes | 🟡 Manual update needed | 🟢 Regenerate SDK |
+| Validation | 🟡 None | 🟢 Built-in |
+| Contract enforcement | 🟡 Manual | 🟢 Automatic |
+| Financial accuracy | 🟡 Risk of mismatch | 🟢 Guaranteed sync |
+
+**Implementation:**
+
+The API layer will be generated and exposed through wrapper hooks. See "API Integration with SDK" section below.
 
 ---
 
@@ -433,21 +503,31 @@ CheckoutPage
 
 ## 🔌 API Integration Strategy
 
-### API Service Layer
+### SDK-Based API Service Layer
 
 **File:** `packages/web/src/lib/wallet-api.ts`
 
+This layer wraps the auto-generated SDK clients from `@rewards-bolivia/sdk` and exposes wallet-specific methods to the rest of the application.
+
 ```typescript
-import { api } from './api';
+// Generated SDK imports from workspace package
+import {
+  UsersApi,
+  TransactionsApi,
+  LedgerApi,
+} from '@rewards-bolivia/sdk';
 import type {
   UserDto,
   TransactionDto,
   LedgerEntryDto,
-  RedeemPointsDto,
-  EarnPointsDto,
-} from '@rewards-bolivia/shared-types';
+} from '@rewards-bolivia/sdk';
 
-// Types for API responses (extend shared types)
+// Initialize SDK clients with default configuration
+const usersApi = new UsersApi();
+const transactionsApi = new TransactionsApi();
+const ledgerApi = new LedgerApi();
+
+// Types for API responses
 export interface PaginatedLedgerResponse {
   entries: LedgerEntryDto[];
   total: number;
@@ -464,51 +544,77 @@ export interface LedgerQueryParams {
   pageSize?: number;
 }
 
-// Wallet API client
+// Wallet API client wrapping SDK
 export const walletApi = {
   // Get user balance (from user profile)
+  // Uses auto-generated UsersApi.getUser() method
   getBalance: async (userId: string): Promise<number> => {
-    const { data } = await api.get<UserDto>(`/users/${userId}`);
-    return data.pointsBalance;
+    const user = await usersApi.getUser(userId);
+    return user.pointsBalance;
   },
 
   // Get user full profile
+  // Uses auto-generated UsersApi.getUser() method
   getUser: async (userId: string): Promise<UserDto> => {
-    const { data } = await api.get<UserDto>(`/users/${userId}`);
-    return data;
+    return await usersApi.getUser(userId);
   },
 
   // Get paginated ledger entries
+  // Uses auto-generated LedgerApi.getLedgerEntries() method
   getLedgerEntries: async (params: LedgerQueryParams): Promise<PaginatedLedgerResponse> => {
-    const { data } = await api.get<PaginatedLedgerResponse>('/ledger/entries', { params });
-    return data;
+    return await ledgerApi.getLedgerEntries({
+      accountId: params.accountId,
+      transactionId: params.transactionId,
+      startDate: params.startDate,
+      endDate: params.endDate,
+      page: params.page || 1,
+      pageSize: params.pageSize || 10,
+    });
   },
 
   // Get single ledger entry
+  // Uses auto-generated LedgerApi.getLedgerEntry() method
   getLedgerEntry: async (id: string): Promise<LedgerEntryDto> => {
-    const { data } = await api.get<LedgerEntryDto>(`/ledger/entries/${id}`);
-    return data;
+    return await ledgerApi.getLedgerEntry(id);
   },
 
   // Verify ledger entry hash
+  // Uses auto-generated LedgerApi.verifyLedgerEntry() method
   verifyLedgerEntry: async (id: string): Promise<{ valid: boolean; message: string }> => {
-    const { data } = await api.get(`/ledger/entries/${id}/verify`);
-    return data;
+    return await ledgerApi.verifyLedgerEntry(id);
   },
 
   // Redeem points
-  redeemPoints: async (payload: RedeemPointsDto): Promise<TransactionDto> => {
-    const { data } = await api.post<TransactionDto>('/transactions/redeem', payload);
-    return data;
+  // Uses auto-generated TransactionsApi.redeemPoints() method
+  redeemPoints: async (payload: {
+    points: number;
+    businessId: string;
+    purchaseAmount: number;
+  }): Promise<TransactionDto> => {
+    return await transactionsApi.redeemPoints(payload);
   },
 
   // Earn points (for business flow - optional for Epic 7)
-  earnPoints: async (payload: EarnPointsDto): Promise<TransactionDto> => {
-    const { data } = await api.post<TransactionDto>('/transactions/earn', payload);
-    return data;
+  // Uses auto-generated TransactionsApi.earnPoints() method
+  earnPoints: async (payload: {
+    points: number;
+    userId: string;
+    businessId: string;
+    purchaseAmount: number;
+  }): Promise<TransactionDto> => {
+    return await transactionsApi.earnPoints(payload);
   },
 };
 ```
+
+**Benefits of SDK-Based Approach:**
+
+1. **Type Safety:** All types auto-generated from OpenAPI spec
+2. **Consistency:** Types always match backend implementation
+3. **Validation:** SDK includes built-in validation
+4. **Maintainability:** Update backend → regenerate SDK → no manual changes needed
+5. **Error Handling:** Standardized error responses from SDK
+6. **Documentation:** Auto-generated API documentation in types
 
 ### Custom React Hooks (TanStack Query)
 
@@ -1166,8 +1272,35 @@ e2e/tests/
 
 ### Day 1: Foundation & Wallet Page (T7.1 + T7.3)
 
-**Morning (4 hours):**
-- [ ] Install dependencies:
+**Morning (4-5 hours):**
+
+**Step 1: SDK Generation (30 minutes)**
+- [ ] Ensure infrastructure is running:
+  ```bash
+  # Terminal 1: Database and Redis
+  docker-compose -f infra/local/docker-compose.yml up -d postgres redis
+
+  # Terminal 2: Backend API
+  pnpm --filter api start:dev
+  ```
+- [ ] Generate SDK from OpenAPI spec:
+  ```bash
+  pnpm generate:sdk
+  ```
+- [ ] Verify SDK generated:
+  ```bash
+  ls packages/sdk/
+  # Should contain: api.ts, configuration.ts, common.ts, base.ts, index.ts, package.json
+  ```
+- [ ] Verify SDK is available as workspace package:
+  ```bash
+  # The SDK is automatically available as @rewards-bolivia/sdk in the monorepo
+  cat packages/sdk/package.json
+  # Should show: "name": "@rewards-bolivia/sdk"
+  ```
+
+**Step 2: Install Frontend Dependencies (20 minutes)**
+- [ ] Install TanStack Query and form handling:
   ```bash
   pnpm --filter web add @tanstack/react-query
   pnpm --filter web add -D @tanstack/react-query-devtools
@@ -1178,24 +1311,34 @@ e2e/tests/
   ```bash
   npx shadcn@latest add card skeleton table
   ```
+
+**Step 3: Setup API Layer with SDK (1.5 hours)**
+- [ ] Create `packages/web/src/lib/wallet-api.ts` service wrapping generated SDK
+  - Import SDK clients from `@rewards-bolivia/sdk` (UsersApi, TransactionsApi, LedgerApi)
+  - Initialize SDK client instances
+  - Wrap SDK methods with wallet-specific methods
+  - See "API Integration Strategy" section above for full code
+- [ ] Create `packages/web/src/hooks/useWallet.ts` hooks using TanStack Query
+  - `useWalletBalance()` → calls `walletApi.getBalance()`
+  - `useTransactionHistory()` → calls `walletApi.getLedgerEntries()`
+  - `useRedeemPoints()` → calls `walletApi.redeemPoints()`
+- [ ] Write unit tests for wallet-api.ts and useWallet.ts
 - [ ] Setup QueryClientProvider in `main.tsx`
-- [ ] Create `wallet-api.ts` service with typed methods
-- [ ] Create `useWallet.ts` hooks (balance, history)
-- [ ] Write unit tests for API service and hooks
 - [ ] Update `test-utils.tsx` to include QueryClient
 
 **Afternoon (4 hours):**
-- [ ] Create `WalletPage.tsx` with route in `App.tsx`
+- [ ] Create `packages/web/src/pages/WalletPage.tsx` with route in `App.tsx`
 - [ ] Implement `WalletBalance` component
 - [ ] Implement `TransactionHistory` component with pagination
 - [ ] Implement `TransactionItem` component
 - [ ] Add loading skeletons
 - [ ] Write component unit tests
-- [ ] Manual testing: verify data displays correctly
+- [ ] Manual testing: verify data displays correctly and API calls succeed
 
 **End of Day 1 Deliverables:**
-- ✅ TanStack Query integrated
-- ✅ API integration layer complete
+- ✅ SDK generated and integrated
+- ✅ TanStack Query configured
+- ✅ API integration layer (wallet-api.ts) complete with SDK
 - ✅ Wallet page displaying balance and history
 - ✅ Basic tests passing
 - ✅ No console errors

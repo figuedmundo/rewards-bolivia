@@ -11,12 +11,17 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
+    "@rewards-bolivia/sdk": "workspace:*",
+    "@rewards-bolivia/shared-types": "workspace:*",
+    "@tanstack/react-query": "^5.90.9",
     "axios": "^1.13.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.552.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-hook-form": "^7.66.0",
     "react-router-dom": "^7.9.5",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7"
@@ -24,6 +29,7 @@
   "devDependencies": {
     "@eslint/js": "^9.36.0",
     "@tailwindcss/postcss": "^4.1.16",
+    "@tanstack/react-query-devtools": "^5.90.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
@@ -38,6 +44,7 @@
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",
     "jsdom": "^27.1.0",
+    "msw": "^2.12.2",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.16",
     "typescript": "~5.9.3",
