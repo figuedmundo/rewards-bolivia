@@ -15,7 +15,8 @@
     "test": "turbo run test",
     "test:api:local": "docker-compose -f infra/local/docker-compose.yml up -d postgres redis && sleep 5 && pnpm --filter api exec prisma migrate dev && pnpm --filter api test && docker-compose -f infra/local/docker-compose.yml down",
     "lint": "turbo run lint",
-    "generate:sdk": "pnpm run --filter=api start & sleep 5 && npx @openapitools/openapi-generator-cli generate -i http://localhost:3001/api-json -g typescript-axios -o packages/sdk && kill $(lsof -t -i:3001)",
+    "generate:sdk": "GOOGLE_CLIENT_ID=dummy GOOGLE_CLIENT_SECRET=dummy GOOGLE_CALLBACK_URL=http://localhost pnpm run generate:sdk:run",
+    "generate:sdk:run": "wait-on http://localhost:3001/docs-json && npx @openapitools/openapi-generator-cli generate -i http://localhost:3001/docs-json -g typescript-axios -o packages/sdk",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -37,6 +38,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.6",
     "prettier": "^3.6.2",
-    "turbo": "^2.6.0"
+    "turbo": "^2.6.0",
+    "wait-on": "^9.0.3"
   }
 }

@@ -3,7 +3,8 @@
     "allow": [
       "Bash(pnpm test:*)",
       "Bash(pnpm --filter api exec prisma migrate:*)",
-      "Bash(pnpm --filter api test:*)"
+      "Bash(pnpm --filter api test:*)",
+      "Bash(pnpm add:*)"
     ],
     "deny": [],
     "ask": []
