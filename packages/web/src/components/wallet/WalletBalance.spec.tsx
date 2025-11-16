@@ -3,6 +3,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { WalletBalance } from './WalletBalance';
 import { render } from '@/test-setup/test-utils';
+import { useWalletBalance } from '@/hooks/useWallet';
 
 // Mock the useWalletBalance hook
 vi.mock('@/hooks/useWallet', () => ({
@@ -14,14 +15,15 @@ vi.mock('@/hooks/useWallet', () => ({
   useLedgerEntry: vi.fn(),
 }));
 
+const mockUseWalletBalance = useWalletBalance as ReturnType<typeof vi.fn>;
+
 describe('WalletBalance Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('should render balance card with loading skeleton', () => {
-    const { useWalletBalance } = require('@/hooks/useWallet');
-    useWalletBalance.mockReturnValue({
+    mockUseWalletBalance.mockReturnValue({
       data: undefined,
       isLoading: true,
       error: null,
@@ -36,8 +38,7 @@ describe('WalletBalance Component', () => {
   });
 
   it('should display balance when data loads successfully', async () => {
-    const { useWalletBalance } = require('@/hooks/useWallet');
-    useWalletBalance.mockReturnValue({
+    mockUseWalletBalance.mockReturnValue({
       data: 1500,
       isLoading: false,
       error: null,
@@ -54,8 +55,7 @@ describe('WalletBalance Component', () => {
   });
 
   it('should format large numbers with thousand separators', () => {
-    const { useWalletBalance } = require('@/hooks/useWallet');
-    useWalletBalance.mockReturnValue({
+    mockUseWalletBalance.mockReturnValue({
       data: 1234567,
       isLoading: false,
       error: null,
@@ -69,8 +69,7 @@ describe('WalletBalance Component', () => {
   });
 
   it('should show "points available" label', () => {
-    const { useWalletBalance } = require('@/hooks/useWallet');
-    useWalletBalance.mockReturnValue({
+    mockUseWalletBalance.mockReturnValue({
       data: 1000,
       isLoading: false,
       error: null,
@@ -83,9 +82,8 @@ describe('WalletBalance Component', () => {
   });
 
   it('should display error message when fetch fails', () => {
-    const { useWalletBalance } = require('@/hooks/useWallet');
     const error = new Error('Failed to load balance');
-    useWalletBalance.mockReturnValue({
+    mockUseWalletBalance.mockReturnValue({
       data: undefined,
       isLoading: false,
       error,
@@ -98,9 +96,8 @@ describe('WalletBalance Component', () => {
   });
 
   it('should show retry button on error', async () => {
-    const { useWalletBalance } = require('@/hooks/useWallet');
     const mockRefetch = vi.fn();
-    useWalletBalance.mockReturnValue({
+    mockUseWalletBalance.mockReturnValue({
       data: undefined,
       isLoading: false,
       error: new Error('Failed to load balance'),
@@ -117,8 +114,7 @@ describe('WalletBalance Component', () => {
   });
 
   it('should display card header with title and coins icon', () => {
-    const { useWalletBalance } = require('@/hooks/useWallet');
-    useWalletBalance.mockReturnValue({
+    mockUseWalletBalance.mockReturnValue({
       data: 1000,
       isLoading: false,
       error: null,
@@ -134,8 +130,7 @@ describe('WalletBalance Component', () => {
   });
 
   it('should handle zero balance correctly', () => {
-    const { useWalletBalance } = require('@/hooks/useWallet');
-    useWalletBalance.mockReturnValue({
+    mockUseWalletBalance.mockReturnValue({
       data: 0,
       isLoading: false,
       error: null,
@@ -149,8 +144,7 @@ describe('WalletBalance Component', () => {
   });
 
   it('should maintain loading state while refetching', async () => {
-    const { useWalletBalance } = require('@/hooks/useWallet');
-    useWalletBalance.mockReturnValue({
+    mockUseWalletBalance.mockReturnValue({
       data: 1000,
       isLoading: false,
       error: null,
@@ -166,8 +160,7 @@ describe('WalletBalance Component', () => {
   });
 
   it('should apply correct styling classes', () => {
-    const { useWalletBalance } = require('@/hooks/useWallet');
-    useWalletBalance.mockReturnValue({
+    mockUseWalletBalance.mockReturnValue({
       data: 1000,
       isLoading: false,
       error: null,

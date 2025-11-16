@@ -1,15 +1,30 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import * as sdk from '@rewards-bolivia/sdk';
-import { walletApi } from './wallet-api';
 import type { UserDto } from '@rewards-bolivia/sdk';
 import type { LedgerEntryDto } from '@rewards-bolivia/shared-types';
 
-// Mock the SDK clients
+// Mock the SDK before importing wallet-api
 vi.mock('@rewards-bolivia/sdk', () => ({
   UsersApi: vi.fn(),
   TransactionsApi: vi.fn(),
   LedgerApi: vi.fn(),
+  Configuration: vi.fn(),
 }));
+
+// Mock the ApiService
+vi.mock('./api', () => ({
+  ApiService: {
+    getInstance: vi.fn(() => ({
+      api: {
+        defaults: { baseURL: '/api' },
+        interceptors: { response: { use: vi.fn() } },
+      },
+    })),
+  },
+}));
+
+// Import after mocks are set up
+import { walletApi } from './wallet-api';
+import * as sdk from '@rewards-bolivia/sdk';
 
 describe('walletApi Service Layer', () => {
   let mockUsersApi: any;
@@ -147,14 +162,14 @@ describe('walletApi Service Layer', () => {
         pageSize: 10,
       });
 
-      // Page 3 with pageSize 10 = offset 20 (page - 1) * pageSize
+      // Pagination parameters are passed directly
       expect(mockLedgerApi.ledgerControllerQueryEntries).toHaveBeenCalledWith(
-        '',
-        '',
-        '',
-        '',
-        '10',
-        '20'
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        10,
+        3
       );
     });
   });

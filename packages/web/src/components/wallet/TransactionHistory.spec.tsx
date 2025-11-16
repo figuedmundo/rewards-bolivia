@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { TransactionHistory } from './TransactionHistory';
 import { render } from '@/test-setup/test-utils';
 import type { LedgerEntryDto } from '@rewards-bolivia/shared-types';
+import { useTransactionHistory } from '@/hooks/useWallet';
 
 // Mock the useTransactionHistory hook
 vi.mock('@/hooks/useWallet', () => ({
@@ -14,6 +15,8 @@ vi.mock('@/hooks/useWallet', () => ({
   useEarnPoints: vi.fn(),
   useLedgerEntry: vi.fn(),
 }));
+
+const mockUseTransactionHistory = useTransactionHistory as ReturnType<typeof vi.fn>;
 
 describe('TransactionHistory Component', () => {
   const mockEntries: LedgerEntryDto[] = [
@@ -46,8 +49,7 @@ describe('TransactionHistory Component', () => {
   });
 
   it('should render loading skeletons while fetching', () => {
-    const { useTransactionHistory } = require('@/hooks/useWallet');
-    useTransactionHistory.mockReturnValue({
+    mockUseTransactionHistory.mockReturnValue({
       data: undefined,
       isLoading: true,
       error: null,
@@ -56,15 +58,12 @@ describe('TransactionHistory Component', () => {
     render(<TransactionHistory pageSize={10} />);
 
     // Should render multiple skeleton rows
-    const skeletons = screen.getAllByRole('generic').filter((el) =>
-      el.className.includes('skeleton')
-    );
-    expect(skeletons.length).toBeGreaterThan(0);
+    const skeletons = screen.getAllByTestId('transaction-skeleton');
+    expect(skeletons.length).toBe(10);
   });
 
   it('should display transaction entries in table', async () => {
-    const { useTransactionHistory } = require('@/hooks/useWallet');
-    useTransactionHistory.mockReturnValue({
+    mockUseTransactionHistory.mockReturnValue({
       data: {
         entries: mockEntries,
         total: 2,
@@ -78,15 +77,14 @@ describe('TransactionHistory Component', () => {
     render(<TransactionHistory />);
 
     await waitFor(() => {
-      expect(screen.getByText('2025-01-10')).toBeInTheDocument(); // First entry date
+      expect(screen.getByText('Jan 10, 2025')).toBeInTheDocument(); // First entry date (en-US locale format)
       expect(screen.getByText('EARN')).toBeInTheDocument();
       expect(screen.getByText('REDEEM')).toBeInTheDocument();
     });
   });
 
   it('should display amount with correct sign', () => {
-    const { useTransactionHistory } = require('@/hooks/useWallet');
-    useTransactionHistory.mockReturnValue({
+    mockUseTransactionHistory.mockReturnValue({
       data: {
         entries: mockEntries,
         total: 2,
@@ -106,8 +104,7 @@ describe('TransactionHistory Component', () => {
   });
 
   it('should display transaction caption showing count', () => {
-    const { useTransactionHistory } = require('@/hooks/useWallet');
-    useTransactionHistory.mockReturnValue({
+    mockUseTransactionHistory.mockReturnValue({
       data: {
         entries: mockEntries,
         total: 2,
@@ -124,8 +121,7 @@ describe('TransactionHistory Component', () => {
   });
 
   it('should show empty state when no transactions', () => {
-    const { useTransactionHistory } = require('@/hooks/useWallet');
-    useTransactionHistory.mockReturnValue({
+    mockUseTransactionHistory.mockReturnValue({
       data: {
         entries: [],
         total: 0,
@@ -145,8 +141,7 @@ describe('TransactionHistory Component', () => {
   });
 
   it('should display error message on fetch failure', () => {
-    const { useTransactionHistory } = require('@/hooks/useWallet');
-    useTransactionHistory.mockReturnValue({
+    mockUseTransactionHistory.mockReturnValue({
       data: undefined,
       isLoading: false,
       error: new Error('Failed to fetch'),
@@ -158,8 +153,7 @@ describe('TransactionHistory Component', () => {
   });
 
   it('should handle pagination - next page button', async () => {
-    const { useTransactionHistory } = require('@/hooks/useWallet');
-    useTransactionHistory.mockReturnValue({
+    mockUseTransactionHistory.mockReturnValue({
       data: {
         entries: mockEntries,
         total: 30,
@@ -172,13 +166,13 @@ describe('TransactionHistory Component', () => {
 
     const { rerender } = render(<TransactionHistory pageSize={10} />);
 
-    const nextButton = screen.getByRole('button', { name: /next/i });
+    const nextButton = screen.getByTestId('next-button');
     expect(nextButton).not.toBeDisabled();
 
     await userEvent.click(nextButton);
 
     // After click, the component state updates and calls hook with new page
-    useTransactionHistory.mockReturnValue({
+    mockUseTransactionHistory.mockReturnValue({
       data: {
         entries: mockEntries,
         total: 30,
@@ -190,16 +184,15 @@ describe('TransactionHistory Component', () => {
     });
 
     rerender(<TransactionHistory pageSize={10} />);
-    expect(screen.getByText('Page 2 of 3')).toBeInTheDocument();
+    expect(screen.getByTestId('page-counter')).toHaveTextContent('Page 2 of 3');
   });
 
   it('should disable next button on last page', () => {
-    const { useTransactionHistory } = require('@/hooks/useWallet');
-    useTransactionHistory.mockReturnValue({
+    mockUseTransactionHistory.mockReturnValue({
       data: {
-        entries: mockEntries.slice(0, 1),
-        total: 1,
-        page: 1,
+        entries: mockEntries,
+        total: 20, // Ensure pagination shows (total > pageSize)
+        page: 2, // Set to last page (20 / 10 = 2 pages, so page 2 is last)
         pageSize: 10,
       },
       isLoading: false,
@@ -208,16 +201,15 @@ describe('TransactionHistory Component', () => {
 
     render(<TransactionHistory pageSize={10} />);
 
-    const nextButton = screen.getByRole('button', { name: /next/i });
+    const nextButton = screen.getByTestId('next-button');
     expect(nextButton).toBeDisabled();
   });
 
   it('should disable previous button on first page', () => {
-    const { useTransactionHistory } = require('@/hooks/useWallet');
-    useTransactionHistory.mockReturnValue({
+    mockUseTransactionHistory.mockReturnValue({
       data: {
         entries: mockEntries,
-        total: 2,
+        total: 20, // Need more than 10 to show pagination
         page: 1,
         pageSize: 10,
       },
@@ -227,16 +219,33 @@ describe('TransactionHistory Component', () => {
 
     render(<TransactionHistory pageSize={10} />);
 
-    const prevButton = screen.getByRole('button', { name: /previous/i });
+    const prevButton = screen.getByTestId('previous-button');
     expect(prevButton).toBeDisabled();
   });
 
-  it('should show page counter correctly', () => {
-    const { useTransactionHistory } = require('@/hooks/useWallet');
-    useTransactionHistory.mockReturnValue({
+  it('should show page counter correctly', async () => {
+    mockUseTransactionHistory.mockReturnValue({
       data: {
         entries: mockEntries,
-        total: 25,
+        total: 30,
+        page: 1,
+        pageSize: 10,
+      },
+      isLoading: false,
+      error: null,
+    });
+
+    const { rerender } = render(<TransactionHistory pageSize={10} />);
+
+    // Click next to go to page 2
+    const nextButton = screen.getByTestId('next-button');
+    await userEvent.click(nextButton);
+
+    // Update mock to return page 2 data
+    mockUseTransactionHistory.mockReturnValue({
+      data: {
+        entries: mockEntries,
+        total: 30,
         page: 2,
         pageSize: 10,
       },
@@ -244,14 +253,12 @@ describe('TransactionHistory Component', () => {
       error: null,
     });
 
-    render(<TransactionHistory pageSize={10} />);
-
-    expect(screen.getByText('Page 2 of 3')).toBeInTheDocument();
+    rerender(<TransactionHistory pageSize={10} />);
+    expect(screen.getByTestId('page-counter')).toHaveTextContent('Page 2 of 3');
   });
 
   it('should hide pagination when showPagination is false', () => {
-    const { useTransactionHistory } = require('@/hooks/useWallet');
-    useTransactionHistory.mockReturnValue({
+    mockUseTransactionHistory.mockReturnValue({
       data: {
         entries: mockEntries,
         total: 2,
@@ -269,8 +276,7 @@ describe('TransactionHistory Component', () => {
   });
 
   it('should render table headers correctly', () => {
-    const { useTransactionHistory } = require('@/hooks/useWallet');
-    useTransactionHistory.mockReturnValue({
+    mockUseTransactionHistory.mockReturnValue({
       data: {
         entries: mockEntries,
         total: 2,
@@ -290,8 +296,7 @@ describe('TransactionHistory Component', () => {
   });
 
   it('should use custom pageSize prop', () => {
-    const { useTransactionHistory } = require('@/hooks/useWallet');
-    useTransactionHistory.mockReturnValue({
+    mockUseTransactionHistory.mockReturnValue({
       data: {
         entries: mockEntries,
         total: 25,
@@ -309,7 +314,6 @@ describe('TransactionHistory Component', () => {
   });
 
   it('should format balance with thousand separators', () => {
-    const { useTransactionHistory } = require('@/hooks/useWallet');
     const entriesWithLargeBalance: LedgerEntryDto[] = [
       {
         ...mockEntries[0],
@@ -317,7 +321,7 @@ describe('TransactionHistory Component', () => {
       },
     ];
 
-    useTransactionHistory.mockReturnValue({
+    mockUseTransactionHistory.mockReturnValue({
       data: {
         entries: entriesWithLargeBalance,
         total: 1,

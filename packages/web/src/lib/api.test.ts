@@ -52,9 +52,9 @@ describe('ApiService', () => {
   });
 
   it('should attach a response interceptor', () => {
-    ApiService.getInstance();
-    // @ts-expect-error: Interceptors are mocked and not directly exposed in AxiosInstance type
-    expect(axios.create().interceptors.response.use).toHaveBeenCalledTimes(1);
+    const service = ApiService.getInstance();
+    // Interceptors are mocked and not directly exposed in AxiosInstance type
+    expect(service.api.interceptors.response.use).toHaveBeenCalledTimes(1);
   });
 
   // More tests for interceptor logic will go here

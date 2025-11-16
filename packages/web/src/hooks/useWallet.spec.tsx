@@ -13,13 +13,16 @@ import * as walletApiModule from '@/lib/wallet-api';
 import type { UserDto } from '@rewards-bolivia/sdk';
 import type { LedgerEntryDto } from '@rewards-bolivia/shared-types';
 
+// Import useAuth for mocking
+import { useAuth } from './useAuth';
+
 // Mock the auth hook
 vi.mock('./useAuth', () => ({
-  useAuth: vi.fn(() => ({
-    user: { id: 'test-user-id' },
-    isAuthenticated: true,
-  })),
+  useAuth: vi.fn(),
 }));
+
+// Cast to mock for easier usage
+const mockUseAuth = useAuth as ReturnType<typeof vi.fn>;
 
 // Mock the wallet API
 vi.mock('@/lib/wallet-api', () => ({
@@ -45,6 +48,15 @@ describe('useWallet Hooks', () => {
       },
     });
     vi.clearAllMocks();
+
+    // Set default mock return value for useAuth
+    mockUseAuth.mockReturnValue({
+      user: { id: 'test-user-id', email: 'test@example.com', role: 'client' },
+      isAuthenticated: true,
+      isLoading: false,
+      login: vi.fn(),
+      logout: vi.fn(),
+    });
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -80,8 +92,13 @@ describe('useWallet Hooks', () => {
     });
 
     it('should disable query when user is not authenticated', () => {
-      const { useAuth } = require('./useAuth');
-      useAuth.mockReturnValue({ user: null, isAuthenticated: false });
+      mockUseAuth.mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        login: vi.fn(),
+        logout: vi.fn(),
+      });
 
       const { result } = renderHook(() => useWalletBalance(), { wrapper });
 

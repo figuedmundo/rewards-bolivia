@@ -9,7 +9,7 @@ vi.mock('../hooks', () => ({
   useAuth: vi.fn(),
 }));
 
-const mockedUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
+const mockedUseAuth = useAuth as ReturnType<typeof vi.fn>;
 
 describe('ProtectedRoute', () => {
   beforeEach(() => {
@@ -20,7 +20,7 @@ describe('ProtectedRoute', () => {
     mockedUseAuth.mockReturnValue({
       isAuthenticated: true,
       isLoading: false,
-      user: { id: '1', email: 'test@example.com' },
+      user: { id: '1', email: 'test@example.com', role: 'client' },
       login: vi.fn(),
       logout: vi.fn(),
     });

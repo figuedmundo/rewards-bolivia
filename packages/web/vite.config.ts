@@ -11,6 +11,9 @@ const viteConfig = defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ['@rewards-bolivia/sdk'],
+  },
   server: {
     host: '0.0.0.0',
     proxy: {

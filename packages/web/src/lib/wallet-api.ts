@@ -9,6 +9,7 @@ import {
   UsersApi,
   TransactionsApi,
   LedgerApi,
+  Configuration,
 } from '@rewards-bolivia/sdk';
 import type {
   UserDto,
@@ -18,11 +19,62 @@ import type {
   TransactionDto,
   LedgerEntryDto,
 } from '@rewards-bolivia/shared-types';
+import { ApiService } from './api';
 
-// Initialize SDK clients with default configuration
-const usersApi = new UsersApi();
-const transactionsApi = new TransactionsApi();
-const ledgerApi = new LedgerApi();
+// Lazy initialization of SDK clients
+// This allows tests to properly mock the SDK before the clients are created
+let cachedUsersApi: UsersApi | undefined;
+let cachedTransactionsApi: TransactionsApi | undefined;
+let cachedLedgerApi: LedgerApi | undefined;
+
+const getUsersApi = (): UsersApi => {
+  if (!cachedUsersApi) {
+    const axiosInstance = ApiService.getInstance().api;
+    const sdkConfig = new Configuration({
+      basePath: '/api',
+      baseOptions: {
+        withCredentials: true,
+      },
+    });
+    cachedUsersApi = new UsersApi(sdkConfig, '/api', axiosInstance);
+  }
+  return cachedUsersApi;
+};
+
+const getTransactionsApi = (): TransactionsApi => {
+  if (!cachedTransactionsApi) {
+    const axiosInstance = ApiService.getInstance().api;
+    const sdkConfig = new Configuration({
+      basePath: '/api',
+      baseOptions: {
+        withCredentials: true,
+      },
+    });
+    cachedTransactionsApi = new TransactionsApi(sdkConfig, '/api', axiosInstance);
+  }
+  return cachedTransactionsApi;
+};
+
+const getLedgerApi = (): LedgerApi => {
+  if (!cachedLedgerApi) {
+    const axiosInstance = ApiService.getInstance().api;
+    const sdkConfig = new Configuration({
+      basePath: '/api',
+      baseOptions: {
+        withCredentials: true,
+      },
+    });
+    cachedLedgerApi = new LedgerApi(sdkConfig, '/api', axiosInstance);
+  }
+  return cachedLedgerApi;
+};
+
+// Reset API clients (used for testing)
+export const resetApiClients = (): void => {
+  cachedUsersApi = undefined;
+  cachedTransactionsApi = undefined;
+  cachedLedgerApi = undefined;
+};
 
 // Types for API responses
 export interface PaginatedLedgerResponse {
@@ -41,14 +93,25 @@ export interface LedgerQueryParams {
   pageSize?: number;
 }
 
+/**
+ * Helper function to convert optional query parameters to SDK format
+ * The SDK expects string parameters, but we use optional values
+ * Empty strings are filtered out by the API
+ */
+const stringifyParam = (value: string | number | undefined): string => {
+  if (value === undefined || value === null) return '';
+  if (typeof value === 'number') return value.toString();
+  return value;
+};
+
 // Wallet API client wrapping SDK
 export const walletApi = {
   // Get user balance (from user profile)
   // Uses auto-generated UsersApi.usersControllerFindOneById() method
   getBalance: async (userId: string): Promise<number> => {
     try {
-      const response = await usersApi.usersControllerFindOneById(userId);
-      const user = response.data as UserDto;
+      const response = await getUsersApi().usersControllerFindOneById(userId);
+      const user = response.data;
       return user.pointsBalance;
     } catch (error) {
       console.error('Failed to fetch balance:', error);
@@ -60,8 +123,8 @@ export const walletApi = {
   // Uses auto-generated UsersApi.usersControllerFindOneById() method
   getUser: async (userId: string): Promise<UserDto> => {
     try {
-      const response = await usersApi.usersControllerFindOneById(userId);
-      return response.data as UserDto;
+      const response = await getUsersApi().usersControllerFindOneById(userId);
+      return response.data;
     } catch (error) {
       console.error('Failed to fetch user:', error);
       throw error;
@@ -72,15 +135,15 @@ export const walletApi = {
   // Uses auto-generated LedgerApi method
   getLedgerEntries: async (params: LedgerQueryParams): Promise<PaginatedLedgerResponse> => {
     try {
-      const response = await ledgerApi.ledgerControllerQueryEntries(
-        params.accountId || '',
-        params.transactionId || '',
-        params.startDate || '',
-        params.endDate || '',
-        String(params.pageSize || 10),
-        String((params.page || 1) - 1) // offset is 0-based
+      const response = await getLedgerApi().ledgerControllerQueryEntries(
+        stringifyParam(params.accountId),
+        stringifyParam(params.transactionId),
+        stringifyParam(params.startDate),
+        stringifyParam(params.endDate),
+        stringifyParam(params.pageSize),
+        stringifyParam(params.page)
       );
-      return (response.data as unknown) as PaginatedLedgerResponse;
+      return response.data as any; // API response type differs from SDK types
     } catch (error) {
       console.error('Failed to fetch ledger entries:', error);
       throw error;
@@ -91,8 +154,8 @@ export const walletApi = {
   // Uses auto-generated LedgerApi method
   getLedgerEntry: async (id: string): Promise<LedgerEntryDto> => {
     try {
-      const response = await ledgerApi.ledgerControllerGetEntry(id);
-      return (response.data as unknown) as LedgerEntryDto;
+      const response = await getLedgerApi().ledgerControllerGetEntry(id);
+      return response.data as any;
     } catch (error) {
       console.error('Failed to fetch ledger entry:', error);
       throw error;
@@ -103,8 +166,8 @@ export const walletApi = {
   // Uses auto-generated LedgerApi method
   verifyLedgerEntry: async (id: string): Promise<{ valid: boolean; message: string }> => {
     try {
-      const response = await ledgerApi.ledgerControllerVerifyEntry(id);
-      return (response.data as unknown) as { valid: boolean; message: string };
+      const response = await getLedgerApi().ledgerControllerVerifyEntry(id);
+      return response.data as any;
     } catch (error) {
       console.error('Failed to verify ledger entry:', error);
       throw error;
@@ -119,8 +182,8 @@ export const walletApi = {
     purchaseAmount: number;
   }): Promise<TransactionDto> => {
     try {
-      const response = await transactionsApi.transactionsControllerRedeemPoints(payload);
-      return (response.data as unknown) as TransactionDto;
+      const response = await getTransactionsApi().transactionsControllerRedeemPoints(payload as any);
+      return response.data as any;
     } catch (error) {
       console.error('Failed to redeem points:', error);
       throw error;
@@ -134,8 +197,8 @@ export const walletApi = {
     purchaseAmount: number;
   }): Promise<TransactionDto> => {
     try {
-      const response = await transactionsApi.transactionsControllerEarnPoints(payload);
-      return (response.data as unknown) as TransactionDto;
+      const response = await getTransactionsApi().transactionsControllerEarnPoints(payload as any);
+      return response.data as any;
     } catch (error) {
       console.error('Failed to earn points:', error);
       throw error;

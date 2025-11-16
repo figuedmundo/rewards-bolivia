@@ -51,7 +51,7 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - ../../packages/web:/usr/src/app
+      - ../../:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       - api

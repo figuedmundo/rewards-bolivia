@@ -1,13 +1,38 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
+
+// Mock the SDK before any imports
+vi.mock('@rewards-bolivia/sdk', () => ({
+  UsersApi: vi.fn(),
+  TransactionsApi: vi.fn(),
+  LedgerApi: vi.fn(),
+  Configuration: vi.fn(),
+}));
+
+// Mock the ApiService
+vi.mock('../../src/lib/api', () => ({
+  ApiService: {
+    getInstance: vi.fn(() => ({
+      api: {
+        post: vi.fn(),
+        get: vi.fn(),
+        defaults: { baseURL: '/api' },
+        interceptors: { response: { use: vi.fn() } },
+      },
+    })),
+  },
+  default: {
+    post: vi.fn(),
+    get: vi.fn(),
+  },
+}));
+
 import App from '../../src/App';
-import api from '../../src/lib/api';
+import { ApiService } from '../../src/lib/api';
 import { AuthProvider } from '../../src/components/providers/AuthProvider';
 
-// Mock the api module
-vi.mock('../../src/lib/api');
-const mockedApi = api as jest.Mocked<typeof api>;
+const mockedApiInstance = (ApiService.getInstance() as any).api;
 
 describe('Authentication Integration Flow', () => {
   beforeEach(() => {
@@ -15,7 +40,7 @@ describe('Authentication Integration Flow', () => {
   });
 
   it('should allow a user to log in and be redirected to the home page', async () => {
-    mockedApi.post.mockResolvedValue({ data: { accessToken: 'fake-jwt-token' } });
+    mockedApiInstance.post.mockResolvedValue({ data: { accessToken: 'fake-jwt-token' } });
 
     render(
       <MemoryRouter initialEntries={['/login']}>
@@ -43,14 +68,14 @@ describe('Authentication Integration Flow', () => {
     });
 
     // Assert that the API was called correctly
-    expect(mockedApi.post).toHaveBeenCalledWith('/auth/login', {
+    expect(mockedApiInstance.post).toHaveBeenCalledWith('/auth/login', {
       email: 'test@example.com',
       password: 'password123',
     });
   });
 
   it('should show an error message on failed login', async () => {
-    mockedApi.post.mockRejectedValue(new Error('Invalid credentials'));
+    mockedApiInstance.post.mockRejectedValue(new Error('Invalid credentials'));
 
     render(
       <MemoryRouter initialEntries={['/login']}>

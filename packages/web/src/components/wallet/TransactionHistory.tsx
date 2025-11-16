@@ -38,7 +38,7 @@ export const TransactionHistory = ({
     return (
       <div className="space-y-4 p-4">
         {Array.from({ length: pageSize }).map((_, i) => (
-          <Skeleton key={i} className="h-16 w-full" />
+          <Skeleton key={i} className="h-16 w-full" data-testid="transaction-skeleton" />
         ))}
       </div>
     );
@@ -89,7 +89,7 @@ export const TransactionHistory = ({
       {/* Pagination */}
       {showPagination && totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-4 border-t">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-600" data-testid="page-counter">
             Page {page} of {totalPages}
           </div>
           <div className="flex gap-2">
@@ -98,6 +98,7 @@ export const TransactionHistory = ({
               size="sm"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
+              data-testid="previous-button"
             >
               <ChevronLeft className="w-4 h-4" />
               Previous
@@ -107,6 +108,7 @@ export const TransactionHistory = ({
               size="sm"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
+              data-testid="next-button"
             >
               Next
               <ChevronRight className="w-4 h-4" />
