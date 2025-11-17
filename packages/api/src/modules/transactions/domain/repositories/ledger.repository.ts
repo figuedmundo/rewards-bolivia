@@ -1,8 +1,21 @@
-import type { PointLedger } from '@prisma/client';
+import type { PointLedger, LedgerEntryType } from '@prisma/client';
 
 export interface QueryOptions {
   limit?: number;
   offset?: number;
+}
+
+export interface LedgerQueryFilters {
+  accountId?: string;
+  transactionId?: string;
+  startDate?: Date;
+  endDate?: Date;
+  types?: LedgerEntryType[];
+  minAmount?: number;
+  maxAmount?: number;
+  search?: string;
+  limit: number;
+  offset: number;
 }
 
 export interface ILedgerRepository {
@@ -15,7 +28,7 @@ export interface ILedgerRepository {
   getPointsRedeemedInLast30Days(): Promise<number>;
   getTransactionCountInLast30Days(): Promise<number>;
 
-  // NEW: Granular query methods
+  // Granular query methods (legacy - kept for backward compatibility)
   findLedgerEntriesByAccount(
     accountId: string,
     options?: QueryOptions,
@@ -30,4 +43,9 @@ export interface ILedgerRepository {
   ): Promise<{ entries: PointLedger[]; total: number }>;
 
   findLedgerEntryById(id: string): Promise<PointLedger | null>;
+
+  // NEW: Unified query method with comprehensive filters
+  queryLedgerEntries(
+    filters: LedgerQueryFilters,
+  ): Promise<{ entries: PointLedger[]; total: number }>;
 }

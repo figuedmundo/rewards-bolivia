@@ -1227,12 +1227,16 @@ export const LedgerApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {string} transactionId 
          * @param {string} startDate 
          * @param {string} endDate 
+         * @param {string} type 
+         * @param {string} minAmount 
+         * @param {string} maxAmount 
+         * @param {string} search 
          * @param {string} limit 
          * @param {string} offset 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        ledgerControllerQueryEntries: async (accountId: string, transactionId: string, startDate: string, endDate: string, limit: string, offset: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        ledgerControllerQueryEntries: async (accountId: string, transactionId: string, startDate: string, endDate: string, type: string, minAmount: string, maxAmount: string, search: string, limit: string, offset: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'accountId' is not null or undefined
             assertParamExists('ledgerControllerQueryEntries', 'accountId', accountId)
             // verify required parameter 'transactionId' is not null or undefined
@@ -1241,6 +1245,14 @@ export const LedgerApiAxiosParamCreator = function (configuration?: Configuratio
             assertParamExists('ledgerControllerQueryEntries', 'startDate', startDate)
             // verify required parameter 'endDate' is not null or undefined
             assertParamExists('ledgerControllerQueryEntries', 'endDate', endDate)
+            // verify required parameter 'type' is not null or undefined
+            assertParamExists('ledgerControllerQueryEntries', 'type', type)
+            // verify required parameter 'minAmount' is not null or undefined
+            assertParamExists('ledgerControllerQueryEntries', 'minAmount', minAmount)
+            // verify required parameter 'maxAmount' is not null or undefined
+            assertParamExists('ledgerControllerQueryEntries', 'maxAmount', maxAmount)
+            // verify required parameter 'search' is not null or undefined
+            assertParamExists('ledgerControllerQueryEntries', 'search', search)
             // verify required parameter 'limit' is not null or undefined
             assertParamExists('ledgerControllerQueryEntries', 'limit', limit)
             // verify required parameter 'offset' is not null or undefined
@@ -1271,6 +1283,22 @@ export const LedgerApiAxiosParamCreator = function (configuration?: Configuratio
 
             if (endDate !== undefined) {
                 localVarQueryParameter['endDate'] = endDate;
+            }
+
+            if (type !== undefined) {
+                localVarQueryParameter['type'] = type;
+            }
+
+            if (minAmount !== undefined) {
+                localVarQueryParameter['minAmount'] = minAmount;
+            }
+
+            if (maxAmount !== undefined) {
+                localVarQueryParameter['maxAmount'] = maxAmount;
+            }
+
+            if (search !== undefined) {
+                localVarQueryParameter['search'] = search;
             }
 
             if (limit !== undefined) {
@@ -1352,13 +1380,17 @@ export const LedgerApiFp = function(configuration?: Configuration) {
          * @param {string} transactionId 
          * @param {string} startDate 
          * @param {string} endDate 
+         * @param {string} type 
+         * @param {string} minAmount 
+         * @param {string} maxAmount 
+         * @param {string} search 
          * @param {string} limit 
          * @param {string} offset 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async ledgerControllerQueryEntries(accountId: string, transactionId: string, startDate: string, endDate: string, limit: string, offset: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.ledgerControllerQueryEntries(accountId, transactionId, startDate, endDate, limit, offset, options);
+        async ledgerControllerQueryEntries(accountId: string, transactionId: string, startDate: string, endDate: string, type: string, minAmount: string, maxAmount: string, search: string, limit: string, offset: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.ledgerControllerQueryEntries(accountId, transactionId, startDate, endDate, type, minAmount, maxAmount, search, limit, offset, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['LedgerApi.ledgerControllerQueryEntries']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -1399,13 +1431,17 @@ export const LedgerApiFactory = function (configuration?: Configuration, basePat
          * @param {string} transactionId 
          * @param {string} startDate 
          * @param {string} endDate 
+         * @param {string} type 
+         * @param {string} minAmount 
+         * @param {string} maxAmount 
+         * @param {string} search 
          * @param {string} limit 
          * @param {string} offset 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        ledgerControllerQueryEntries(accountId: string, transactionId: string, startDate: string, endDate: string, limit: string, offset: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.ledgerControllerQueryEntries(accountId, transactionId, startDate, endDate, limit, offset, options).then((request) => request(axios, basePath));
+        ledgerControllerQueryEntries(accountId: string, transactionId: string, startDate: string, endDate: string, type: string, minAmount: string, maxAmount: string, search: string, limit: string, offset: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.ledgerControllerQueryEntries(accountId, transactionId, startDate, endDate, type, minAmount, maxAmount, search, limit, offset, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1439,13 +1475,17 @@ export class LedgerApi extends BaseAPI {
      * @param {string} transactionId 
      * @param {string} startDate 
      * @param {string} endDate 
+     * @param {string} type 
+     * @param {string} minAmount 
+     * @param {string} maxAmount 
+     * @param {string} search 
      * @param {string} limit 
      * @param {string} offset 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public ledgerControllerQueryEntries(accountId: string, transactionId: string, startDate: string, endDate: string, limit: string, offset: string, options?: RawAxiosRequestConfig) {
-        return LedgerApiFp(this.configuration).ledgerControllerQueryEntries(accountId, transactionId, startDate, endDate, limit, offset, options).then((request) => request(this.axios, this.basePath));
+    public ledgerControllerQueryEntries(accountId: string, transactionId: string, startDate: string, endDate: string, type: string, minAmount: string, maxAmount: string, search: string, limit: string, offset: string, options?: RawAxiosRequestConfig) {
+        return LedgerApiFp(this.configuration).ledgerControllerQueryEntries(accountId, transactionId, startDate, endDate, type, minAmount, maxAmount, search, limit, offset, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

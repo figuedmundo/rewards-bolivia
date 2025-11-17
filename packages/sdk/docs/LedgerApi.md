@@ -77,6 +77,10 @@ let accountId: string; // (default to undefined)
 let transactionId: string; // (default to undefined)
 let startDate: string; // (default to undefined)
 let endDate: string; // (default to undefined)
+let type: string; // (default to undefined)
+let minAmount: string; // (default to undefined)
+let maxAmount: string; // (default to undefined)
+let search: string; // (default to undefined)
 let limit: string; // (default to undefined)
 let offset: string; // (default to undefined)
 
@@ -85,6 +89,10 @@ const { status, data } = await apiInstance.ledgerControllerQueryEntries(
     transactionId,
     startDate,
     endDate,
+    type,
+    minAmount,
+    maxAmount,
+    search,
     limit,
     offset
 );
@@ -98,6 +106,10 @@ const { status, data } = await apiInstance.ledgerControllerQueryEntries(
 | **transactionId** | [**string**] |  | defaults to undefined|
 | **startDate** | [**string**] |  | defaults to undefined|
 | **endDate** | [**string**] |  | defaults to undefined|
+| **type** | [**string**] |  | defaults to undefined|
+| **minAmount** | [**string**] |  | defaults to undefined|
+| **maxAmount** | [**string**] |  | defaults to undefined|
+| **search** | [**string**] |  | defaults to undefined|
 | **limit** | [**string**] |  | defaults to undefined|
 | **offset** | [**string**] |  | defaults to undefined|
 

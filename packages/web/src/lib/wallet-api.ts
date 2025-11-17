@@ -84,12 +84,65 @@ export interface PaginatedLedgerResponse {
   pageSize: number;
 }
 
+/**
+ * Query parameters for ledger entries endpoint
+ *
+ * Extended to support filtering by transaction type, amount range, and search.
+ * All parameters are optional to allow flexible filtering combinations.
+ */
 export interface LedgerQueryParams {
+  /**
+   * Account ID to filter by (typically user ID)
+   */
   accountId?: string;
+
+  /**
+   * Specific transaction ID to filter by
+   */
   transactionId?: string;
+
+  /**
+   * Date range start (ISO 8601 format: YYYY-MM-DD)
+   */
   startDate?: string;
+
+  /**
+   * Date range end (ISO 8601 format: YYYY-MM-DD)
+   */
   endDate?: string;
+
+  /**
+   * Comma-separated list of transaction types (EARN,REDEEM,ADJUSTMENT,BURN)
+   * Multiple types use OR logic
+   */
+  type?: string;
+
+  /**
+   * Minimum transaction amount (inclusive)
+   * Supports negative values for redemptions
+   */
+  minAmount?: number;
+
+  /**
+   * Maximum transaction amount (inclusive)
+   * Supports negative values for redemptions
+   */
+  maxAmount?: number;
+
+  /**
+   * Search term for merchant/business name or transaction ID
+   * Case-insensitive partial matching
+   */
+  search?: string;
+
+  /**
+   * Page number for pagination (1-indexed)
+   */
   page?: number;
+
+  /**
+   * Number of items per page
+   */
   pageSize?: number;
 }
 
@@ -131,7 +184,7 @@ export const walletApi = {
     }
   },
 
-  // Get paginated ledger entries
+  // Get paginated ledger entries with extended filter support
   // Uses auto-generated LedgerApi method
   getLedgerEntries: async (params: LedgerQueryParams): Promise<PaginatedLedgerResponse> => {
     try {
@@ -140,6 +193,10 @@ export const walletApi = {
         stringifyParam(params.transactionId),
         stringifyParam(params.startDate),
         stringifyParam(params.endDate),
+        stringifyParam(params.type),
+        stringifyParam(params.minAmount),
+        stringifyParam(params.maxAmount),
+        stringifyParam(params.search),
         stringifyParam(params.pageSize),
         stringifyParam(params.page)
       );

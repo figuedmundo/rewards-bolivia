@@ -1,103 +1,118 @@
 # Product Mission
 
 ## Pitch
-Rewards Bolivia is a blockchain-backed loyalty platform that helps businesses and consumers participate in a fast, auditable points ecosystem by providing sub-1.5-second redemptions with comprehensive economic controls and cryptographic verification.
+
+Rewards Bolivia is a modern loyalty and rewards platform that helps Bolivian businesses and consumers build trust and engagement through instant, transparent point transactions by providing a hybrid on-chain/off-chain system that delivers sub-1.5-second redemptions with blockchain-grade auditability.
 
 ## Users
 
 ### Primary Customers
-- **Businesses**: Local merchants in Bolivia seeking to implement loyalty programs without complex infrastructure
-- **End Consumers**: Shoppers who earn and redeem loyalty points across participating businesses
-- **System Administrators**: Platform operators who maintain economic health and audit compliance
+
+- **Small to Medium Businesses (SMBs)**: Local businesses in Bolivia seeking to implement loyalty programs without complex infrastructure or high costs
+- **Enterprise Merchants**: Larger retail chains and franchises requiring scalable, auditable point management systems
+- **End Consumers**: Bolivian customers who want to earn, track, and redeem loyalty points across participating businesses
 
 ### User Personas
 
 **Maria - Small Business Owner** (35-50)
-- **Role:** Restaurant owner in La Paz
-- **Context:** Operates a medium-sized restaurant with 50-100 daily customers, wants to increase repeat visits
-- **Pain Points:** Cannot afford expensive loyalty software, needs simple point issuance system, wants customer retention tools
-- **Goals:** Increase customer frequency by 30%, simple point management, low operational overhead
+- **Role:** Owner of a local coffee shop chain (3 locations)
+- **Context:** Wants to reward repeat customers and compete with larger chains that have loyalty programs
+- **Pain Points:** Cannot afford expensive loyalty software, lacks technical expertise, needs simple point issuance
+- **Goals:** Increase customer retention by 30%, track customer engagement, issue points via simple QR codes
 
-**Carlos - Frequent Shopper** (25-40)
-- **Role:** Urban professional with disposable income
-- **Context:** Regularly shops at multiple local businesses, values rewards and discounts
-- **Pain Points:** Fragmented loyalty programs across businesses, points expire unused, redemption processes are slow
-- **Goals:** Maximize value from purchases, fast redemption experience, transparency on point balances
+**Carlos - IT Manager at Retail Chain** (30-45)
+- **Role:** Technology decision-maker at a mid-size supermarket chain
+- **Context:** Managing loyalty program for 15+ locations with 50,000+ active customers
+- **Pain Points:** Current system is slow, lacks transparency, difficult to audit, high transaction fees
+- **Goals:** Sub-2-second redemption times, comprehensive audit trails for compliance, real-time economic monitoring
 
-**Admin - Platform Administrator** (30-45)
-- **Role:** Technical operator managing platform health
-- **Context:** Responsible for economic stability and regulatory compliance
-- **Pain Points:** Point inflation risks, lack of audit trails, manual intervention required for economic adjustments
-- **Goals:** Maintain economic balance, ensure regulatory compliance, automate monitoring
+**Sofia - Loyal Consumer** (22-40)
+- **Role:** Urban professional, frequent shopper
+- **Context:** Shops at multiple participating businesses weekly
+- **Pain Points:** Forgets physical loyalty cards, unclear point balances, slow redemption process at checkout
+- **Goals:** Track all points in one place, instant balance updates, seamless redemption experience
+
+**Regulatory Auditor - Juan** (40-55)
+- **Role:** Financial compliance officer
+- **Context:** Audits loyalty programs for regulatory compliance
+- **Pain Points:** Incomplete audit trails, difficulty verifying transaction integrity, manual reconciliation
+- **Goals:** Cryptographic proof of all transactions, immutable ledger access, automated compliance reporting
 
 ## The Problem
 
-### Slow and Opaque Loyalty Programs
-Traditional loyalty systems suffer from slow redemption times (often 3-10 seconds), lack of transparency, and no audit trail. This creates friction at checkout and erodes trust. Small businesses cannot afford enterprise solutions, leaving them without competitive customer retention tools.
+### Fragmented and Opaque Loyalty Systems
 
-**Quantifiable Impact:** 45% of loyalty points go unredeemed due to poor user experience and lack of trust in point values.
+Bolivian businesses struggle to implement reliable loyalty programs. Traditional solutions are expensive, slow, and lack transparency. Customers lose trust when points disappear or balances are inconsistent. Businesses cannot track economic health of their point systems, leading to over-issuance or devaluation. Manual reconciliation is time-consuming and error-prone. This results in lost revenue, poor customer experience, and regulatory risk.
 
-**Our Solution:** Combine database performance (sub-1.5s redemptions) with blockchain auditability, making enterprise-grade loyalty accessible to small businesses while providing consumers with transparency and speed.
+**Our Solution:** A hybrid architecture combining database speed (sub-1.5s transactions) with blockchain auditability (cryptographic proof). Every transaction is hashed and tracked in an immutable ledger, while real-time economic monitoring prevents system abuse.
 
-### Economic Instability in Points Systems
-Unchecked point issuance creates digital liabilities that can destabilize platforms. Without real-time monitoring, platforms risk over-issuance, leading to devaluation or requiring forced expiration policies that anger users.
+### Lack of Economic Control and Transparency
 
-**Quantifiable Impact:** 60% of loyalty programs fail within 3 years due to economic mismanagement.
+Most loyalty platforms treat points like unlimited currency, leading to inflation, devaluation, and eventual program collapse. Businesses have no visibility into circulation ratios, burn rates, or redemption patterns. When programs fail, both businesses and consumers lose value.
 
-**Our Solution:** Real-time economic controls monitor circulation ratios, burn rates, and redemption patterns. Automated alerts trigger when thresholds are breached, with semi-automated emission rate adjustments to maintain stability.
+**Our Solution:** Built-in Economic Control System that monitors key metrics in real-time (total supply, circulation ratio, burn rate, redemption velocity). Automated alerts prevent dangerous economic states. Admin tools provide semi-automated emission adjustment with safety thresholds.
 
-### Compliance and Audit Challenges
-Regulators increasingly demand audit trails for digital value systems. Manual auditing is expensive, error-prone, and cannot scale. Businesses face compliance risks and high operational costs.
+### Poor Auditability and Trust
 
-**Quantifiable Impact:** Compliance audits cost platforms $50,000+ annually, with 30% failing initial audits.
+Existing systems use centralized databases with no cryptographic verification. Transactions can be altered or deleted. Businesses and regulators cannot independently verify ledger integrity. This creates distrust and regulatory complications.
 
-**Our Solution:** Dual-level cryptographic hashing (per-transaction + daily batch) creates immutable audit trails. Blockchain anchoring provides regulatory-grade proof without sacrificing performance.
+**Our Solution:** Dual-level cryptographic hashing - every transaction gets a SHA256 hash for instant verification, while daily batch hashes prepare for blockchain anchoring. Complete audit trails with tamper-proof verification endpoints.
 
 ## Differentiators
 
-### Hybrid On-Chain/Off-Chain Architecture
-Unlike pure blockchain solutions (slow, expensive) or traditional databases (no audit trail), we provide database speed with blockchain auditability.
-This results in sub-1.5-second redemptions with cryptographic verification, combining the best of both worlds.
+### Hybrid On-chain/Off-chain Architecture
 
-### Real-Time Economic Controls
-Unlike static loyalty programs, our EconomicControlService continuously monitors metrics (circulation ratio, burn rate, active points percentage) and generates automated alerts.
-This results in proactive economic stability with 80% fewer manual interventions and prevents point inflation crises.
+Unlike pure blockchain solutions (slow, expensive) or pure database solutions (no trust guarantees), we provide instant transactions with cryptographic auditability. This results in 10x faster redemptions than blockchain-only platforms while maintaining tamper-proof ledgers.
 
-### Modular Monolith with DDD
-Unlike tightly coupled monoliths or premature microservices, we use domain-driven design within a single deployable unit.
-This results in faster development cycles, easier testing, and the ability to extract microservices when genuinely needed.
+### Real-time Economic Monitoring
 
-### Semi-Automated Governance
-Unlike fully automated (risky) or fully manual (slow) systems, our emission rate adjuster generates recommendations that require admin approval.
-This results in data-driven decisions with human oversight, balancing automation efficiency with risk management.
+Unlike traditional loyalty platforms that treat points as infinite, we monitor economic health continuously. Circulation ratios, burn rates, and supply metrics are calculated in real-time with automated alerting. This prevents program collapse and maintains point value.
+
+### Developer-First API with Auto-Generated SDK
+
+Unlike legacy platforms with poor APIs, we provide OpenAPI-documented REST endpoints with auto-generated TypeScript clients. Integration takes days, not months. Type-safe SDK ensures frontend-backend consistency.
+
+### Modular Monolith Architecture
+
+Unlike microservices complexity or traditional monolith rigidity, we use a Modular Monolith with DDD principles. Each module (Auth, Users, Transactions) is independently testable with clear boundaries, but deployed as one unit. This reduces operational complexity while maintaining code quality.
+
+### Dual-Level Audit System
+
+Unlike single-hash systems, we provide per-transaction hashing (instant verification) and daily batch hashing (gas-efficient blockchain anchoring). Regulators can verify individual transactions or entire days with cryptographic proof.
 
 ## Key Features
 
 ### Core Features
-- **Sub-1.5s Redemptions:** Lightning-fast point redemptions that don't slow down checkout, powered by Redis caching and optimized database queries
-- **Point Earning:** Businesses issue points to customers at configurable rates, with automatic ledger entries and balance updates
-- **Point Redemption:** Customers redeem points for discounts with automatic validation of balance limits (max 30% of transaction)
-- **Transaction Fees:** Automated 0.5% burn on redemptions to control supply and prevent inflation
 
-### Audit and Compliance Features
-- **Per-Transaction Hashing:** Every ledger entry receives a SHA256 hash computed from transaction data, enabling instant verification
-- **Daily Batch Hashing:** All ledger entries aggregated into daily hashes for gas-efficient blockchain anchoring
-- **Immutable Ledger:** Every point movement (EARN, REDEEM, BURN, ADJUSTMENT, EXPIRE) recorded with balance snapshots
-- **Granular Audit APIs:** User-scoped queries for transparency, admin APIs for compliance verification
+- **Instant Point Transactions:** Sub-1.5-second earn and redeem operations with real-time balance updates
+- **Immutable Ledger:** Every point movement recorded in tamper-proof ledger with SHA256 hashing
+- **Wallet Dashboard:** Real-time balance tracking, transaction history with filters, and status indicators
+- **Multi-Role Authentication:** JWT-based auth supporting consumers, business users, and admins with Google OAuth
 
-### Economic Control Features
-- **Real-Time Metrics Dashboard:** Monitor total supply, circulation ratio, burn rate, and redemption rates
-- **Automated Alerts:** Threshold-based warnings (>80% active points, <25% redemption rate) with 1-hour throttling
-- **Emission Rate Adjuster:** AI-driven recommendations for emission rate changes based on economic health metrics
-- **Economic Guardrails:** Limit adjustments to 5-20% changes with 7-day cooldowns and minimum 100 transaction samples
+### Business Features
 
-### Collaboration Features
-- **Multi-Role Authentication:** JWT-based auth supporting client, business, and admin roles with Google OAuth integration
-- **Business Accounts:** Dedicated accounts for merchants with point issuance capabilities
-- **User Wallets:** Consumer accounts tracking point balances, transaction history, and expiration dates
+- **Point Issuance:** Businesses issue points via QR codes, manual entry, or API integration
+- **Redemption Management:** Configurable discount rates (0-30%), validation rules, and confirmation flows
+- **Business Dashboard:** Track customer transactions, point issuance history, and redemption patterns
+- **Business Plans:** Tiered plans (Starter/Basic/Pro/Premium) with blocked balance rules and eligibility constraints
+
+### Economic & Admin Features
+
+- **Economic Control System:** Real-time monitoring of circulation ratio, burn rate, total supply, and velocity metrics
+- **Automated Alerts:** Configurable thresholds trigger warnings for economic anomalies (over-issuance, unusual redemption patterns)
+- **Admin Console:** Search users, businesses, and transactions; view system-wide point statistics
+- **Semi-Automated Emission Engine:** Admin tools for economy tuning with safety thresholds and approval workflows
+
+### Audit & Compliance Features
+
+- **Per-Transaction Verification:** Every ledger entry can be independently verified via API endpoint
+- **Daily Audit Hashes:** Automated batch hashing at 3 AM UTC for entire day's transactions
+- **Admin Audit Tools:** Query daily hashes, verify integrity, generate compliance reports
+- **Ledger Export:** Export audit trails for regulatory submission in standardized formats
 
 ### Advanced Features
-- **Redis Caching:** Balance caching layer reducing database load by 70% for high-frequency queries
-- **Event-Driven Architecture:** Domain events trigger ledger entries, metrics updates, and alerts asynchronously
-- **Background Jobs:** Scheduled tasks for daily hash generation (3 AM UTC) and emission rate checks (2 AM UTC)
-- **Blockchain Anchoring Ready:** Infrastructure prepared for Polygon integration with `blockchainTxHash` field
+
+- **Point Expiration System:** Scheduled expirations with notifications and automatic EXPIRE ledger entries
+- **Rate Limiting:** Redis-based API throttling with role-based limits to prevent abuse
+- **Background Job Processing:** BullMQ workers handle scheduled tasks (expiration, alerts, daily hashes)
+- **Blockchain Anchoring (Planned):** Daily batch hash submission to Polygon for long-term immutable proof
