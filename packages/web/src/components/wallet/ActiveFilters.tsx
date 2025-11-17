@@ -3,11 +3,13 @@
  *
  * Displays active filters as removable pills with a "Clear All" link.
  * Wraps to multiple lines on narrow screens.
+ * Touch-optimized with adequate button sizes for mobile devices.
  */
 
 import { TransactionFilters, ActiveFilter } from '@/types/filters';
 import { FilterPill } from './filters/FilterPill';
 import { formatActiveFilters } from '@/lib/filter-utils';
+import { Button } from '@/components/ui/button';
 
 export interface ActiveFiltersProps {
   /**
@@ -28,6 +30,7 @@ export interface ActiveFiltersProps {
 
 /**
  * ActiveFilters - Display active filters as removable pills
+ * Responsive layout with proper wrapping on mobile devices
  */
 export function ActiveFilters({ filters, onRemoveFilter, onClearAll }: ActiveFiltersProps) {
   const activeFilters = formatActiveFilters(filters);
@@ -38,8 +41,8 @@ export function ActiveFilters({ filters, onRemoveFilter, onClearAll }: ActiveFil
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+      <span className="text-sm font-medium text-gray-700 dark:text-gray-300 shrink-0">
         Active filters:
       </span>
 
@@ -53,13 +56,15 @@ export function ActiveFilters({ filters, onRemoveFilter, onClearAll }: ActiveFil
         ))}
       </div>
 
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="sm"
         onClick={onClearAll}
-        className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
+        className="shrink-0 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 min-h-[44px] sm:min-h-0"
       >
         Clear All
-      </button>
+      </Button>
     </div>
   );
 }

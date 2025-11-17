@@ -4,6 +4,7 @@
  * Multi-select checkbox group for filtering by transaction type.
  * Supports EARN, REDEEM, ADJUSTMENT, and BURN types.
  * Visual styling with badges to distinguish types.
+ * Touch-friendly design with adequate spacing and targets.
  */
 
 import { ArrowDownCircle, ArrowUpCircle, RefreshCw, Flame } from 'lucide-react';
@@ -55,6 +56,7 @@ const transactionTypeOptions = [
 
 /**
  * TransactionTypeFilter - Multi-select transaction type filter
+ * Optimized for touch with adequate spacing and target sizes
  */
 export function TransactionTypeFilter({ value, onChange }: TransactionTypeFilterProps) {
   /**
@@ -92,7 +94,7 @@ export function TransactionTypeFilter({ value, onChange }: TransactionTypeFilter
         <Label className="text-sm font-medium">Transaction Type</Label>
         <button
           type="button"
-          className="text-xs text-blue-600 hover:text-blue-800"
+          className="text-xs text-blue-600 hover:text-blue-800 px-2 py-2 touch-manipulation"
           onClick={() => handleSelectAll(!allSelected)}
         >
           {allSelected ? 'Deselect All' : 'Select All'}
@@ -105,17 +107,18 @@ export function TransactionTypeFilter({ value, onChange }: TransactionTypeFilter
           const isChecked = value.includes(option.type);
 
           return (
-            <div key={option.type} className="flex items-center space-x-3">
+            <div key={option.type} className="flex items-center space-x-3 py-1">
               <Checkbox
                 id={`type-${option.type}`}
                 checked={isChecked}
                 onCheckedChange={(checked) => handleTypeToggle(option.type, checked as boolean)}
+                className="h-5 w-5"
               />
               <Label
                 htmlFor={`type-${option.type}`}
-                className="flex flex-1 items-center space-x-2 cursor-pointer"
+                className="flex flex-1 items-center space-x-2 cursor-pointer py-2"
               >
-                <Icon className={`h-4 w-4 ${option.color}`} />
+                <Icon className={`h-5 w-5 ${option.color}`} />
                 <span className="text-sm font-normal">{option.label}</span>
               </Label>
             </div>

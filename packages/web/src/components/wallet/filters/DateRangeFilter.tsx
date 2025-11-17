@@ -4,6 +4,7 @@
  * Provides date range filtering with quick presets and custom date selection.
  * Supports presets: Last 7/30/90 days, This year, All time.
  * Allows custom date range selection with validation.
+ * Touch-optimized for mobile devices with adequate button sizes.
  */
 
 import { useState } from 'react';
@@ -48,6 +49,7 @@ const presets: { label: string; value: DatePreset }[] = [
 
 /**
  * DateRangeFilter - Date range selection with presets and custom dates
+ * Optimized for mobile with touch-friendly controls
  */
 export function DateRangeFilter({ startDate, endDate, selectedPreset, onChange }: DateRangeFilterProps) {
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>(
@@ -97,6 +99,7 @@ export function DateRangeFilter({ startDate, endDate, selectedPreset, onChange }
               variant={selectedPreset === preset.value ? 'default' : 'outline'}
               size="sm"
               onClick={() => handlePresetClick(preset.value)}
+              className="touch-manipulation min-h-[44px] sm:min-h-0"
             >
               {preset.label}
             </Button>
@@ -104,7 +107,7 @@ export function DateRangeFilter({ startDate, endDate, selectedPreset, onChange }
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="start-date" className="text-sm">
             Start Date
@@ -114,7 +117,7 @@ export function DateRangeFilter({ startDate, endDate, selectedPreset, onChange }
               <Button
                 id="start-date"
                 variant="outline"
-                className="w-full justify-start text-left font-normal"
+                className="w-full justify-start text-left font-normal min-h-[44px] sm:min-h-0"
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {customStartDate ? format(customStartDate, 'PPP') : 'Pick a date'}
@@ -139,7 +142,7 @@ export function DateRangeFilter({ startDate, endDate, selectedPreset, onChange }
               <Button
                 id="end-date"
                 variant="outline"
-                className="w-full justify-start text-left font-normal"
+                className="w-full justify-start text-left font-normal min-h-[44px] sm:min-h-0"
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {customEndDate ? format(customEndDate, 'PPP') : 'Pick a date'}

@@ -1,8 +1,22 @@
 /**
  * FilterModal Component
  *
- * Desktop/tablet modal for transaction filtering using Dialog component.
- * Displays all filter options with apply and clear actions.
+ * Desktop/tablet modal dialog for transaction filtering using Dialog component.
+ * Displays all filter options with apply, clear, and CSV export actions.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <FilterModal
+ *   isOpen={isOpen}
+ *   onClose={() => setOpen(false)}
+ *   filters={filters}
+ *   onApply={(filters) => handleApply(filters)}
+ *   onClearAll={() => handleClear()}
+ *   onExport={() => handleExport()}
+ *   isExporting={false}
+ * />
+ * ```
  */
 
 import { useState, useEffect } from 'react';
@@ -15,7 +29,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { TransactionFilters } from '@/types/filters';
+import { Download } from 'lucide-react';
+import { TransactionFilters, TransactionType, DatePreset } from '@/types/filters';
 import {
   DateRangeFilter,
   TransactionTypeFilter,
@@ -41,6 +56,7 @@ export interface FilterModalProps {
 
   /**
    * Callback when filters are applied
+   * @param filters - The updated filter values
    */
   onApply: (filters: TransactionFilters) => void;
 
@@ -48,10 +64,31 @@ export interface FilterModalProps {
    * Callback when all filters are cleared
    */
   onClearAll: () => void;
+
+  /**
+   * Callback when CSV export is requested
+   */
+  onExport?: () => void;
+
+  /**
+   * Whether export is in progress
+   * @default false
+   */
+  isExporting?: boolean;
 }
 
 /**
  * FilterModal - Desktop/tablet filter dialog
+ *
+ * Provides a comprehensive filtering interface for transaction history.
+ * Includes date range, transaction type, amount range, and search filters.
+ *
+ * Features:
+ * - Local filter state management before applying
+ * - Keyboard accessible with proper focus management
+ * - Screen reader friendly with ARIA labels
+ * - Responsive layout with scrollable content
+ * - CSV export integration
  */
 export function FilterModal({
   isOpen,
@@ -59,6 +96,8 @@ export function FilterModal({
   filters,
   onApply,
   onClearAll,
+  onExport,
+  isExporting = false,
 }: FilterModalProps) {
   // Local state for filter values before applying
   const [localFilters, setLocalFilters] = useState<TransactionFilters>(filters);
@@ -98,14 +137,14 @@ export function FilterModal({
       ...localFilters,
       startDate,
       endDate,
-      datePreset: preset as any,
+      datePreset: preset as DatePreset | undefined,
     });
   };
 
   /**
    * Handle transaction type change
    */
-  const handleTypeChange = (types: any[]) => {
+  const handleTypeChange = (types: TransactionType[]) => {
     setLocalFilters({
       ...localFilters,
       types,
@@ -141,15 +180,18 @@ export function FilterModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto"
+        aria-describedby="filter-description"
+      >
         <DialogHeader>
           <DialogTitle>Filter Transactions</DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="filter-description">
             Filter your transaction history by date, type, amount, or merchant.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-6 py-4" role="form" aria-label="Transaction filters">
           <DateRangeFilter
             startDate={localFilters.startDate}
             endDate={localFilters.endDate}
@@ -170,7 +212,9 @@ export function FilterModal({
           />
 
           <div>
-            <label className="text-sm font-medium mb-2 block">Search</label>
+            <label className="text-sm font-medium mb-2 block" htmlFor="transaction-search">
+              Search
+            </label>
             <SearchInput
               value={localFilters.search || ''}
               onChange={handleSearchChange}
@@ -179,11 +223,39 @@ export function FilterModal({
           </div>
         </div>
 
+        {/* CSV Export Button */}
+        {onExport && (
+          <div className="border-t pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onExport}
+              disabled={isExporting}
+              className="w-full"
+              aria-label={isExporting ? 'Generating CSV export' : 'Export filtered transactions to CSV'}
+            >
+              <Download className="w-4 h-4 mr-2" aria-hidden="true" />
+              {isExporting ? 'Generating CSV...' : 'Export to CSV'}
+            </Button>
+          </div>
+        )}
+
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button type="button" variant="outline" onClick={handleClearAll} className="w-full sm:w-auto">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClearAll}
+            className="w-full sm:w-auto"
+            aria-label="Clear all filters"
+          >
             Clear All
           </Button>
-          <Button type="button" onClick={handleApply} className="w-full sm:w-auto">
+          <Button
+            type="button"
+            onClick={handleApply}
+            className="w-full sm:w-auto"
+            aria-label="Apply selected filters"
+          >
             Apply Filters
           </Button>
         </DialogFooter>

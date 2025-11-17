@@ -17,6 +17,9 @@ import { FilterContainer } from './FilterContainer';
 import { ActiveFilters } from './ActiveFilters';
 import { TransactionFilters, TransactionType, ActiveFilter } from '@/types/filters';
 import { getActiveFilterCount, getDateRangeForPreset } from '@/lib/filter-utils';
+import { generateCSV, downloadCSV, getCSVFilename } from '@/lib/csv-utils';
+import { walletApi } from '@/lib/wallet-api';
+import { useAuth } from '@/hooks/useAuth';
 
 interface TransactionHistoryProps {
   pageSize?: number;
@@ -39,15 +42,17 @@ const getDefaultFilters = (): TransactionFilters => {
 /**
  * TransactionHistory Component
  *
- * Displays paginated list of ledger entries (transaction history) with filtering
+ * Displays paginated list of ledger entries (transaction history) with filtering and CSV export
  */
 export const TransactionHistory = ({
   pageSize = 10,
   showPagination = true,
 }: TransactionHistoryProps) => {
+  const { user } = useAuth();
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<TransactionFilters>(getDefaultFilters());
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Convert filters to API query params
   const queryParams = {
@@ -116,6 +121,61 @@ export const TransactionHistory = ({
     setPage(1);
   };
 
+  /**
+   * Handle CSV export
+   *
+   * Fetches ALL filtered transactions (without pagination) and exports to CSV.
+   * Shows loading state during export and provides user feedback.
+   */
+  const handleExportCSV = async () => {
+    if (!user) return;
+
+    setIsExporting(true);
+
+    try {
+      // Fetch all entries matching current filters (no pagination limit)
+      const exportQueryParams = {
+        accountId: user.id,
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+        type: filters.types && filters.types.length > 0 ? filters.types.join(',') : undefined,
+        minAmount: filters.minAmount,
+        maxAmount: filters.maxAmount,
+        search: filters.search,
+        pageSize: 10000, // Large page size to get all results
+        page: 1,
+      };
+
+      const response = await walletApi.getLedgerEntries(exportQueryParams);
+
+      // Warn if dataset is very large
+      if (response.total > 1000) {
+        const confirmExport = window.confirm(
+          `You are about to export ${response.total} transactions. This may take a moment. Continue?`
+        );
+        if (!confirmExport) {
+          setIsExporting(false);
+          return;
+        }
+      }
+
+      // Generate CSV from entries
+      const csvContent = generateCSV(response.entries);
+
+      // Download CSV file
+      const filename = getCSVFilename();
+      downloadCSV(csvContent, filename);
+
+      // Show success feedback (optional - could use a toast notification)
+      console.log(`Successfully exported ${response.entries.length} transactions to ${filename}`);
+    } catch (err) {
+      console.error('Failed to export CSV:', err);
+      alert('Failed to export transactions. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   // Calculate active filter count
   const activeFilterCount = getActiveFilterCount(filters);
 
@@ -182,6 +242,8 @@ export const TransactionHistory = ({
             filters={filters}
             onApply={handleApplyFilters}
             onClearAll={handleClearAllFilters}
+            onExport={handleExportCSV}
+            isExporting={isExporting}
           />
         </div>
       );
@@ -253,7 +315,7 @@ export const TransactionHistory = ({
         </TableBody>
       </Table>
 
-      {/* Pagination */}
+      {/* Pagination - Touch-optimized for mobile */}
       {showPagination && totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-4 border-t">
           <div className="text-sm text-gray-600" data-testid="page-counter">
@@ -266,6 +328,7 @@ export const TransactionHistory = ({
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
               data-testid="previous-button"
+              className="min-h-[44px] sm:min-h-0"
             >
               <ChevronLeft className="w-4 h-4" />
               Previous
@@ -276,6 +339,7 @@ export const TransactionHistory = ({
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
               data-testid="next-button"
+              className="min-h-[44px] sm:min-h-0"
             >
               Next
               <ChevronRight className="w-4 h-4" />
@@ -291,6 +355,8 @@ export const TransactionHistory = ({
         filters={filters}
         onApply={handleApplyFilters}
         onClearAll={handleClearAllFilters}
+        onExport={handleExportCSV}
+        isExporting={isExporting}
       />
     </div>
   );
