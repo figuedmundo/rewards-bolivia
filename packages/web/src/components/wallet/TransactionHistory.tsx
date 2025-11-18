@@ -42,7 +42,21 @@ const getDefaultFilters = (): TransactionFilters => {
 /**
  * TransactionHistory Component
  *
- * Displays paginated list of ledger entries (transaction history) with filtering and CSV export
+ * Displays paginated list of ledger entries (transaction history) with filtering and CSV export.
+ *
+ * Features:
+ * - Transaction filtering by date, type, amount, and merchant search
+ * - CSV export of filtered transactions
+ * - Responsive design with mobile-optimized controls
+ * - Pagination with touch-friendly buttons
+ * - Active filter pills with individual removal
+ * - Large dataset warnings for performance
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <TransactionHistory pageSize={20} showPagination={true} />
+ * ```
  */
 export const TransactionHistory = ({
   pageSize = 10,
@@ -166,10 +180,9 @@ export const TransactionHistory = ({
       const filename = getCSVFilename();
       downloadCSV(csvContent, filename);
 
-      // Show success feedback (optional - could use a toast notification)
-      console.log(`Successfully exported ${response.entries.length} transactions to ${filename}`);
-    } catch (err) {
-      console.error('Failed to export CSV:', err);
+      // Success - file downloaded automatically
+    } catch {
+      // Show error to user
       alert('Failed to export transactions. Please try again.');
     } finally {
       setIsExporting(false);

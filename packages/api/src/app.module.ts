@@ -10,6 +10,7 @@ import * as Joi from 'joi';
 import { LoggerMiddleware } from '@rewards-bolivia/logger';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { RedisModule } from './infrastructure/redis/redis.module';
     AuthModule,
     UsersModule,
     TransactionsModule,
+    NotificationsModule,
     RedisModule,
   ],
   controllers: [AppController, MetricsController],

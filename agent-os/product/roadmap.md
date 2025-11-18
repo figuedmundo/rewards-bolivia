@@ -21,7 +21,7 @@ This roadmap reflects the current state of the project and outlines upcoming fea
 
 ## Phase 1 - Enhanced Wallet Experience
 
-1. [ ] Wallet Transaction Filtering - Add advanced filters to transaction history (date range, type, amount, merchant), export capabilities, and search functionality `S`
+1. [x] Wallet Transaction Filtering - Add advanced filters to transaction history (date range, type, amount, merchant), export capabilities, and search functionality `S`
 2. [ ] Point Expiration Notifications - Implement user notifications (email/SMS) for upcoming point expirations with configurable warning periods `M`
 3. [ ] Wallet Analytics Dashboard - Display user-specific insights (monthly earn/redeem trends, top merchants, point velocity) with charts `M`
 

@@ -14,7 +14,7 @@ export const walletKeys = {
   all: ['wallet'] as const,
   balance: (userId: string) => [...walletKeys.all, 'balance', userId] as const,
   user: (userId: string) => [...walletKeys.all, 'user', userId] as const,
-  ledger: (params: LedgerQueryParams) => [...walletKeys.all, 'ledger', params] as const,
+  ledger: (accountId: string | undefined, params: LedgerQueryParams) => [...walletKeys.all, 'ledger', accountId, params] as const,
   entry: (id: string) => [...walletKeys.all, 'entry', id] as const,
 };
 
@@ -67,7 +67,7 @@ export const useTransactionHistory = (params: LedgerQueryParams = {}) => {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: walletKeys.ledger({ accountId: user?.id, ...params }),
+    queryKey: walletKeys.ledger(user?.id, params),
     queryFn: () => walletApi.getLedgerEntries({ accountId: user?.id, ...params }),
     enabled: !!user,
     placeholderData: (previousData) => previousData, // For smooth pagination in v5
@@ -137,7 +137,7 @@ export const useRedeemPoints = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: walletKeys.balance(user!.id) });
       queryClient.invalidateQueries({ queryKey: walletKeys.user(user!.id) });
-      queryClient.invalidateQueries({ queryKey: walletKeys.ledger({ accountId: user?.id }) });
+      queryClient.invalidateQueries({ queryKey: walletKeys.ledger(user!.id, {}) });
     },
 
     // On error: rollback optimistic update
@@ -171,7 +171,7 @@ export const useEarnPoints = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: walletKeys.balance(user!.id) });
       queryClient.invalidateQueries({ queryKey: walletKeys.user(user!.id) });
-      queryClient.invalidateQueries({ queryKey: walletKeys.ledger({ accountId: user?.id }) });
+      queryClient.invalidateQueries({ queryKey: walletKeys.ledger(user!.id, {}) });
     },
 
     onError: (error: any) => {

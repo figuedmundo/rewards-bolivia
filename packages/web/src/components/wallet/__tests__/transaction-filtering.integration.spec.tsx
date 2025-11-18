@@ -353,7 +353,7 @@ describe('Transaction Filtering - Critical Workflows', () => {
       );
 
       // Default filter (Last 90 days) should be active
-      const filterButton = screen.getByRole('button', { name: /filter/i });
+      const filterButton = screen.getByRole('button', { name: /^filters/i });
       expect(filterButton).toBeInTheDocument();
 
       // Badge should show "1" for the default date range filter
@@ -371,7 +371,7 @@ describe('Transaction Filtering - Critical Workflows', () => {
         </QueryClientProvider>
       );
 
-      const filterButton = screen.getByRole('button', { name: /filter/i });
+      const filterButton = screen.getByRole('button', { name: /^filters/i });
       await user.click(filterButton);
 
       // Modal should open - check for modal title
@@ -389,7 +389,7 @@ describe('Transaction Filtering - Critical Workflows', () => {
       );
 
       // Open filter modal
-      const filterButton = screen.getByRole('button', { name: /filter/i });
+      const filterButton = screen.getByRole('button', { name: /^filters/i });
       await user.click(filterButton);
 
       await waitFor(() => {
@@ -419,7 +419,7 @@ describe('Transaction Filtering - Critical Workflows', () => {
       );
 
       // Open filter modal
-      const filterButton = screen.getByRole('button', { name: /filter/i });
+      const filterButton = screen.getByRole('button', { name: /^filters/i });
       await user.click(filterButton);
 
       await waitFor(() => {
@@ -470,7 +470,7 @@ describe('Transaction Filtering - Critical Workflows', () => {
       );
 
       // Open filter modal
-      const filterButton = screen.getByRole('button', { name: /filter/i });
+      const filterButton = screen.getByRole('button', { name: /^filters/i });
       await user.click(filterButton);
 
       await waitFor(() => {
@@ -505,7 +505,7 @@ describe('Transaction Filtering - Critical Workflows', () => {
       );
 
       // Open filter modal
-      const filterButton = screen.getByRole('button', { name: /filter/i });
+      const filterButton = screen.getByRole('button', { name: /^filters/i });
       await user.click(filterButton);
 
       await waitFor(() => {
@@ -538,7 +538,7 @@ describe('Transaction Filtering - Critical Workflows', () => {
       );
 
       // Open filter modal
-      const filterButton = screen.getByRole('button', { name: /filter/i });
+      const filterButton = screen.getByRole('button', { name: /^filters/i });
       await user.click(filterButton);
 
       await waitFor(() => {
@@ -577,7 +577,7 @@ describe('Transaction Filtering - Critical Workflows', () => {
       );
 
       // Open filter modal
-      const filterButton = screen.getByRole('button', { name: /filter/i });
+      const filterButton = screen.getByRole('button', { name: /^filters/i });
       await user.click(filterButton);
 
       await waitFor(() => {

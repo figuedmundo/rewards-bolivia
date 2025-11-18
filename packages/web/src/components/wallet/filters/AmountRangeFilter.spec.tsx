@@ -15,8 +15,8 @@ describe('AmountRangeFilter', () => {
     const mockOnMaxChange = vi.fn();
     render(<AmountRangeFilter onMinChange={mockOnMinChange} onMaxChange={mockOnMaxChange} />);
 
-    expect(screen.getByLabelText(/minimum/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/maximum/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/min amount/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/max amount/i)).toBeInTheDocument();
   });
 
   it('displays current values in inputs', () => {
@@ -31,8 +31,8 @@ describe('AmountRangeFilter', () => {
       />
     );
 
-    const minInput = screen.getByLabelText(/minimum/i) as HTMLInputElement;
-    const maxInput = screen.getByLabelText(/maximum/i) as HTMLInputElement;
+    const minInput = screen.getByLabelText(/min amount/i) as HTMLInputElement;
+    const maxInput = screen.getByLabelText(/max amount/i) as HTMLInputElement;
 
     expect(minInput.value).toBe('100');
     expect(maxInput.value).toBe('500');
@@ -44,7 +44,7 @@ describe('AmountRangeFilter', () => {
     const mockOnMaxChange = vi.fn();
     render(<AmountRangeFilter onMinChange={mockOnMinChange} onMaxChange={mockOnMaxChange} />);
 
-    const minInput = screen.getByLabelText(/minimum/i);
+    const minInput = screen.getByLabelText(/min amount/i);
     await user.type(minInput, '50');
 
     expect(mockOnMinChange).toHaveBeenCalled();
@@ -56,7 +56,7 @@ describe('AmountRangeFilter', () => {
     const mockOnMaxChange = vi.fn();
     render(<AmountRangeFilter onMinChange={mockOnMinChange} onMaxChange={mockOnMaxChange} />);
 
-    const maxInput = screen.getByLabelText(/maximum/i);
+    const maxInput = screen.getByLabelText(/max amount/i);
     await user.type(maxInput, '200');
 
     expect(mockOnMaxChange).toHaveBeenCalled();
@@ -75,7 +75,7 @@ describe('AmountRangeFilter', () => {
     );
 
     expect(
-      screen.getByText(/maximum amount must be greater than or equal to minimum amount/i)
+      screen.getByText(/Maximum must be greater than minimum/i)
     ).toBeInTheDocument();
   });
 
@@ -92,7 +92,7 @@ describe('AmountRangeFilter', () => {
     );
 
     expect(
-      screen.queryByText(/maximum amount must be greater than or equal to minimum amount/i)
+      screen.queryByText(/Maximum must be greater than minimum/i)
     ).not.toBeInTheDocument();
   });
 
@@ -101,6 +101,6 @@ describe('AmountRangeFilter', () => {
     const mockOnMaxChange = vi.fn();
     render(<AmountRangeFilter onMinChange={mockOnMinChange} onMaxChange={mockOnMaxChange} />);
 
-    expect(screen.getByText(/negative values represent redemptions and burns/i)).toBeInTheDocument();
+    expect(screen.getByText(/Tip: Use negative values for redemptions/i)).toBeInTheDocument();
   });
 });

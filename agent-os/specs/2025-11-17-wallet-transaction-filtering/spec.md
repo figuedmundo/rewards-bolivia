@@ -1,138 +1,159 @@
 # Specification: Wallet Transaction Filtering
 
 ## Goal
-
-Enable users to efficiently filter and search their transaction history using date range, transaction type, amount range, and merchant filters, with CSV export capabilities. This feature enhances the existing wallet UI to support large transaction histories while maintaining sub-1.5 second performance targets.
+Enable users to efficiently filter, search, and export transaction history through a comprehensive filtering interface that supports date ranges, transaction types, amount ranges, merchant search, and CSV export while maintaining sub-1.5 second performance.
 
 ## User Stories
-
-- As a user, I want to filter my transaction history by date range, so that I can review transactions from specific time periods (e.g., last month, last quarter)
-- As a user, I want to filter transactions by type (earn, redeem, burn, adjustment), so that I can quickly see all points I've earned or redeemed
-- As a user, I want to export my filtered transaction history to CSV, so that I can keep records for personal budgeting or analysis
-- As a mobile user, I want an intuitive filtering interface optimized for small screens, so that I can easily filter transactions on the go
+- As a user, I want to filter my transaction history by date range, type, amount, and merchant so that I can quickly find specific transactions
+- As a user, I want to export my filtered transaction history to CSV so that I can keep records for personal budgeting or tax purposes
 
 ## Specific Requirements
 
 **Date Range Filtering**
-- Implement quick presets: Last 7 days, Last 30 days, Last 90 days (default), This year, All time
-- Support custom date range with start and end date pickers using shadcn Calendar component
-- Default to Last 90 days to balance performance with user needs
-- Validate end date is not before start date
-- Date range persists during session unless cleared
+- Support preset options: Last 7 days, Last 30 days, Last 90 days (default), This year, All time
+- Allow custom date range selection with start and end date pickers using shadcn/ui Calendar component
+- Default to Last 90 days on initial load for optimal performance
+- Validate that end date is not before start date
+- Immediately apply filter when preset is selected
+- Persist date range selection during user session
 
-**Transaction Type Multi-Select**
-- Support filtering by EARN, REDEEM, ADJUSTMENT, BURN transaction types
-- Use checkbox group or button group for multiple selection
-- Multiple types combine with OR logic (show EARN OR REDEEM)
-- Default to all types selected (no filtering)
+**Transaction Type Filtering**
+- Support filtering by EARN, REDEEM, ADJUSTMENT, and BURN transaction types
+- Implement multi-select using checkboxes or button group UI pattern
+- Default to all types selected (no filtering) on initial load
+- Apply OR logic within selected types (show EARN OR REDEEM if both selected)
+- Combine with other filters using AND logic (date AND type AND amount)
+- Visual indication of which types are currently selected
 
 **Amount Range Filtering**
-- Provide Min and Max numeric input fields
-- Support positive values (for earnings) and negative values (for redemptions/debits)
-- Validate Max is greater than Min when both specified
-- Empty fields mean no limit for that boundary
+- Support minimum and maximum amount input fields (numeric)
+- Allow positive values for earnings and negative values for redemptions
+- Validate that max value is greater than min value when both specified
+- Empty fields indicate "no limit" for that boundary
+- Support use cases: large transactions (min only), small redemptions (both negative), specific range (both specified)
 
-**Search with Debouncing**
-- Implement global search across merchant/business names and transaction IDs
-- Apply 300-500ms debounce to reduce API calls
-- Support minimum 2 characters to trigger search
-- Case-insensitive partial matching
+**Merchant/Business Search and Global Search**
+- Implement debounced search input (300-500ms delay) to reduce API calls
+- Search across merchant/business names and transaction IDs
+- Apply case-insensitive partial matching on backend
+- Display search term as removable filter pill
+- Combine search with other active filters using AND logic
+- Clear button to reset search term
 
 **CSV Export Functionality**
-- Generate client-side CSV with columns: Date, Business, Type, Points, Transaction ID
-- Use filename format: historial-rewards-bolivia-YYYY-MM-DD.csv
-- Export only transactions matching current filters
-- Show loading indicator during generation
-- Proper CSV escaping for special characters, UTF-8 encoding
+- Export button in filter modal/sheet that exports current filtered results
+- CSV columns in order: Date (YYYY-MM-DD HH:mm:ss), Business, Type, Points (signed), Transaction ID
+- Filename format: historial-rewards-bolivia-YYYY-MM-DD.csv (date is export date, not filter date)
+- Client-side CSV generation using proper escaping for commas, quotes, and newlines
+- UTF-8 BOM for Excel compatibility
+- Loading indicator during export generation
+- Confirmation dialog if exporting more than 1000 transactions
+- Success/error feedback after export attempt
 
-**Filter UI Components**
-- Filter button with badge showing active filter count
-- Desktop: Modal dialog (400-600px width)
-- Mobile: Bottom sheet with slide-up animation
-- Active filter pills displayed above transaction list with individual removal
-- Clear All option to reset filters
+**Filter UI/UX - Desktop/Tablet**
+- Filter button with badge showing count of active filters (e.g., "Filter (3)")
+- Modal dialog (desktop) or side sheet (tablet) with 400-600px width
+- Scrollable content area containing all filter controls
+- Action buttons: "Apply Filters" (primary), "Clear All" (secondary), "Close/Cancel"
+- Apply button applies filters, closes modal, and resets pagination to page 1
+- Clear All resets all filters to defaults (Last 90 days, all types)
 
-**Performance Requirements**
-- Default to 90-day date range to limit initial query scope
-- Implement pagination with 20-50 transactions per page
-- Display warning when results exceed 1000 transactions
-- All filter combinations use AND logic between different filter types
+**Filter UI/UX - Mobile**
+- Full-screen bottom sheet with slide-up animation
+- Header with "Filters" title and close button
+- Scrollable content area for filter controls
+- Fixed footer with "Apply" and "Clear All" buttons positioned for thumb access
+- Touch-optimized controls with minimum 44px tap targets
 
-**Integration with Existing API**
-- Extend existing GET /api/ledger/entries endpoint usage
-- Current query parameters: accountId, transactionId, startDate, endDate, limit, offset
-- Need to verify support for: type filter, amount range (minAmount/maxAmount), search parameter
-- Maintain TanStack Query integration for caching and pagination
+**Active Filter Display**
+- Display filter pills/tags above transaction list, below filter button
+- Each active filter shown as removable pill with × icon
+- Examples: "Last 30 days ×", "Type: EARN ×", "Amount: 100-500 ×", "Search: \"coffee\" ×"
+- Click × on individual pill to remove that specific filter
+- "Clear All" link to remove all filters at once
+- Pills wrap to multiple lines on narrow screens with smooth animations
 
-**Responsive Design**
-- Mobile (< 640px): Bottom sheet, full-screen filter interface
-- Tablet/Desktop (>= 640px): Modal dialog
-- Filter pills wrap to multiple lines on narrow screens
-- Transaction list optimized for small screens
+**Pagination and Performance**
+- Initial load: 10-20 transactions per page
+- Pagination controls with Previous/Next buttons (touch-optimized 44px height on mobile)
+- Reset to page 1 whenever filters change
+- Display warning banner if total results exceed 1000 transactions with suggestion to refine filters
+- Maintain target of sub-1.5 second filter operations using TanStack Query caching
 
-**Empty States**
-- No transactions found: Friendly message with filter adjustment suggestion
-- No results after filtering: "No transactions match your criteria" with Clear Filters action
+**Filter Modal Layout and Order**
+- Search Input at top (most frequently used)
+- Date Range Filter second (common use case)
+- Transaction Type Filter third (checkboxes or button group)
+- Amount Range Filter fourth (min/max inputs side by side)
+- Export CSV button at bottom (after filters applied)
+- Clear visual separation between sections with consistent Tailwind spacing
 
 ## Visual Design
-
 No visual mockups provided in planning/visuals folder.
 
 ## Existing Code to Leverage
 
 **TransactionHistory Component**
-- Located at /packages/web/src/components/wallet/TransactionHistory.tsx
-- Already implements pagination with Previous/Next buttons
-- Uses TanStack Query via useTransactionHistory hook
-- Displays loading skeletons and error states
-- Can be extended to accept filter parameters and pass to useTransactionHistory hook
+- Core transaction list component already implements filtering, pagination, CSV export
+- Located at packages/web/src/components/wallet/TransactionHistory.tsx
+- Uses useState for filter state, TanStack Query for data fetching
+- Handles filter application, clearing, and individual filter removal
+- Implements CSV export with large dataset confirmation
+- Reuse this as the main component, it already meets all requirements
 
-**useTransactionHistory Hook**
-- Located at /packages/web/src/hooks/useWallet.ts
-- Already calls walletApi.getLedgerEntries with LedgerQueryParams
-- Supports accountId, page, pageSize, startDate, endDate, transactionId parameters
-- Uses TanStack Query with caching (5-minute stale time)
-- Can be extended to support additional filter parameters (type, amount range, search)
+**Filter Components in packages/web/src/components/wallet/filters/**
+- DateRangeFilter: Date preset buttons and custom range picker using shadcn/ui Calendar
+- TransactionTypeFilter: Multi-select checkboxes for transaction types with visual state
+- AmountRangeFilter: Min/max numeric inputs with validation
+- SearchInput: Debounced search with clear button
+- FilterPill: Reusable pill component with remove functionality
+- All components already built and tested, ready to use
 
-**walletApi.getLedgerEntries Method**
-- Located at /packages/web/src/lib/wallet-api.ts
-- Calls LedgerApi.ledgerControllerQueryEntries from generated SDK
-- Currently supports: accountId, transactionId, startDate, endDate, pageSize, page
-- Returns PaginatedLedgerResponse with entries array and total count
-- May need extension for type filter, amount range, and search parameters
+**FilterContainer, FilterModal, FilterSheet Components**
+- FilterContainer: Responsive wrapper that renders modal (desktop) or sheet (mobile)
+- FilterModal: Dialog-based desktop filter interface with scrollable content
+- FilterSheet: Bottom sheet mobile filter interface with slide-up animation
+- Located at packages/web/src/components/wallet/
+- Already implements responsive behavior, apply/clear actions, and export button placement
 
-**Backend GET /api/ledger/entries Endpoint**
-- Located at /packages/api/src/modules/transactions/infrastructure/controllers/ledger.controller.ts
-- Supports accountId, transactionId, startDate, endDate, limit, offset query parameters
-- Implements user authorization (users can only query their own entries)
-- Returns paginated results with total count metadata
-- May require extension to support transaction type filter, amount range, and merchant search
+**Filter Utility Functions (packages/web/src/lib/filter-utils.ts)**
+- getDateRangeForPreset: Calculates start/end dates for presets (7d, 30d, 90d, year, all)
+- formatActiveFilters: Converts filter state to array of ActiveFilter objects for pill rendering
+- getActiveFilterCount: Counts active filters for badge display
+- removeFilter: Removes specific filter while preserving others
+- getDefaultFilters: Returns default filter state (Last 90 days, all types)
+- Comprehensive utility coverage, reuse for all filter state management
 
-**shadcn/ui Components Available**
-- Badge: For active filter pills and transaction type badges
-- Button: For filter actions and pagination
-- Table: Already used in TransactionHistory component
-- Card: Can be used for filter modal layout
-- Skeleton: Already used for loading states
-- Note: Need to install Dialog, Sheet, Calendar, Input components if not present
+**CSV Export Utilities (packages/web/src/lib/csv-utils.ts)**
+- generateCSV: Converts ledger entries to CSV string with proper escaping (RFC 4180)
+- downloadCSV: Triggers browser download with UTF-8 BOM for Excel compatibility
+- getCSVFilename: Generates filename with current date (historial-rewards-bolivia-YYYY-MM-DD.csv)
+- Handles special characters (commas, quotes, newlines), proper date/amount formatting
+- Already implements all CSV requirements, use as-is
 
-**TransactionItem Component**
-- Located at /packages/web/src/components/wallet/TransactionItem.tsx
-- Uses Badge component with color mapping for transaction types
-- Formats dates using toLocaleDateString
-- Displays debit/credit with color coding (green for earnings, red for redemptions)
-- Can be reference for transaction type display and formatting logic
+**Backend API Endpoint (packages/api/src/modules/transactions/infrastructure/controllers/ledger.controller.ts)**
+- GET /api/ledger/entries supports all required query parameters
+- Parameters: accountId, transactionId, startDate, endDate, type (comma-separated), minAmount, maxAmount, search, limit, offset
+- Pagination uses limit/offset (convert to page/pageSize in frontend: offset = (page-1) * pageSize)
+- Returns paginated response with entries array, total count, limit, offset
+- Authorization ensures users can only query their own transactions
+- Validation for date ranges, amount ranges, transaction types already implemented
+
+**TanStack Query Integration (packages/web/src/hooks/useWallet.ts)**
+- useTransactionHistory hook wraps walletApi.getLedgerEntries with TanStack Query
+- Caching with 5-minute staleTime for performance
+- Placeholder data during pagination for smooth transitions
+- Query key includes all filter parameters for proper cache invalidation
+- Reuse this hook for all transaction fetching with filter params
 
 ## Out of Scope
-
-- Saved filter presets: Ability to save and name custom filter combinations for quick access
-- Filter history: Tracking or suggesting previously used filter combinations
-- Automatic recurring transaction detection: Identifying and grouping recurring transactions
-- Advanced export formats: PDF, Excel (.xlsx), or other formats beyond CSV
-- Bulk transaction actions: Selecting multiple transactions for bulk operations
-- Transaction categorization: User-defined categories or tags for transactions
-- Charts/Visualizations: Graphs or charts of filtered transaction data
-- Email/Schedule exports: Automated or scheduled report generation
-- URL state persistence: Storing filter state in URL query parameters for shareable views
-- LocalStorage persistence: Filter state persistence across user sessions
-- Server-side CSV generation: Only client-side generation for this iteration
+- Saved filter presets with user-defined names for quick access
+- Filter history tracking or suggestions based on previously used filters
+- Automatic recurring transaction detection and grouping
+- Advanced export formats beyond CSV (PDF, Excel .xlsx)
+- Bulk transaction selection for bulk operations
+- User-defined transaction categorization or tagging
+- Charts or visualizations of filtered transaction data
+- Email/scheduled report generation or automated exports
+- URL state management for shareable filter states (may be added as enhancement)
+- Merchant autocomplete suggestions (search is full-text, not autocomplete)

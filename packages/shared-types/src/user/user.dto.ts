@@ -40,6 +40,12 @@ export class UserDto {
     description: 'Date and time when the user was last updated',
   })
   updatedAt!: Date;
+
+  @ApiProperty({
+    example: true,
+    description: 'Whether the user wants to receive email notifications about expiring points',
+  })
+  emailNotifications!: boolean;
 }
 
 export class RegisterUserDto {

@@ -271,3 +271,6 @@ Required for local development (see `.env.example`):
 - **Monorepo awareness**: Use `pnpm --filter <package>` for package-specific commands
 - **Workspace dependencies**: Local packages referenced with `workspace:*` protocol
 - **Test setup**: API tests require setup file (`test/setup-e2e.ts`)
+
+## IMPORTANT AI Memories
+- Always use context7 when I need code generation, setup or configuration steps, or library/API documentation. This means you should automatically use the Context7 MCP tools to resolve library id and get library docs without me having to explicitly ask.

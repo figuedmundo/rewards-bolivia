@@ -2,13 +2,32 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import HomePage from './HomePage';
 import { useAuth } from '../hooks';
+import { BrowserRouter } from 'react-router-dom';
 
 // Mock the useAuth hook
 vi.mock('../hooks', () => ({
   useAuth: vi.fn(),
 }));
 
+// Mock useNavigate
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
+
 const mockedUseAuth = useAuth as ReturnType<typeof vi.fn>;
+
+const renderHomePage = () => {
+  return render(
+    <BrowserRouter>
+      <HomePage />
+    </BrowserRouter>
+  );
+};
 
 describe('HomePage', () => {
   beforeEach(() => {
@@ -24,12 +43,12 @@ describe('HomePage', () => {
       logout: vi.fn(),
     });
 
-    render(<HomePage />);
+    renderHomePage();
 
     expect(screen.getByRole('heading', { name: /welcome to the home page/i })).toBeInTheDocument();
   });
 
-  it('renders the logout button', () => {
+  it('renders the wallet and logout buttons', () => {
     mockedUseAuth.mockReturnValue({
       isAuthenticated: true,
       isLoading: false,
@@ -38,9 +57,27 @@ describe('HomePage', () => {
       logout: vi.fn(),
     });
 
-    render(<HomePage />);
+    renderHomePage();
 
+    expect(screen.getByRole('button', { name: /go to wallet/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument();
+  });
+
+  it('navigates to wallet when wallet button is clicked', () => {
+    mockedUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+      user: { id: '1', email: 'test@example.com', role: 'client' },
+      login: vi.fn(),
+      logout: vi.fn(),
+    });
+
+    renderHomePage();
+
+    const walletButton = screen.getByRole('button', { name: /go to wallet/i });
+    fireEvent.click(walletButton);
+
+    expect(mockNavigate).toHaveBeenCalledWith('/wallet');
   });
 
   it('calls logout when logout button is clicked', () => {
@@ -53,7 +90,7 @@ describe('HomePage', () => {
       logout: mockLogout,
     });
 
-    render(<HomePage />);
+    renderHomePage();
 
     const logoutButton = screen.getByRole('button', { name: /logout/i });
     fireEvent.click(logoutButton);
@@ -70,7 +107,7 @@ describe('HomePage', () => {
       logout: vi.fn(),
     });
 
-    render(<HomePage />);
+    renderHomePage();
 
     expect(mockedUseAuth).toHaveBeenCalledTimes(1);
   });

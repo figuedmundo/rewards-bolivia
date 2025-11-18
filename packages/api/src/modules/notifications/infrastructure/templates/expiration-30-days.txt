@@ -1,0 +1,31 @@
+REWARDS BOLIVIA - POINTS EXPIRING NOTIFICATION
+==============================================
+
+Hello {{userName}},
+
+We wanted to let you know that some of your loyalty points will be expiring soon. Now is the perfect time to redeem them for rewards!
+
+POINTS EXPIRING SOON
+---
+You have {{pointsExpiring}} points expiring on {{expirationDate}}
+
+Current Balance: {{currentBalance}} points
+
+Don't let these points go to waste! Visit your wallet to see available rewards and redeem your points before they expire.
+
+VIEW YOUR WALLET
+{{walletUrl}}
+
+---
+
+You're receiving this email because you have points expiring soon. If you no longer want to receive these notifications, you can manage your preferences in your account settings.
+
+HELPFUL LINKS
+- My Wallet: {{walletUrl}}
+- Manage Preferences: {{unsubscribeUrl}}
+
+---
+
+© 2025 Rewards Bolivia. All rights reserved.
+
+This is a transactional email. Please do not reply to this message.

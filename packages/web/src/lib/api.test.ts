@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axios from 'axios';
-import { ApiService } from './api';
 
 // Mock axios to prevent actual network requests
 vi.mock('axios', () => {
@@ -29,21 +28,18 @@ vi.mock('axios', () => {
 
 describe('ApiService', () => {
   beforeEach(() => {
-    // Reset mocks before each test
-    vi.clearAllMocks();
-    // Re-initialize the ApiService instance to clear any previous state
-    // This is a bit tricky with singletons, but we can force it for testing
-    // @ts-expect-error: Resetting private static instance for testing purposes
-    ApiService.instance = undefined;
+    vi.resetModules();
   });
 
-  it('should be a singleton', () => {
+  it('should be a singleton', async () => {
+    const { ApiService } = await import('./api');
     const instance1 = ApiService.getInstance();
     const instance2 = ApiService.getInstance();
     expect(instance1).toBe(instance2);
   });
 
-  it('should create an axios instance with correct baseURL and withCredentials', () => {
+  it('should create an axios instance with correct baseURL and withCredentials', async () => {
+    const { ApiService } = await import('./api');
     ApiService.getInstance();
     expect(axios.create).toHaveBeenCalledWith({
       baseURL: '/api',
@@ -51,11 +47,10 @@ describe('ApiService', () => {
     });
   });
 
-  it('should attach a response interceptor', () => {
+  it('should attach a response interceptor', async () => {
+    const { ApiService } = await import('./api');
     const service = ApiService.getInstance();
     // Interceptors are mocked and not directly exposed in AxiosInstance type
     expect(service.api.interceptors.response.use).toHaveBeenCalledTimes(1);
   });
-
-  // More tests for interceptor logic will go here
 });

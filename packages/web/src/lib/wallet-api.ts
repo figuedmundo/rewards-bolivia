@@ -19,7 +19,7 @@ import type {
   TransactionDto,
   LedgerEntryDto,
 } from '@rewards-bolivia/shared-types';
-import { ApiService } from './api';
+import apiService from './api';
 
 // Lazy initialization of SDK clients
 // This allows tests to properly mock the SDK before the clients are created
@@ -29,7 +29,7 @@ let cachedLedgerApi: LedgerApi | undefined;
 
 const getUsersApi = (): UsersApi => {
   if (!cachedUsersApi) {
-    const axiosInstance = ApiService.getInstance().api;
+    const axiosInstance = apiService.api;
     const sdkConfig = new Configuration({
       basePath: '/api',
       baseOptions: {
@@ -43,7 +43,7 @@ const getUsersApi = (): UsersApi => {
 
 const getTransactionsApi = (): TransactionsApi => {
   if (!cachedTransactionsApi) {
-    const axiosInstance = ApiService.getInstance().api;
+    const axiosInstance = apiService.api;
     const sdkConfig = new Configuration({
       basePath: '/api',
       baseOptions: {
@@ -57,7 +57,7 @@ const getTransactionsApi = (): TransactionsApi => {
 
 const getLedgerApi = (): LedgerApi => {
   if (!cachedLedgerApi) {
-    const axiosInstance = ApiService.getInstance().api;
+    const axiosInstance = apiService.api;
     const sdkConfig = new Configuration({
       basePath: '/api',
       baseOptions: {
