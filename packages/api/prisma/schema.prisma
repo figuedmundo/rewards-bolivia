@@ -34,9 +34,11 @@ model User {
   provider   String  @default("local")
   providerId String?
 
-  pointsBalance Int           @default(0)
+  pointsBalance Int            @default(0)
   transactions  Transaction[]
-  businesses    Business[] // A user can own/manage multiple businesses
+  businesses    Business[]     // A user can own/manage multiple businesses
+  notificationLogs NotificationLog[]
+  emailNotifications Boolean    @default(true)
 
   @@unique([provider, providerId])
 }
@@ -105,11 +107,15 @@ model PointLedger {
   balanceAfter  Int
   reason        String?
   hash          String?
+  expiresAt     DateTime?
   createdAt     DateTime        @default(now())
   transaction   Transaction     @relation(fields: [transactionId], references: [id])
   transactionId String
 
   @@index([accountId])
+  @@index([expiresAt])
+  @@index([expiresAt, credit])
+  @@index([accountId, expiresAt])
 }
 
 model EconomicAlert {
@@ -164,4 +170,21 @@ model DailyAuditHash {
   createdAt        DateTime @default(now())
 
   @@index([createdAt])
+}
+
+model NotificationLog {
+  id               String   @id @default(cuid())
+  userId           String
+  notificationType String
+  status           String
+  sentAt           DateTime?
+  failureReason    String?
+  expirationDate   DateTime
+  pointsExpiring   Int
+  createdAt        DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, notificationType, expirationDate])
+  @@index([status, createdAt])
 }

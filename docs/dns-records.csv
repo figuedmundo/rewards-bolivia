@@ -1,0 +1,7 @@
+Type,Name,Value
+CNAME,ogoe224c5r7vpiviv7m3x4ynw525amr3._domainkey.figuedmundo.com,ogoe224c5r7vpiviv7m3x4ynw525amr3.dkim.amazonses.com
+CNAME,drxvezfhdlkfs2yvv4qdcpgn7debmtzt._domainkey.figuedmundo.com,drxvezfhdlkfs2yvv4qdcpgn7debmtzt.dkim.amazonses.com
+CNAME,q2dzy7nzghv5yumxvqdllu3khldu24du._domainkey.figuedmundo.com,q2dzy7nzghv5yumxvqdllu3khldu24du.dkim.amazonses.com
+MX,rewards.figuedmundo.com,10 feedback-smtp.eu-north-1.amazonses.com
+TXT,rewards.figuedmundo.com,"v=spf1 include:amazonses.com ~all"
+TXT,_dmarc.figuedmundo.com,"v=DMARC1; p=none;"

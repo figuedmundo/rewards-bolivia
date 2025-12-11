@@ -1,0 +1,57 @@
+task_groups:
+  - name: Project Setup & Dependencies
+    claude_code_subagent: devops
+    standards:
+      - all
+  - name: Database Schema & Migrations
+    claude_code_subagent: database
+    standards:
+      - all
+  - name: Domain Layer
+    claude_code_subagent: backend
+    standards:
+      - all
+  - name: Infrastructure Layer - Repositories
+    claude_code_subagent: backend
+    standards:
+      - all
+  - name: Application Layer - Email Services
+    claude_code_subagent: backend
+    standards:
+      - all
+  - name: Application Layer - Notification Logic
+    claude_code_subagent: backend
+    standards:
+      - all
+  - name: Application Layer - Scheduled Job
+    claude_code_subagent: backend
+    standards:
+      - all
+  - name: Email Templates
+    claude_code_subagent: backend
+    standards:
+      - all
+  - name: API Endpoints & Frontend Integration
+    claude_code_subagent: backend
+    standards:
+      - all
+  - name: Module Registration & Configuration
+    claude_code_subagent: backend
+    standards:
+      - all
+  - name: Testing & Quality Assurance
+    claude_code_subagent: backend
+    standards:
+      - all
+  - name: AWS SES Setup & Configuration
+    claude_code_subagent: devops
+    standards:
+      - all
+  - name: Manual Testing & Validation
+    claude_code_subagent: user
+    standards:
+      - all
+  - name: Documentation & Deployment Preparation
+    claude_code_subagent: backend
+    standards:
+      - all

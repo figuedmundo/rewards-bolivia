@@ -1,0 +1,33 @@
+REWARDS BOLIVIA - URGENT: POINTS EXPIRING SOON!
+==============================================
+
+ONLY {{daysRemaining}} DAYS REMAINING! Act now to redeem your points.
+
+Hello {{userName}},
+
+Your loyalty points are expiring very soon! This is your reminder to redeem them before you lose them forever.
+
+POINTS EXPIRING SOON - {{daysRemaining}} DAYS LEFT
+---
+You have {{pointsExpiring}} points expiring on {{expirationDate}}
+
+Current Balance: {{currentBalance}} points
+
+Don't miss out! Redeem your points now to enjoy exclusive rewards. Visit your wallet immediately to see what you can claim.
+
+REDEEM POINTS NOW
+{{walletUrl}}
+
+---
+
+You're receiving this email because you have points expiring soon. If you no longer want to receive these notifications, you can manage your preferences in your account settings.
+
+HELPFUL LINKS
+- My Wallet: {{walletUrl}}
+- Manage Preferences: {{unsubscribeUrl}}
+
+---
+
+© 2025 Rewards Bolivia. All rights reserved.
+
+This is a transactional email. Please do not reply to this message.

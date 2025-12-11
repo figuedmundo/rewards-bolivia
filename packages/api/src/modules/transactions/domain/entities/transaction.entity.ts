@@ -26,6 +26,7 @@ export class PointLedger implements PrismaPointLedger {
   debit: number;
   credit: number;
   balanceAfter: number;
+  expiresAt: Date | null;
   reason: string | null;
   hash: string | null;
   createdAt: Date;

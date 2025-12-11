@@ -1,0 +1,35 @@
+REWARDS BOLIVIA - LAST CHANCE: POINTS EXPIRE TODAY!
+==================================================
+
+LAST CHANCE: Points Expire Today!
+
+Hello {{userName}},
+
+This is your final notice! Your loyalty points expire TODAY. You must redeem them immediately to avoid losing them forever.
+
+EXPIRING TODAY - DO NOT DELAY!
+---
+You have {{pointsExpiring}} points expiring on {{expirationDate}}
+
+Current Balance: {{currentBalance}} points
+
+DO NOT DELAY! These points will be lost at the end of today.
+
+Click the link below immediately to go to your wallet and redeem your points before they expire.
+
+REDEEM NOW
+{{walletUrl}}
+
+---
+
+You're receiving this email because you have points expiring today. If you no longer want to receive these notifications, you can manage your preferences in your account settings.
+
+HELPFUL LINKS
+- My Wallet: {{walletUrl}}
+- Manage Preferences: {{unsubscribeUrl}}
+
+---
+
+© 2025 Rewards Bolivia. All rights reserved.
+
+This is a transactional email. Please do not reply to this message.

@@ -14,7 +14,11 @@
 
 -   **Instantaneous Transactions:** Sub-1.5-second point redemptions for a seamless user experience.
 -   **Hybrid On-chain/Off-chain Model:** Combines the speed of a traditional database with the trust and auditability of a blockchain.
--   **Modular Monolith Architecture:** A scalable and maintainable codebase that is easy to develop and deploy.
+-   **Dual-Level Audit System:** Per-transaction SHA256 hashing plus daily batch hashing for comprehensive auditability.
+-   **Wallet Dashboard:** Real-time point balance tracking, advanced transaction filtering, and CSV export with TanStack Query integration.
+-   **Auto-Generated SDK:** TypeScript-Axios client for type-safe API integration across frontend applications.
+-   **Modular Monolith Architecture:** A scalable and maintainable codebase following DDD principles and Clean Architecture.
+-   **Economic Control System:** Real-time monitoring and validation of point economics to prevent system abuse.
 -   **Modern Tech Stack:** Built with NestJS, React, Flutter (planned), and other modern technologies.
 -   **Comprehensive Testing:** A robust testing strategy ensures code quality and reliability.
 
@@ -36,20 +40,31 @@ This project is a monorepo using pnpm workspaces. The main packages are:
 
 ```
 /rewards-bolivia
-├───e2e/             # End-to-end tests
-├───infra/           # Infrastructure as Code (Docker, K8s)
+├───agent-os/             # Agent-OS configuration and documentation
+│   ├───product/          # Product documentation (mission, roadmap, tech-stack)
+│   └───standards/        # Coding standards (backend, frontend, testing, global)
+├───e2e/                  # End-to-end tests
+├───infra/                # Infrastructure as Code (Docker, K8s)
 ├───packages/
-│   ├───api/         # NestJS Backend (Modular Monolith)
-│   ├───web/         # React Frontend (Dashboard)
-│   ├───worker/      # Background job processor
-│   ├───sdk/         # Auto-generated API client
-│   ├───shared-types/# Shared TypeScript types and DTOs
-│   ├───libs/        # Shared libraries (auth, logger, etc.)
-│   └───test-utils/  # Test utilities and fixtures
-└───docs/            # Project documentation
+│   ├───api/              # NestJS Backend (Modular Monolith)
+│   ├───web/              # React Frontend (Dashboard with Wallet UI)
+│   ├───worker/           # Background job processor (BullMQ/Redis)
+│   ├───sdk/              # Auto-generated TypeScript-Axios API client
+│   ├───shared-types/     # Shared TypeScript types and DTOs
+│   ├───libs/             # Shared libraries
+│   │   ├───auth/         # Authentication utilities
+│   │   ├───logger/       # Shared logging library
+│   │   └───utils/        # Common utilities
+│   ├───test-utils/       # Test utilities and fixtures
+│   └───infra-scripts/    # Infrastructure utility scripts
+└───docs/                 # Project documentation
+    ├───api/              # API-specific documentation (ledger endpoints, etc.)
+    ├───Rewards_Bolivia/  # Product and business documentation
+    └───RUNBOOKS/         # Operational procedures
 ```
 
 For a more detailed explanation of the architecture, please see [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md).
+See the full implementation plan in [`docs/PROPOSED_ROADMAP.md`](./docs/PROPOSED_ROADMAP.md).
 
 ## 🏁 Getting Started
 
@@ -213,5 +228,5 @@ This project is licensed under the MIT License. See the [LICENSE](./LICENSE) fil
 
 ## 📞 Contact
 
--   **Project Maintainer:** Edmundo Figueroa - [figuedmundol@gmail.com]
+-   **Project Maintainer:** Edmundo Figueroa - [figuedmundo@gmail.com]
 -   **GitHub Issues:** [https://github.com/figuedmundo/rewards-bolivia/issues](https://github.com/figuedmundo/rewards-bolivia/issues)

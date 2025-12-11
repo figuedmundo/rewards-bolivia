@@ -41,6 +41,11 @@ services:
       - GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - AWS_SES_REGION=${AWS_SES_REGION}
+      - AWS_SES_FROM_EMAIL=${AWS_SES_FROM_EMAIL}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+
     networks:
       - app-network
 
@@ -51,7 +56,7 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - ../../packages/web:/usr/src/app
+      - ../../:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       - api

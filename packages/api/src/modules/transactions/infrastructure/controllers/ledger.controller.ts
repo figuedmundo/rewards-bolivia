@@ -16,6 +16,20 @@ import type { ILedgerRepository } from '../../domain/repositories/ledger.reposit
 import { LedgerHashService } from '../../application/services/ledger-services/ledger-hash.service';
 import { RolesGuard } from '../../../auth/roles.guard';
 import { Roles } from '../../../auth/roles.decorator';
+import { LedgerEntryType } from '@prisma/client';
+
+export interface LedgerQueryFilters {
+  accountId?: string;
+  transactionId?: string;
+  startDate?: Date;
+  endDate?: Date;
+  types?: LedgerEntryType[];
+  minAmount?: number;
+  maxAmount?: number;
+  search?: string;
+  limit: number;
+  offset: number;
+}
 
 @Controller('ledger')
 @UseGuards(AuthGuard('jwt'))
@@ -28,6 +42,7 @@ export class LedgerController {
 
   /**
    * Query ledger entries with flexible filters
+   * Supports: accountId, transactionId, date range, transaction type, amount range, and search
    */
   @Get('entries')
   @UseGuards(RolesGuard)
@@ -38,6 +53,10 @@ export class LedgerController {
     @Query('transactionId') transactionId?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
+    @Query('type') type?: string,
+    @Query('minAmount') minAmount?: string,
+    @Query('maxAmount') maxAmount?: string,
+    @Query('search') search?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
   ) {
@@ -55,52 +74,84 @@ export class LedgerController {
       throw new BadRequestException('Limit cannot exceed 500');
     }
 
-    // Query by transaction (highest priority)
-    if (transactionId) {
-      const entries =
-        await this.ledgerRepository.findLedgerEntriesByTransaction(
-          transactionId,
-        );
+    // Parse transaction types (comma-separated: EARN,REDEEM,ADJUSTMENT,BURN)
+    let types: LedgerEntryType[] | undefined;
+    if (type) {
+      const typeArray = type.split(',').map((t) => t.trim().toUpperCase());
+      const validTypes = ['EARN', 'REDEEM', 'ADJUSTMENT', 'BURN', 'EXPIRE'];
 
-      return {
-        entries,
-        total: entries.length,
-        limit: queryLimit,
-        offset: queryOffset,
-      };
+      for (const t of typeArray) {
+        if (!validTypes.includes(t)) {
+          throw new BadRequestException(
+            `Invalid transaction type: ${t}. Valid types are: ${validTypes.join(', ')}`,
+          );
+        }
+      }
+
+      types = typeArray as LedgerEntryType[];
     }
 
-    // Query by account
-    const finalAccountId =
-      user.role === 'admin' && accountId ? accountId : user.id;
+    // Parse amount range
+    const parsedMinAmount = minAmount ? parseFloat(minAmount) : undefined;
+    const parsedMaxAmount = maxAmount ? parseFloat(maxAmount) : undefined;
 
-    // Query by date range
+    if (parsedMinAmount !== undefined && isNaN(parsedMinAmount)) {
+      throw new BadRequestException('Invalid minAmount: must be a valid number');
+    }
+
+    if (parsedMaxAmount !== undefined && isNaN(parsedMaxAmount)) {
+      throw new BadRequestException('Invalid maxAmount: must be a valid number');
+    }
+
+    if (
+      parsedMinAmount !== undefined &&
+      parsedMaxAmount !== undefined &&
+      parsedMaxAmount < parsedMinAmount
+    ) {
+      throw new BadRequestException(
+        'maxAmount must be greater than or equal to minAmount',
+      );
+    }
+
+    // Parse date range
+    let parsedStartDate: Date | undefined;
+    let parsedEndDate: Date | undefined;
+
     if (startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
+      parsedStartDate = new Date(startDate);
+      parsedEndDate = new Date(endDate);
 
-      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      if (isNaN(parsedStartDate.getTime()) || isNaN(parsedEndDate.getTime())) {
         throw new BadRequestException('Invalid date format. Use ISO 8601.');
       }
 
-      const result = await this.ledgerRepository.findLedgerEntriesByDateRange(
-        start,
-        end,
-        { limit: queryLimit, offset: queryOffset },
-      );
-
-      return {
-        ...result,
-        limit: queryLimit,
-        offset: queryOffset,
-      };
+      if (parsedEndDate < parsedStartDate) {
+        throw new BadRequestException(
+          'endDate must be greater than or equal to startDate',
+        );
+      }
     }
 
-    // No filters - query user's own entries (default)
-    const result = await this.ledgerRepository.findLedgerEntriesByAccount(
-      finalAccountId,
-      { limit: queryLimit, offset: queryOffset },
-    );
+    // Determine final accountId for query
+    const finalAccountId =
+      user.role === 'admin' && accountId ? accountId : user.id;
+
+    // Build filters object
+    const filters: LedgerQueryFilters = {
+      accountId: finalAccountId,
+      transactionId,
+      startDate: parsedStartDate,
+      endDate: parsedEndDate,
+      types,
+      minAmount: parsedMinAmount,
+      maxAmount: parsedMaxAmount,
+      search: search?.trim(),
+      limit: queryLimit,
+      offset: queryOffset,
+    };
+
+    // Use unified query method with filters
+    const result = await this.ledgerRepository.queryLedgerEntries(filters);
 
     return {
       ...result,

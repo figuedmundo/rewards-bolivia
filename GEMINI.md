@@ -168,8 +168,9 @@ This project uses a comprehensive testing strategy. For more details, please see
 -   **API Package:** `packages/api`
 -   **Web App Package:** `packages/web`
 -   **Infrastructure as Code:** `infra/`
--   **Project Documentation:** `.vibe/documentation/`
--   **Task Plans:** `.vibe/tasks/`
+-   **Project Documentation:** `docs/Rewards_Bolivia/`
+-   **Mission:** `agent-os/product/mission.md`
+-   **Roadmap:** `agent-os/product/roadmap.md`
 -   **Docker Compose:** `infra/local/docker-compose.yml`
 -   **Prisma Schema:** `packages/api/prisma/schema.prisma`
 
