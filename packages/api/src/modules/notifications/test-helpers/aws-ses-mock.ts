@@ -126,7 +126,7 @@ export function setupSesMock(): {
         MessageId: `msg-${Date.now()}`,
       });
     }),
-  } as jest.Mocked<SESClient>;
+  } as unknown as jest.Mocked<SESClient>;
 
   return {
     store,

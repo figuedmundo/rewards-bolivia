@@ -1,5 +1,5 @@
 version: 2.1.1
-last_compiled: 2025-11-17 11:46:56
+last_compiled: 2025-12-10 18:49:39
 
 # ================================================
 # Compiled with the following settings:
@@ -10,4 +10,4 @@ profile: default
 claude_code_commands: true
 use_claude_code_subagents: true
 agent_os_commands: false
-standards_as_claude_code_skills: false
+standards_as_claude_code_skills: true

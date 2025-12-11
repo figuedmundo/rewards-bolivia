@@ -19,6 +19,7 @@ Rewards Bolivia is a modern loyalty and rewards platform that helps Bolivian bus
 - **Context:** Wants to reward repeat customers and compete with larger chains that have loyalty programs
 - **Pain Points:** Cannot afford expensive loyalty software, lacks technical expertise, needs simple point issuance
 - **Goals:** Increase customer retention by 30%, track customer engagement, issue points via simple QR codes
+- **How Rewards Bolivia Helps:** Opens business dashboard, generates QR code with purchase amount, customer scans to earn points (5% reward rate), tracks daily issued/redeemed points, sees customer return patterns, manually onboarded by Rewards Bolivia team with no technical setup required
 
 **Carlos - IT Manager at Retail Chain** (30-45)
 - **Role:** Technology decision-maker at a mid-size supermarket chain
@@ -31,6 +32,7 @@ Rewards Bolivia is a modern loyalty and rewards platform that helps Bolivian bus
 - **Context:** Shops at multiple participating businesses weekly
 - **Pain Points:** Forgets physical loyalty cards, unclear point balances, slow redemption process at checkout
 - **Goals:** Track all points in one place, instant balance updates, seamless redemption experience
+- **How Rewards Bolivia Helps:** Opens PWA wallet on phone, scans QR at café to earn points instantly, sees animated balance update with tier progress, initiates redemption at checkout by showing QR to cashier (discount applied in seconds), transfers points to friends for special occasions
 
 **Regulatory Auditor - Juan** (40-55)
 - **Role:** Financial compliance officer
@@ -80,21 +82,36 @@ Unlike microservices complexity or traditional monolith rigidity, we use a Modul
 
 Unlike single-hash systems, we provide per-transaction hashing (instant verification) and daily batch hashing (gas-efficient blockchain anchoring). Regulators can verify individual transactions or entire days with cryptographic proof.
 
+### Mobile-First PWA Strategy
+
+Unlike traditional web apps requiring app store downloads, our Progressive Web App delivers a native-like experience instantly through the browser. Users can install it to their home screen, use it offline, and receive push notifications - all without app store friction. This allows rapid iteration and feedback gathering before committing to native mobile development (React Native in Phase 10).
+
 ## Key Features
 
 ### Core Features
 
 - **Instant Point Transactions:** Sub-1.5-second earn and redeem operations with real-time balance updates
 - **Immutable Ledger:** Every point movement recorded in tamper-proof ledger with SHA256 hashing
-- **Wallet Dashboard:** Real-time balance tracking, transaction history with filters, and status indicators
+- **Mobile-First PWA:** Progressive Web App with installable experience, offline support, and responsive design optimized for mobile devices
 - **Multi-Role Authentication:** JWT-based auth supporting consumers, business users, and admins with Google OAuth
+
+### Customer (Cliente) Features - MVP Foundation
+
+- **QR Scanning for Earning:** Customers scan business QR codes at point-of-sale to instantly earn points with visual confirmation
+- **QR-Based Redemption:** Customers initiate redemption from their wallet, generate QR code for business to scan and apply discount (0-30%)
+- **P2P Point Transfers:** Send points to friends/family via username or QR code with confirmation flow and transaction history
+- **Mobile Wallet Dashboard:** Real-time balance tracking, transaction history with filters, expiration warnings, and quick actions
+- **Gamification (Visual):** Display tier badges (Plata/Oro/Diamante), progress bars toward next tier, visual hierarchy showing loyalty status
+- **Transaction Notifications:** Real-time feedback for earnings, redemptions, transfers, and upcoming point expirations
 
 ### Business Features
 
-- **Point Issuance:** Businesses issue points via QR codes, manual entry, or API integration
-- **Redemption Management:** Configurable discount rates (0-30%), validation rules, and confirmation flows
-- **Business Dashboard:** Track customer transactions, point issuance history, and redemption patterns
-- **Business Plans:** Tiered plans (Starter/Basic/Pro/Premium) with blocked balance rules and eligibility constraints
+- **QR Code Generation:** Businesses generate dynamic QR codes with transaction amounts for customers to scan and earn points
+- **QR Scanner for Redemption:** Scan customer redemption QR codes, validate points, apply discounts, confirm transactions
+- **Point Issuance Management:** Configure reward percentages (e.g., 5% of purchase = points), set expiration policies, track emissions
+- **Business Dashboard:** Track daily stats (points issued, redeemed, transactions), current balance, recent activity feed
+- **Advanced Operations (Post-MVP):** Manual user lookup, bulk operations, CSV import, comprehensive analytics
+- **Business Plans (Post-MVP):** Tiered plans (Starter/Basic/Pro/Premium) with feature gates and blocked balance rules
 
 ### Economic & Admin Features
 
@@ -112,7 +129,42 @@ Unlike single-hash systems, we provide per-transaction hashing (instant verifica
 
 ### Advanced Features
 
-- **Point Expiration System:** Scheduled expirations with notifications and automatic EXPIRE ledger entries
+- **Point Expiration System:** Scheduled expirations (12 months standard, 3-6 months promos) with notifications and automatic EXPIRE ledger entries
+- **Burn Fee Mechanism:** Configurable burn fee (default 0.5%) on redemptions to manage economic health and prevent inflation
+- **Tier Progression Logic:** Automated tier calculation based on 12-month point accumulation with threshold-based progression (Plata → Oro → Diamante)
 - **Rate Limiting:** Redis-based API throttling with role-based limits to prevent abuse
-- **Background Job Processing:** BullMQ workers handle scheduled tasks (expiration, alerts, daily hashes)
+- **Background Job Processing:** BullMQ workers handle scheduled tasks (expiration, alerts, daily hashes, tier calculations)
 - **Blockchain Anchoring (Planned):** Daily batch hash submission to Polygon for long-term immutable proof
+
+---
+
+## MVP Strategy
+
+### Phase 0: Cliente-First Foundation
+
+Our MVP prioritizes completing the **full customer-business transaction loop** before building advanced features. This ensures we deliver real value to end-users from day one.
+
+**MVP Scope:**
+1. **Customer Journey:** Mobile-first PWA wallet, QR scanning for earning/redeeming, P2P transfers, visual gamification (tier badges)
+2. **Business Journey:** QR code generation for earning/redemption, simple dashboard, emission rules configuration
+3. **Economic Rules:** Burn fees, point expiration, tier calculation logic
+4. **Manual Onboarding:** Admin tools to manually onboard first businesses (self-service in later phase)
+
+**Technology Choice:**
+- **Progressive Web App (PWA)** for MVP validation with mobile-optimized responsive design
+- **React Native mobile app** deferred to Phase 10 after PWA proves customer experience
+- This allows rapid iteration while gathering feedback before native development investment
+
+**What's Deferred:**
+- Self-service business registration (manual onboarding initially)
+- Advanced analytics dashboards (Phase 1+)
+- Full tier multiplier logic (Phase 7 - visual badges only in MVP)
+- Business collaboration tools (Phase 6)
+- Blockchain anchoring (Phase 9)
+
+**Success Criteria:**
+- Customer can walk into a café, scan QR, earn points, see balance update
+- Customer can redeem points at checkout via QR with instant discount applied
+- Business can issue and accept points via simple QR interface
+- All transactions create proper ledger entries with cryptographic verification
+- PWA is installable and works smoothly on mobile devices

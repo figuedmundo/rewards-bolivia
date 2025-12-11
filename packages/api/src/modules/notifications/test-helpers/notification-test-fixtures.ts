@@ -3,9 +3,8 @@
  * Provides helper functions to create realistic test data
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, LedgerEntryType } from '@prisma/client';
 import {
-  NotificationLog,
   NotificationType,
   NotificationStatus,
 } from '../domain/entities/notification-log.entity';
@@ -59,7 +58,7 @@ export async function createExpiringPointsLedgerEntry(
   const ledgerData = {
     id: `ledger-${Date.now()}`,
     accountId: overrides?.userId || `user-${Date.now()}`,
-    type: 'CREDIT' as const,
+    type: LedgerEntryType.EARN,
     debit: 0,
     credit: overrides?.pointsExpiring ?? 100,
     balanceAfter: 1000 + (overrides?.pointsExpiring ?? 100),
@@ -84,7 +83,17 @@ export async function createBatchExpiringPointsLedger(
     pointsPerEntry?: number;
   },
 ) {
-  const entries = [];
+  const entries: Array<{
+    id: string;
+    accountId: string;
+    type: LedgerEntryType;
+    debit: number;
+    credit: number;
+    balanceAfter: number;
+    expiresAt: Date;
+    transactionId: string;
+    createdAt: Date;
+  }> = [];
   const now = new Date();
   const daysUntilExpiration = overrides?.daysUntilExpiration ?? 30;
   const expiresAt = new Date(
@@ -95,7 +104,7 @@ export async function createBatchExpiringPointsLedger(
     entries.push({
       id: `ledger-batch-${Date.now()}-${i}`,
       accountId: `user-batch-${Date.now()}-${i}`,
-      type: 'CREDIT' as const,
+      type: LedgerEntryType.EARN,
       debit: 0,
       credit: overrides?.pointsPerEntry ?? 100,
       balanceAfter: 1000 + (overrides?.pointsPerEntry ?? 100),

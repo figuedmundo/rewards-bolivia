@@ -15,7 +15,7 @@
 -   **Instantaneous Transactions:** Sub-1.5-second point redemptions for a seamless user experience.
 -   **Hybrid On-chain/Off-chain Model:** Combines the speed of a traditional database with the trust and auditability of a blockchain.
 -   **Dual-Level Audit System:** Per-transaction SHA256 hashing plus daily batch hashing for comprehensive auditability.
--   **Wallet Dashboard:** Real-time point balance tracking and transaction history with TanStack Query integration.
+-   **Wallet Dashboard:** Real-time point balance tracking, advanced transaction filtering, and CSV export with TanStack Query integration.
 -   **Auto-Generated SDK:** TypeScript-Axios client for type-safe API integration across frontend applications.
 -   **Modular Monolith Architecture:** A scalable and maintainable codebase following DDD principles and Clean Architecture.
 -   **Economic Control System:** Real-time monitoring and validation of point economics to prevent system abuse.
